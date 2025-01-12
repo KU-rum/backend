@@ -1,14 +1,10 @@
-package ku_rum.backend.global.config;
+package ku_rum.backend.global.config.redis;
 
-import ku_rum.backend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor

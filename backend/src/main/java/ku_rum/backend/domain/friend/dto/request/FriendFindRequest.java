@@ -1,26 +1,19 @@
 package ku_rum.backend.domain.friend.dto.request;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
-@NoArgsConstructor
-public class FriendFindRequest {
-
-    private Long userId;
-    private String nickname;
+public record FriendFindRequest(
+        Long userId,
+        String nickname) {
 
     @Builder
-    private FriendFindRequest(Long userId, String nickname) {
-        this.userId = userId;
-        this.nickname = nickname;
-    }
+    public FriendFindRequest {}
 
     public static FriendFindRequest of(Long userId, String nickname) {
-        return FriendFindRequest.builder().
-                userId(userId).
-                nickname(nickname).
-                build();
+        return FriendFindRequest
+                .builder()
+                .userId(userId)
+                .nickname(nickname)
+                .build();
     }
 }

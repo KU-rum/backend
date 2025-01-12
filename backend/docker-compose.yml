@@ -1,13 +1,4 @@
 services:
-  my-server:
-    build: .
-    ports:
-      - 8080:8080
-    depends_on:
-      my-db:
-        condition: service_healthy
-      my-cache-server:
-        condition: service_healthy
   my-db:
     image: mysql:latest
     environment:

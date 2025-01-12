@@ -6,8 +6,6 @@ import ku_rum.backend.global.response.status.ResponseStatus;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import java.util.Optional;
-
 @Getter
 @JsonPropertyOrder({"code", "status", "message", "result"})
 public class BaseResponse<T> implements ResponseStatus {
@@ -53,5 +51,4 @@ public class BaseResponse<T> implements ResponseStatus {
     public String getMessage() {
         return message;
     }
-
 }

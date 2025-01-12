@@ -27,14 +27,10 @@ public class FriendService {
     private final UserRepository userRepository;
 
     public List<FriendListResponse> getMyLists(final FriendListRequest friendListRequest) {
-        User user = userRepository.findUserById(friendListRequest.getUserId())
+        User user = userRepository.findUserById(friendListRequest.userId())
                 .orElseThrow(() -> new UserNotFoundException(NO_SUCH_USER));
 
-        List<Friend> friends = friendRepository.findAllByFromUser(user);
-
-        if (friends.isEmpty()){
-            throw new NoFriendsException(NO_FRIENDS_FOUND);
-        }
+        List<Friend> friends = getFriendList(user);
 
         return friends.stream()
                 .map(FriendListResponse::from)
@@ -42,10 +38,9 @@ public class FriendService {
     }
 
     public FriendFindResponse findByNameInLists(final FriendFindRequest friendFindRequest) {
-        User fromUser = userRepository.findUserById(friendFindRequest.getUserId())
+        User fromUser = userRepository.findUserById(friendFindRequest.userId())
                 .orElseThrow(() -> new UserNotFoundException(NO_SUCH_USER));
-
-        User toUser = userRepository.findUserByNickname(friendFindRequest.getNickname())
+        User toUser = userRepository.findUserByNickname(friendFindRequest.nickname())
                         .orElseThrow(() -> new UserNotFoundException(NO_SUCH_USER));
 
         if (!friendRepository.existsByFromUserAndToUser(fromUser, toUser))
@@ -54,4 +49,11 @@ public class FriendService {
         return FriendFindResponse.from(toUser);
     }
 
+    private List<Friend> getFriendList(User user) {
+        List<Friend> friends = friendRepository.findAllByFromUser(user);
+        if (friends.isEmpty()){
+            throw new NoFriendsException(NO_FRIENDS_FOUND);
+        }
+        return friends;
+    }
 }

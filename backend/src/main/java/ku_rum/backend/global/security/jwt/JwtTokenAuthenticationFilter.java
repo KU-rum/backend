@@ -5,7 +5,7 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ku_rum.backend.global.config.RedisUtil;
+import ku_rum.backend.global.config.redis.RedisUtil;
 import ku_rum.backend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

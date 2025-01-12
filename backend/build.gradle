@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 group = 'ku-rum'
@@ -14,9 +15,15 @@ java {
 }
 
 configurations {
+	asciidoctorExt
+
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+}
+
+ext {
+	set('snippetsDir', file("build/generated-snippets"))
 }
 
 repositories {
@@ -27,11 +34,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok:1.18.12'
-	annotationProcessor 'org.projectlombok:lombok:1.18.12'
+	compileOnly 'org.projectlombok:lombok:1.18.22'
+	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	runtimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
@@ -46,7 +55,8 @@ dependencies {
 
 	// Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-  
+	testImplementation 'org.springframework.security:spring-security-test'
+
 	implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
 	implementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
 	implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
@@ -62,10 +72,37 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+	// RestDocs
+	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+}
+tasks.named('testClasses') { // (1)
+	doFirst {
+		delete file('build/docs/asciidoc')
+	}
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	outputs.dir snippetsDir
+	finalizedBy asciidoctor
+}
+
+tasks.named('asciidoctor') {
+	dependsOn test
+	configurations 'asciidoctorExt'
+	inputs.dir snippetsDir
+	finalizedBy copyDocument
+	doFirst {
+		delete file('src/main/resources/static/docs')
+	}
+}
+
+task copyDocument(type: Copy) { // (5)
+	dependsOn asciidoctor
+	from file('build/docs/asciidoc')
+	into file('src/main/resources/static/docs')
 }
 
 def querydslSrcDir = 'src/main/generated'
@@ -74,10 +111,13 @@ clean {
 	delete file(querydslSrcDir)
 }
 
-test.onlyIf {
-!project.hasProperty('test')
-}
+bootJar { // (6)
+	dependsOn asciidoctor
+	doFirst {
+		delete file('static/docs')
+	}
 
-tasks.withType(JavaCompile) {
-	options.generatedSourceOutputDirectory = file(querydslSrcDir)
+	from( "${asciidoctor.outputDir}") {
+		into 'static/docs'
+	}
 }

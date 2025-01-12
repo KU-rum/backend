@@ -5,7 +5,6 @@ spring:
     hibernate:
       # dialect: org.hibernate.dialect.MySQLDialect
       dialect: org.hibernate.dialect.H2Dialect  # H2 전용 Dialect
-      ddl-auto: update
     show-sql: true
   datasource:
 #    url: ${dbUrl}

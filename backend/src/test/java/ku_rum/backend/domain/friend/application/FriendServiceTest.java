@@ -114,8 +114,8 @@ class FriendServiceTest {
         FriendFindResponse friendFIndResponse = friendService.findByNameInLists(friendFindRequest);
 
         //then
-        Assertions.assertThat(friendFIndResponse.getId()).isEqualTo(2L);
-        Assertions.assertThat(friendFIndResponse.getNickname()).isEqualTo("미미미누1");
+        Assertions.assertThat(friendFIndResponse.id()).isEqualTo(2L);
+        Assertions.assertThat(friendFIndResponse.nickname()).isEqualTo("미미미누1");
     }
 
     @Test

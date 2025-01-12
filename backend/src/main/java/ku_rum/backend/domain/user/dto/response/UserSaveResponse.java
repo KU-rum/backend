@@ -13,7 +13,7 @@ public class UserSaveResponse {
         this.id = id;
     }
 
-    public static UserSaveResponse of(User user) {
+    public static UserSaveResponse from(User user) {
         return new UserSaveResponse(user.getId());
     }
 

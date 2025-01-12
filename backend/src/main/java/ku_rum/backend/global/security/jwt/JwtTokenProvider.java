@@ -3,7 +3,7 @@ package ku_rum.backend.global.security.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import ku_rum.backend.global.config.RedisUtil;
+import ku_rum.backend.global.config.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 
 import static java.util.stream.Collectors.joining;
 
@@ -141,7 +140,10 @@ public class JwtTokenProvider {
     }
 
     public long getExpiredTime(String token) {
-        return parseClaims(token).getPayload().getExpiration().getTime();
+        return parseClaims(token).
+                getPayload().
+                getExpiration().
+                getTime();
     }
 
     public Long getUserId(String token) {

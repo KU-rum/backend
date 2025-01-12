@@ -7,7 +7,7 @@ import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.department.domain.repository.DepartmentRepository;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.domain.user.dto.request.EmailValidationRequest;
+import ku_rum.backend.domain.user.dto.request.mail.EmailValidationRequest;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.domain.user.dto.response.UserSaveResponse;
 import ku_rum.backend.global.exception.user.DuplicateEmailException;

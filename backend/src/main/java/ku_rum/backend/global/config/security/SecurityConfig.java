@@ -1,6 +1,7 @@
-package ku_rum.backend.global.config;
+package ku_rum.backend.global.config.security;
 
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
+import ku_rum.backend.global.config.redis.RedisUtil;
 import ku_rum.backend.global.security.jwt.CustomUserDetails;
 import ku_rum.backend.global.security.jwt.JwtTokenAuthenticationFilter;
 import ku_rum.backend.global.security.jwt.JwtTokenProvider;
@@ -22,8 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.Collection;
-
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
@@ -37,7 +36,7 @@ public class SecurityConfig {
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/api/auth/login", "/api/v1/users").permitAll()
+                .requestMatchers("/api/v1/auth/login", "/api/v1/users", "/docs/**").permitAll()
                 .anyRequest().authenticated());
         http.addFilterBefore(new JwtTokenAuthenticationFilter(jwtTokenProvider, redisUtil), UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement((session) -> session

@@ -1,9 +1,9 @@
-package ku_rum.backend.domain.user.application;
+package ku_rum.backend.domain.user.application.mail;
 
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.domain.user.dto.request.MailSendRequest;
-import ku_rum.backend.domain.user.dto.request.MailVerificationRequest;
-import ku_rum.backend.domain.user.dto.response.MailVerificationResponse;
+import ku_rum.backend.domain.user.dto.request.mail.MailSendRequest;
+import ku_rum.backend.domain.user.dto.request.mail.MailVerificationRequest;
+import ku_rum.backend.domain.user.dto.response.mail.MailVerificationResponse;
 import ku_rum.backend.global.exception.user.DuplicateEmailException;
 import ku_rum.backend.global.exception.user.MailSendException;
 import lombok.RequiredArgsConstructor;
@@ -48,18 +48,18 @@ public class MailService {
     }
 
     public void sendCodeToEmail(final MailSendRequest mailSendRequest) {
-        validateDuplicateEmail(mailSendRequest.getEmail());
+        validateDuplicateEmail(mailSendRequest.email());
 
         String title = MAIL_SEND_INFO.getTitle();
         String authCode = this.createCode();
 
-        sendEmail(mailSendRequest.getEmail(), title, authCode);
-        storeAuthCode(mailSendRequest.getEmail(), authCode);
+        sendEmail(mailSendRequest.email(), title, authCode);
+        storeAuthCode(mailSendRequest.email(), authCode);
     }
 
     public MailVerificationResponse verifiedCode(final MailVerificationRequest mailVerificationRequest) {
-        String email = mailVerificationRequest.getEmail();
-        String authCode = mailVerificationRequest.getCode();
+        String email = mailVerificationRequest.email();
+        String authCode = mailVerificationRequest.code();
 
         validateDuplicateEmail(email);
         return MailVerificationResponse.of(isValidAuthCode(generateKeyByEmail(email), authCode));

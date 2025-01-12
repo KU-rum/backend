@@ -1,13 +1,11 @@
 package ku_rum.backend.domain.user.application;
 
 import jakarta.validation.Valid;
-import ku_rum.backend.domain.building.domain.Building;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.department.domain.repository.DepartmentRepository;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.domain.user.dto.request.AuthRequest;
-import ku_rum.backend.domain.user.dto.request.EmailValidationRequest;
+import ku_rum.backend.domain.user.dto.request.mail.EmailValidationRequest;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.domain.reservation.dto.request.WeinLoginRequest;
 import ku_rum.backend.domain.user.dto.response.UserSaveResponse;
@@ -16,7 +14,6 @@ import ku_rum.backend.global.exception.department.NoSuchDepartmentException;
 import ku_rum.backend.global.exception.user.DuplicateEmailException;
 import ku_rum.backend.global.exception.user.DuplicateStudentIdException;
 import ku_rum.backend.global.response.BaseResponse;
-import ku_rum.backend.global.security.jwt.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
@@ -32,7 +29,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import static ku_rum.backend.global.response.status.BaseExceptionResponseStatus.*;
 
@@ -45,32 +41,23 @@ public class UserService {
     private final DepartmentRepository departmentRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private static final String WEIN_LOGIN_URL = "https://wein.konkuk.ac.kr/common/user/loginProc.do";
-
     @Transactional
     public UserSaveResponse saveUser(final UserSaveRequest userSaveRequest) {
-        validateDuplicateEmail(userSaveRequest.getEmail());
-        validateDuplicateStudentId(userSaveRequest.getStudentId());
-        validateDepartmentName(userSaveRequest.getDepartment());
+        validateDuplicateEmail(userSaveRequest.email());
+        validateDuplicateStudentId(userSaveRequest.studentId());
+        validateDepartmentName(userSaveRequest.department());
 
-        String password = passwordEncoder.encode(userSaveRequest.getPassword());
-        Department department = departmentRepository.findByName(userSaveRequest.getDepartment())
+        String password = passwordEncoder.encode(userSaveRequest.password());
+        Department department = departmentRepository.findByName(userSaveRequest.department())
                .orElseThrow(() -> new NoSuchDepartmentException(NO_SUCH_DEPARTMENT));
 
-        User user = User.builder()
-                .nickname(userSaveRequest.getNickname())
-                .email(userSaveRequest.getEmail())
-                .password(password)
-                .studentId(userSaveRequest.getStudentId())
-                .department(department)
-                .build();
+        User user = UserSaveRequest.newUser(userSaveRequest, department, password);
 
-        userRepository.save(user);
-        return UserSaveResponse.of(user);
+        return UserSaveResponse.from(userRepository.save(user));
     }
 
     public void validateEmail(final EmailValidationRequest emailValidationRequest) {
-        validateDuplicateEmail(emailValidationRequest.getEmail());
+        validateDuplicateEmail(emailValidationRequest.email());
     }
 
 
@@ -109,9 +96,6 @@ public class UserService {
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(createRequestBody(weinLoginRequest), headers);
         log.info("Attempting login with userId: {} and password: {}", weinLoginRequest.getUserId(), weinLoginRequest.getPassword());
-
-//        // HttpEntity로 요청 엔티티 생성
-//        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
         try {
             // 로그인 요청을 전송

@@ -3,7 +3,7 @@ package ku_rum.backend.domain.user.presentation;
 import jakarta.validation.Valid;
 import ku_rum.backend.domain.reservation.dto.request.WeinLoginRequest;
 import ku_rum.backend.domain.user.application.UserService;
-import ku_rum.backend.domain.user.dto.request.EmailValidationRequest;
+import ku_rum.backend.domain.user.dto.request.mail.EmailValidationRequest;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.domain.user.dto.response.UserSaveResponse;
 import ku_rum.backend.domain.user.dto.response.WeinLoginResponse;
@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
+    /**
+     * 유저 회원가입 API
+     * @param userSaveRequest email, nickname, password, studentId, department
+     * @return userSaveResponse userId
+     */
     @PostMapping
     public BaseResponse<UserSaveResponse> join(@RequestBody @Valid final UserSaveRequest userSaveRequest) {
         return BaseResponse.ok(userService.saveUser(userSaveRequest));
@@ -30,6 +35,11 @@ public class UserController {
 
     }
 
+    /**
+     * 아이디 중복인증 확인 API
+     * @param emailValidationRequest
+     * @return userSaveResponse userId
+     */
     @PostMapping("/validations/email")
     public BaseResponse<Void> validateEmail(@RequestBody @Valid final EmailValidationRequest emailValidationRequest) {
         userService.validateEmail(emailValidationRequest);

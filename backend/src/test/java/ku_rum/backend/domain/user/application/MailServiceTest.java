@@ -1,7 +1,8 @@
 package ku_rum.backend.domain.user.application;
 
-import ku_rum.backend.domain.user.dto.request.MailSendRequest;
-import ku_rum.backend.domain.user.dto.request.MailVerificationRequest;
+import ku_rum.backend.domain.user.application.mail.MailService;
+import ku_rum.backend.domain.user.dto.request.mail.MailSendRequest;
+import ku_rum.backend.domain.user.dto.request.mail.MailVerificationRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ class MailServiceTest {
     void sendCodeToEmail() {
         //given
         MailSendRequest mailSendRequest = new MailSendRequest("kmw10693@konkuk.ac.kr");
-        String key = generateKeyByEmail(mailSendRequest.getEmail());
-        String email = mailSendRequest.getEmail();
+        String key = generateKeyByEmail(mailSendRequest.email());
+        String email = mailSendRequest.email();
 
         //when
         mailService.sendCodeToEmail(mailSendRequest);

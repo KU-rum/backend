@@ -1,11 +1,10 @@
-package ku_rum.backend.domain.user.presentation;
+package ku_rum.backend.domain.user.presentation.mail;
 
 import jakarta.validation.Valid;
-import ku_rum.backend.domain.user.application.MailService;
-import ku_rum.backend.domain.user.application.UserService;
-import ku_rum.backend.domain.user.dto.request.MailSendRequest;
-import ku_rum.backend.domain.user.dto.request.MailVerificationRequest;
-import ku_rum.backend.domain.user.dto.response.MailVerificationResponse;
+import ku_rum.backend.domain.user.application.mail.MailService;
+import ku_rum.backend.domain.user.dto.request.mail.MailSendRequest;
+import ku_rum.backend.domain.user.dto.request.mail.MailVerificationRequest;
+import ku_rum.backend.domain.user.dto.response.mail.MailVerificationResponse;
 import ku_rum.backend.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -19,9 +18,9 @@ public class MailController {
     private final MailService mailService;
 
     @PostMapping
-    public BaseResponse<Void> sendMail(@RequestBody @Valid final MailSendRequest mailSendRequest) {
+    public BaseResponse<String> sendMail(@RequestBody @Valid final MailSendRequest mailSendRequest) {
         mailService.sendCodeToEmail(mailSendRequest);
-        return BaseResponse.ok(null);
+        return BaseResponse.ok("메일이 성공적으로 전송되었습니다.");
     }
 
     @GetMapping("/mail_verifications")

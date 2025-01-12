@@ -1,10 +1,11 @@
 package ku_rum.backend.domain.user.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ku_rum.backend.domain.user.application.MailService;
-import ku_rum.backend.domain.user.dto.request.MailSendRequest;
-import ku_rum.backend.domain.user.dto.request.MailVerificationRequest;
-import ku_rum.backend.global.config.SecurityConfig;
+import ku_rum.backend.domain.user.application.mail.MailService;
+import ku_rum.backend.domain.user.dto.request.mail.MailSendRequest;
+import ku_rum.backend.domain.user.dto.request.mail.MailVerificationRequest;
+import ku_rum.backend.domain.user.presentation.mail.MailController;
+import ku_rum.backend.global.config.security.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,18 +2,13 @@ package ku_rum.backend.domain.friend.dto.response;
 
 import ku_rum.backend.domain.friend.domain.Friend;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
-public class FriendListResponse {
-    private Long id;
-
-    private String name;
+public record FriendListResponse(
+        Long id,
+        String name) {
 
     @Builder
-    private FriendListResponse(Long id, String name) {
-        this.id = id;
-        this.name = name;
+    public FriendListResponse {
     }
 
     public static FriendListResponse from(Friend friend) {
