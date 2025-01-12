@@ -10,7 +10,7 @@ import ku_rum.backend.domain.category.application.CategoryService;
 import ku_rum.backend.domain.category.domain.CategoryDetail;
 import ku_rum.backend.domain.category.dto.response.CategoryDetailFloorAndMenusProviding;
 import ku_rum.backend.domain.category.dto.response.CategoryDetailResponse;
-import ku_rum.backend.domain.menu.repository.MenuQueryRepository;
+import ku_rum.backend.domain.menu.domain.repository.MenuQueryRepository;
 import ku_rum.backend.domain.menu.response.MenuSimpleResponse;
 import ku_rum.backend.global.exception.building.BuildingNotFoundException;
 import ku_rum.backend.global.exception.building.BuildingNotRegisteredException;

@@ -1,4 +1,4 @@
-package ku_rum.backend.domain.menu.repository;
+package ku_rum.backend.domain.menu.domain.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
