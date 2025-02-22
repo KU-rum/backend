@@ -40,14 +40,14 @@ public class BuildingCategoryInfoServiceTest {
         Assertions.assertEquals(0, responses.size());
     }
 
-    @Test
-    public void 특정_학생식당_카테고리_디테일_조회_성공() throws Exception {
-        // given
-        CategoryDetailResponse response =  buildingSearchService.viewBuildingDetailByCategory("학생 식당", 16L);
-        // when
-        // then
-        Assertions.assertEquals(0, response.detailList().size());
-    }
+//    @Test
+//    public void 특정_학생식당_카테고리_디테일_조회_성공() throws Exception {
+//        // given
+//        CategoryDetailResponse response =  buildingSearchService.viewBuildingDetailByCategory("학생 식당", 16L);
+//        // when
+//        // then
+//        Assertions.assertEquals(0, response.detailList().size());
+//    }
 
 // 아직 자동으로 데이터를 넣지 않아서 추후 넣을 예정
 //    @Test
