@@ -64,13 +64,6 @@ public class BuildingCategoryQueryRepository {
 
   public Optional<BuildingCategory> findByBuildingAndCategoryId(Long buildingId, Long categoryId) {
     return null;
-//    return Optional.ofNullable(
-//            queryFactory
-//                    .selectFrom(buildingCategory)
-//                    .where(buildingCategory.building.id.eq(buildingId))
-//                    .where(buildingCategory.category.id.eq(categoryId))
-//                    .fetchOne()
-//    );
   }
 
     public List<Category> searchCategoryByNgram(String searchText) {
