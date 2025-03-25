@@ -4,6 +4,10 @@ spring:
   profiles:
     active: local
 
+  batch:
+    jdbc:
+      initialize-schema: always
+
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html

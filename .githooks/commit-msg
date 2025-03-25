@@ -16,7 +16,7 @@ issue_number=$(echo "$branch_name" | grep -o '#[0-9]\+')
 # 이슈 번호가 있고, 아직 커밋 메시지에 포함되어 있지 않으면 추가
 if [ -n "$issue_number" ] && ! echo "$commit_message" | grep -q "$issue_number"; then
   # 커밋 메시지 끝에 이슈 번호 추가
-  commit_message=$(echo "$commit_message" | sed "s/$/($issue_number)/")
+  commit_message=$(echo "$commit_message" | sed "s/$/ ($issue_number)/")
   echo "$commit_message" > "$1"
   echo "이슈 번호 '$issue_number'가 커밋 메시지에 자동으로 추가 되었습니다."
 fi
