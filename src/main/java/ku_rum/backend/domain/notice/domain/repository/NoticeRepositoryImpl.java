@@ -51,5 +51,14 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .execute();
     }
 
+    @Override
+    public String findTitleByUrl(String url) {
+        return queryFactory
+                .select(qNotice.title)
+                .from(qNotice)
+                .where(qNotice.url.eq(url))
+                .fetchOne();
+    }
+
 
 }

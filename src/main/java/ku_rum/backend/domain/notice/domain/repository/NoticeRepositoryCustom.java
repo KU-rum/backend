@@ -15,4 +15,5 @@ public interface NoticeRepositoryCustom {
 
     void updateViewCount(String url, long count);
 
+    String findTitleByUrl(String url);
 }
