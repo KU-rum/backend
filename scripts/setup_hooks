@@ -1,8 +1,8 @@
 #!/bin/sh
 
-cp ../.githooks/* .git/hooks/
+cp ../.githooks/* ../.git/hooks/
 #ls .git/hooks/
-find .git/hooks/ -type f -exec chmod +x {} \;
+find ../.git/hooks/ -type f -exec chmod +x {} \;
 #xattr -d com.apple.quarantine .git/hooks/commit-msg
 #ls -l .git/hooks/
 echo "setup_hooks.sh 실행 완료"
