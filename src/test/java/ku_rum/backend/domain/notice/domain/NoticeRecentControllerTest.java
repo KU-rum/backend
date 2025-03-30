@@ -3,7 +3,7 @@ package ku_rum.backend.domain.notice.domain;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.notice.application.NoticeService;
-import ku_rum.backend.domain.notice.dto.response.RecentSearchTerm;
+import ku_rum.backend.domain.notice.dto.response.RecentSearchTermResponse;
 import ku_rum.backend.global.batch.BatchConfig;
 import ku_rum.backend.global.log.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.CustomUserDetails;
@@ -75,7 +75,7 @@ class NoticeRecentControllerTest  extends RestDocsTestSupport {
     @Test
     @WithMockUser(username = "testUser", roles = "USER")
     void searchTerms() throws Exception {
-        RecentSearchTerm mockResponse = new RecentSearchTerm(1L, List.of("검색어1", "검색어2"));
+        RecentSearchTermResponse mockResponse = new RecentSearchTermResponse(1L, List.of("검색어1", "검색어2"));
         given(noticeService.getRecentSearchTerms(any())).willReturn(mockResponse);
 
         mockMvc.perform(get("/api/v1/notices/recent")

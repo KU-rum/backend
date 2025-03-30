@@ -2,6 +2,7 @@ package ku_rum.backend.global.handler;
 
 import jakarta.annotation.Priority;
 import ku_rum.backend.global.exception.notice.InvalidPageException;
+import ku_rum.backend.global.exception.notice.InvalidViewCountException;
 import ku_rum.backend.global.exception.notice.NoSuchNoticeException;
 import ku_rum.backend.global.support.response.BaseErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,13 @@ public class NoticeExceptionControllerAdvice {
     @ExceptionHandler(InvalidPageException.class)
     public BaseErrorResponse handleInvalidPageException(final InvalidPageException e) {
         log.error("[InvalidPageException]");
+        return new BaseErrorResponse(INVALID_PAGE);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidViewCountException.class)
+    public BaseErrorResponse handleInvalidViewCountException(final InvalidPageException e) {
+        log.error("[InvalidViewCountException]");
         return new BaseErrorResponse(INVALID_PAGE);
     }
 }

@@ -2,30 +2,17 @@ package ku_rum.backend.domain.notice.application;
 
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.NoticeCategory;
-import ku_rum.backend.domain.notice.domain.NoticeStatus;
 import ku_rum.backend.domain.notice.domain.repository.NoticeRepository;
 import ku_rum.backend.domain.notice.dto.response.NoticeSimpleResponse;
-import ku_rum.backend.domain.notice.dto.response.RecentSearchTerm;
+import ku_rum.backend.domain.notice.dto.response.RecentSearchTermResponse;
+import ku_rum.backend.domain.notice.dto.response.ViewCountResponse;
 import ku_rum.backend.global.exception.notice.InvalidPageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,12 +70,12 @@ public class NoticeService {
     /**
      * 유저 아이디로 최근 검색어 가져오기
      */
-    public RecentSearchTerm getRecentSearchTerms(Long userId) {
+    public RecentSearchTermResponse getRecentSearchTerms(Long userId) {
         String redisKey = "user:" + userId + ":recent-searches";
 
         Optional<List<String>> terms = Optional.ofNullable(recentSearchRedisTemplate.opsForList().range(redisKey, 0, 9));
 
-        return RecentSearchTerm.of(userId, terms.orElse(List.of()));
+        return RecentSearchTermResponse.of(userId, terms.orElse(List.of()));
     }
 
 
@@ -99,4 +86,8 @@ public class NoticeService {
         }
     }
 
+
+    public ViewCountResponse increaseViewCount(long noticeId) {
+
+    }
 }

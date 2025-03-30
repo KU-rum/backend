@@ -1,7 +1,7 @@
 package ku_rum.backend.domain.notice.presentation;
 
 import ku_rum.backend.domain.notice.application.NoticeService;
-import ku_rum.backend.domain.notice.dto.response.RecentSearchTerm;
+import ku_rum.backend.domain.notice.dto.response.RecentSearchTermResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class NoticeRecentController {
      * @return
      */
     @GetMapping("/recent")
-    public BaseResponse<RecentSearchTerm> searchTerms(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public BaseResponse<RecentSearchTermResponse> searchTerms(@AuthenticationPrincipal CustomUserDetails userDetails){
         Long userId = userDetails.getUserId();
         return BaseResponse.ok(noticeService.getRecentSearchTerms(userId));
     }

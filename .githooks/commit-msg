@@ -22,7 +22,7 @@ if [ -n "$issue_number" ] && ! echo "$commit_message" | grep -q "$issue_number";
 fi
 
 # 형식 검증: 접두사(feat:, fix: 등) 포함 + 이슈 번호(#숫자) 포함 + 50자 이하
-if ! echo "$commit_message" | grep -Eq '^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert|bug): .+\(#[0-9]+\)$' || [ ${#commit_message} -gt 50 ]; then
+if ! echo "$commit_message" | grep -Eq '^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert|bug|merge|Merge): .+\(#[0-9]+\)$' || [ ${#commit_message} -gt 50 ]; then
   echo "커밋 메시지는 'feat:', 'fix:' 등으로 시작하고, 50자 이하여야 하며, 이슈 번호(#숫자)를 포함해야 합니다."
   echo "예시: feat: 로그인 기능 추가(#123)"
   exit 1
