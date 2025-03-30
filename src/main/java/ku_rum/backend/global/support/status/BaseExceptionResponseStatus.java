@@ -73,6 +73,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     DUPLICATE_NOTICE(801, HttpStatus.BAD_REQUEST, "이미 북마크된 공지사항입니다."),
     INVALID_PAGE(802, HttpStatus.BAD_REQUEST, "유효하지 않은 페이지입니다.(페이지는 1 이상부터 가능합니다)"),
     BELOW_ZERO(803, HttpStatus.BAD_REQUEST, "0보다 작은 조회수 입니다."),
+    SYNCHORNIZATION_ERROR(804, HttpStatus.CONFLICT, "조회수 동기화 중 에러가 발생했습니다."),
     /**
      * 900: Server, DataBase
      */

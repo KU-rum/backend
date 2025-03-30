@@ -24,4 +24,5 @@ public interface NoticeRepository extends JpaRepository<Notice, String>, NoticeR
     Optional<Notice> findByUrl(String link);
 
     boolean existsByUrl(String url);
+
 }

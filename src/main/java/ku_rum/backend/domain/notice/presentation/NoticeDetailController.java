@@ -19,13 +19,13 @@ public class NoticeDetailController {
 
     /**
      * 공지사항 내용 조회
-     * @param noticeId
+     * @param url
      * @return
      */
-    @GetMapping("/{id}")
+    @GetMapping("/url")
     public BaseResponse<ViewCountResponse> searchNotices(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                         @PathVariable(name = "id") long noticeId) {
-        return BaseResponse.ok(noticeService.increaseViewCount(noticeId));
+                                                         @RequestParam(name = "url") String url) {
+        return BaseResponse.ok(noticeService.increaseViewCount(url));
     }
 
 }

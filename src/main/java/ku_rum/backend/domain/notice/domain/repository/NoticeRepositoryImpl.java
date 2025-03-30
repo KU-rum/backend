@@ -1,5 +1,7 @@
 package ku_rum.backend.domain.notice.domain.repository;
 
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.QNotice;
@@ -38,4 +40,16 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .limit(pageSize)
                 .fetch();
     }
+
+    //조회수 db에 동기화
+    @Override
+    public void updateViewCount(String url, long count) {
+        queryFactory
+                .update(qNotice)
+                .set(qNotice.viewCount.count, qNotice.viewCount.count.add(count))
+                .where(qNotice.url.eq(url))
+                .execute();
+    }
+
+
 }
