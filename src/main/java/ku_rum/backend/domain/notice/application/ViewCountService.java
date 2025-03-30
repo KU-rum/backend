@@ -37,7 +37,7 @@ public class ViewCountService {
     /**
      * url에 대해 조회수 redis에 갱신
      */
-    @Scheduled(fixedRate = 5000) //5초마다 큐 확인
+    @Scheduled(fixedRate = 60000) //300초마다 큐 확인
     public void processQueue() {
         String url = redisTemplate.opsForList().rightPop(LOCK_QUEUE_KEY);
         if (url != null) {
@@ -70,7 +70,6 @@ public class ViewCountService {
                 enqueueLockRequest(url);
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
             throw new RedisSynchronizationException(SYNCHORNIZATION_ERROR);        }
     }
 
