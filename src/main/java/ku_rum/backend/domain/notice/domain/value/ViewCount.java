@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.notice.domain.value;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import ku_rum.backend.global.exception.notice.InvalidViewCountException;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,8 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.B
 @Embeddable
 @NoArgsConstructor
 public class ViewCount {
+
+    @Column(name = "view_count", nullable = false)
     private long count;
 
     public ViewCount(long count){

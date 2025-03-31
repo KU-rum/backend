@@ -39,17 +39,17 @@ public class Notice extends BaseEntity {
     private NoticeStatus noticeStatus;
 
     @Convert(converter = ViewCountConverter.class)
-    @Column(name = "view_count")
+    @Column(name = "view_count", nullable = false)
     private ViewCount viewCount;
 
     @Builder
-    private Notice(String url, String title, String date, NoticeCategory noticeCategory, NoticeStatus noticeStatus) {
+    private Notice(String url, String title, String date, NoticeCategory noticeCategory, NoticeStatus noticeStatus, ViewCount viewCount) {
         this.url = url;
         this.title = title;
         this.date = date;
         this.noticeCategory = noticeCategory;
         this.noticeStatus = noticeStatus;
-        this.viewCount = new ViewCount(0);
+        this.viewCount = viewCount != null ? viewCount : new ViewCount(0);
     }
 
     public static Notice of(String title, String url, String date, NoticeCategory noticeCategory, NoticeStatus noticeStatus) {
@@ -59,6 +59,7 @@ public class Notice extends BaseEntity {
                 .date(date)
                 .noticeCategory(noticeCategory)
                 .noticeStatus(noticeStatus)
+                .viewCount(new ViewCount(0))
                 .build();
     }
 

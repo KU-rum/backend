@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.QNotice;
+import ku_rum.backend.domain.notice.domain.value.ViewCount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -39,16 +40,6 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .offset((long) page * pageSize)
                 .limit(pageSize)
                 .fetch();
-    }
-
-    //조회수 db에 동기화
-    @Override
-    public void updateViewCount(String url, long count) {
-        queryFactory
-                .update(qNotice)
-                .set(qNotice.viewCount.count, qNotice.viewCount.count.add(count))
-                .where(qNotice.url.eq(url))
-                .execute();
     }
 
     @Override

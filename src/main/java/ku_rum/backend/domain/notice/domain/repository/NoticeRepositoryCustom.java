@@ -13,7 +13,5 @@ public interface NoticeRepositoryCustom {
 
     List<Notice> searchNoticesByTitleWithPaging(String searchTerm, int page, int pageSize);
 
-    void updateViewCount(String url, long count);
-
     String findTitleByUrl(String url);
 }

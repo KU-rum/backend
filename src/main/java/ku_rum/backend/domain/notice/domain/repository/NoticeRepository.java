@@ -24,4 +24,7 @@ public interface NoticeRepository extends JpaRepository<Notice, String>, NoticeR
     Optional<Notice> findByUrl(String link);
 
     boolean existsByUrl(String url);
+
+    @Query(value = "UPDATE notice SET view_count = view_count + :count WHERE url = :url", nativeQuery = true)
+    int updateViewCount(@Param("url") String url, @Param("count") long count);
 }

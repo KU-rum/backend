@@ -4,7 +4,7 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import ku_rum.backend.domain.notice.domain.value.ViewCount;
 
-@Converter
+@Converter(autoApply = true)
 public class ViewCountConverter implements AttributeConverter<ViewCount, Long> {
     @Override
     public Long convertToDatabaseColumn(ViewCount attribute) {
