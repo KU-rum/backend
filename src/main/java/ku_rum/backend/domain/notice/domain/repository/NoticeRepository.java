@@ -4,6 +4,7 @@ import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.NoticeCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,6 +26,7 @@ public interface NoticeRepository extends JpaRepository<Notice, String>, NoticeR
 
     boolean existsByUrl(String url);
 
+    @Modifying
     @Query(value = "UPDATE notice SET view_count = view_count + :count WHERE url = :url", nativeQuery = true)
     int updateViewCount(@Param("url") String url, @Param("count") long count);
 }

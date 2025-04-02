@@ -8,7 +8,9 @@ import ku_rum.backend.domain.notice.dto.response.RecentSearchTermResponse;
 import ku_rum.backend.global.exception.notice.InvalidPageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +21,23 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.I
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class NoticeService {
 
-    private static final int PAGE_SIZE = 20;       //한 페이지에 들어갈 공지사항 개수 (추후에 논의)
+    private static final int PAGE_SIZE = 20;
 
     private final NoticeRepository noticeRepository;
     private final RedisTemplate<String, String> recentSearchRedisTemplate;
+
+    public NoticeService(
+            NoticeRepository noticeRepository,
+            @Qualifier("recentSearchRedisTemplate") RedisTemplate<String, String> recentSearchRedisTemplate) {
+        this.noticeRepository = noticeRepository;
+        this.recentSearchRedisTemplate = recentSearchRedisTemplate;
+
+        //실제 Redis DB 확인 로그
+        int dbIndex = ((LettuceConnectionFactory) recentSearchRedisTemplate.getConnectionFactory()).getDatabase();
+        log.info("현재 Redis DB Index: " + dbIndex);
+    }
 
     /**
      * 1) 카테고리별 공지사항 조회
@@ -46,6 +58,8 @@ public class NoticeService {
     public List<NoticeSimpleResponse> searchNoticesByTitle(Long userId, String searchTerm, int page) {
         // 최근 검색어는 최대 10개만 유지
         String redisKey = "user:" + userId + ":recent-searches";
+        log.info("Redis DB Index: {}", ((LettuceConnectionFactory) recentSearchRedisTemplate.getConnectionFactory()).getDatabase());
+
         recentSearchRedisTemplate.opsForList().leftPush(redisKey, searchTerm.trim());
         recentSearchRedisTemplate.opsForList().trim(redisKey, 0, 9);
 

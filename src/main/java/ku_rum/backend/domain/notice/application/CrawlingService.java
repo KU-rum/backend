@@ -36,6 +36,7 @@ public class CrawlingService {
     public List<Notice> crawlAndSaveKonkukNotices() {
         WebDriver driver = null;
         List<Notice> notices = new ArrayList<>();
+        final int MAX_NOTICE_COUNT = 10;
 
         try {
             ChromeOptions chromeOptions = new ChromeOptions();
@@ -50,6 +51,11 @@ public class CrawlingService {
 
                 boolean continueCrawling = true;
                 while (continueCrawling) {
+                    if (notices.size() >= MAX_NOTICE_COUNT) {  // ✅ 최대 공지 개수 초과하면 중단
+                        log.info("🔹 최대 공지 개수({}) 초과, 크롤링 중단", MAX_NOTICE_COUNT);
+                        return notices;
+                    }
+
                     continueCrawling = goToNextButton(category, driver, crawlAndSave(category, driver, notices));
                 }
             }

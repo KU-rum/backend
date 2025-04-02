@@ -6,38 +6,51 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.SYNCHORNIZATION_ERROR;
+
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-@EnableAsync
 public class ViewCountService {
     private static final String NORMAL_VIEW_COUNT_KEY = "notice:viewcount:";
     private static final String POPULAR_VIEW_COUNT_KEY = "popular:notices";
     private static final String LOCK_QUEUE_KEY = "lock:viewcount:queue";
 
-
     private final RedissonClient redissonClient;
     private final NoticeRepository noticeRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
+    public ViewCountService(
+            RedissonClient redissonClient,
+            NoticeRepository noticeRepository,
+            @Qualifier("urlRedisTemplate") RedisTemplate<String, String> redisTemplate) {
+        this.redissonClient = redissonClient;
+        this.noticeRepository = noticeRepository;
+        this.redisTemplate = redisTemplate;
+    }
+
+    /*
+     * 조회수 증가 요청 큐에 추가
+     */
     public void enqueueLockRequest(String url) {
         redisTemplate.opsForList().leftPush(LOCK_QUEUE_KEY, url);
+        processQueue();
     }
 
     /**
      * url에 대해 조회수 redis에 갱신
      */
-    @Scheduled(fixedRate = 60000) //300초마다 큐 확인
     public void processQueue() {
         String url = redisTemplate.opsForList().rightPop(LOCK_QUEUE_KEY);
         if (url != null) {
@@ -52,8 +65,10 @@ public class ViewCountService {
         String lockKey = NORMAL_VIEW_COUNT_KEY + url;
         RLock lock = redissonClient.getLock(lockKey);
 
+        log.info("[handleLockRequest]");
         try {
             if (lock.tryLock(3, 1, TimeUnit.SECONDS)) {
+                log.info("락 획득");
                 try {
                     //일반 조회수 증가
                     redisTemplate.opsForValue().increment(lockKey);
@@ -64,13 +79,15 @@ public class ViewCountService {
 
                 } finally {
                     lock.unlock();
+                    log.info("락 릴리즈");
                 }
             } else {
                 //락을 획득하지 못했을 경우 큐에 재시도할 수 있도록 넣기
                 enqueueLockRequest(url);
             }
         } catch (InterruptedException e) {
-            throw new RedisSynchronizationException(SYNCHORNIZATION_ERROR);        }
+            throw new RedisSynchronizationException(SYNCHORNIZATION_ERROR);
+        }
     }
 
 
@@ -94,7 +111,7 @@ public class ViewCountService {
     /**
      * redis의 조회수 정보 db와 동기화
      */
-    @Scheduled(fixedRate = 1800000) // 30분마다 실행
+    @Transactional
     public void syncViewCountsToDatabase() {
         log.info("[syncViewCountsToDatabase] 레디스에 저장된 정보 db에 동기화");
 
