@@ -11,7 +11,7 @@ import ku_rum.backend.domain.notice.dto.response.NoticeSimpleResponse;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.AgreementStatus;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.global.utils.UserUtils;
+import ku_rum.backend.global.utill.UserUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +47,7 @@ class BookmarkServiceTest {
     @Mock
     private NoticeRepository noticeRepository;
 
-    private MockedStatic<UserUtils> mockedStatic;
+    private MockedStatic<UserUtil> mockedStatic;
 
     private User user;
 
@@ -68,8 +68,8 @@ class BookmarkServiceTest {
                 .noticeCategory(NoticeCategory.AFFAIR)
                 .build();
 
-        mockedStatic = mockStatic(UserUtils.class);
-        mockedStatic.when(UserUtils::getLongMemberId).thenReturn(1L);
+        mockedStatic = mockStatic(UserUtil.class);
+        mockedStatic.when(UserUtil::getLongMemberId).thenReturn(1L);
         userRepository.save(user);
     }
 

@@ -10,7 +10,7 @@ import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.AgreementStatus;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
 import ku_rum.backend.global.exception.friend.NoFriendsException;
-import ku_rum.backend.global.utils.UserUtils;
+import ku_rum.backend.global.utill.UserUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +49,7 @@ class FriendServiceTest {
     private User user;
     private User friend;
     private Friend friendEntity;
-    MockedStatic<UserUtils> userUtilsMockedStatic;
+    MockedStatic<UserUtil> userUtilsMockedStatic;
 
     @BeforeEach
     void setUp() {
@@ -61,8 +61,8 @@ class FriendServiceTest {
         friend = User.of("user2", "user2@example.com", "nickname2", "password", "654321", Department.of("Math", building), AgreementStatus.AGREED);
         friendEntity = Friend.of(user, friend, FriendStatus.PENDING);
 
-        userUtilsMockedStatic = Mockito.mockStatic(UserUtils.class);
-        userUtilsMockedStatic.when(UserUtils::getLongMemberId).thenReturn(1L);
+        userUtilsMockedStatic = Mockito.mockStatic(UserUtil.class);
+        userUtilsMockedStatic.when(UserUtil::getLongMemberId).thenReturn(1L);
     }
 
     @AfterEach

@@ -1,22 +1,18 @@
-package ku_rum.backend.global.utils;
+package ku_rum.backend.global.utill;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class RedisUtil {
 
     private final RedisTemplate<String, String> redisTemplate;
-
-    public RedisUtil(@Qualifier("urlRedisTemplate") RedisTemplate<String, String> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
 
     public String getRedisData(String key){
         log.info("레디스에서 키 조회");

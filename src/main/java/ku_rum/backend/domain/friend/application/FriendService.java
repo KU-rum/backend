@@ -9,7 +9,7 @@ import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
 import ku_rum.backend.global.exception.friend.NoFriendsException;
 import ku_rum.backend.global.exception.user.NoSuchUserException;
-import ku_rum.backend.global.utils.UserUtils;
+import ku_rum.backend.global.utill.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -92,7 +92,7 @@ public class FriendService {
     }
 
     User getUser() {
-        Long memberId = UserUtils.getLongMemberId();
+        Long memberId = UserUtil.getLongMemberId();
         User user = userRepository.findUserById(memberId).orElseThrow(() -> new NoSuchUserException(NO_SUCH_USER));
         return user;
     }

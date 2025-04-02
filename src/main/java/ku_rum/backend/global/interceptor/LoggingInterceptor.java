@@ -1,10 +1,10 @@
-package ku_rum.backend.global.log.interceptior;
+package ku_rum.backend.global.interceptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ku_rum.backend.global.log.domain.ApiLog;
-import ku_rum.backend.global.log.domain.repository.ApiLogRepository;
+import ku_rum.backend.global.domain.ApiLog;
+import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

@@ -1,7 +1,7 @@
 package ku_rum.backend.domain.common.firebase.application;
 
-import ku_rum.backend.global.utils.RedisUtil;
-import ku_rum.backend.global.utils.UserUtils;
+import ku_rum.backend.global.utill.RedisUtil;
+import ku_rum.backend.global.utill.UserUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,15 +26,15 @@ class NotificationServiceTest {
     @InjectMocks
     private NotificationService notificationService;  // 테스트 대상 객체
 
-    MockedStatic<UserUtils> userUtilsMockedStatic;
+    MockedStatic<UserUtil> userUtilsMockedStatic;
 
     private static final Long TEST_USER_ID = 123L;
     private static final String TEST_TOKEN = "sample-token";
 
     @BeforeEach
     void setup() {
-        userUtilsMockedStatic = Mockito.mockStatic(UserUtils.class);
-        userUtilsMockedStatic.when(UserUtils::getLongMemberId).thenReturn(TEST_USER_ID);
+        userUtilsMockedStatic = Mockito.mockStatic(UserUtil.class);
+        userUtilsMockedStatic.when(UserUtil::getLongMemberId).thenReturn(TEST_USER_ID);
     }
     @AfterEach
     public void tearDown() {

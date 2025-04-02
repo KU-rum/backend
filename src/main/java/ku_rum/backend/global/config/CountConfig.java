@@ -1,6 +1,6 @@
-package ku_rum.backend.global.config.monitoring;
+package ku_rum.backend.global.config;
 
-import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.aop.CountedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
-public class TimeConfig {
+public class CountConfig {
 
     @Bean
-    public TimedAspect timedAspect(MeterRegistry registry) {
-        return new TimedAspect(registry);
+    public CountedAspect countedAspect(MeterRegistry registry) {
+        return new CountedAspect(registry);
     }
 }

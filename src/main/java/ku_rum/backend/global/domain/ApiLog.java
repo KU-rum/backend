@@ -1,4 +1,4 @@
-package ku_rum.backend.global.log.domain;
+package ku_rum.backend.global.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

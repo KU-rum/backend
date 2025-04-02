@@ -1,6 +1,8 @@
 package ku_rum.backend.domain.user.presentation;
 
 import jakarta.validation.Valid;
+import ku_rum.backend.domain.common.image.application.ImageStorageService;
+import ku_rum.backend.domain.common.image.dto.response.ImageResponse;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.dto.request.NicknameChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
@@ -22,6 +24,7 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.S
 public class UserProfileController {
 
     private final UserService userService;
+    private final ImageStorageService imageStorageService;
 
     /**
      * 프로필 변경 API

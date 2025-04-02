@@ -2,7 +2,7 @@ spring:
   application:
     name: kurum
   profiles:
-    active: local
+    active: prod
 
   batch:
     jdbc:
@@ -19,3 +19,4 @@ spring:
 logging:
   level:
     org.springframework.cache: trace
+

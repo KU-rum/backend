@@ -2,6 +2,7 @@ package ku_rum.backend.domain.user.presentation;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.domain.notice.domain.repository.NoticeRepositoryImpl;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.common.mail.dto.request.EmailValidationRequest;
 import ku_rum.backend.domain.user.application.UserValidator;
@@ -53,6 +54,9 @@ class UserControllerTest extends RestDocsTestSupport {
 
     @MockBean
     private UserValidator userValidator;
+
+    @MockBean
+    private NoticeRepositoryImpl noticeRepository;
 
     @DisplayName("신규 유저를 생성한다.")
     @Test

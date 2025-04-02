@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletResponse;
 import ku_rum.backend.domain.notice.domain.repository.NoticeRepositoryImpl;
-import ku_rum.backend.global.log.domain.ApiLog;
-import ku_rum.backend.global.log.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.log.interceptior.LoggingInterceptor;
+import ku_rum.backend.global.batch.BatchScheduler;
+import ku_rum.backend.global.domain.ApiLog;
+import ku_rum.backend.global.domain.repository.ApiLogRepository;
+import ku_rum.backend.global.interceptor.LoggingInterceptor;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -40,6 +41,10 @@ class LoggingInterceptorTest {
 
     @MockBean
     private NoticeRepositoryImpl noticeRepository;
+
+    @MockBean
+    private BatchScheduler batchScheduler;
+
 
     @Test
     void afterCompletion_정상적인_요청이면_로그가_저장된다() throws Exception {

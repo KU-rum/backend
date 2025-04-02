@@ -1,4 +1,3 @@
-/*
 package ku_rum.backend.domain.common.firebase.application;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -15,7 +14,7 @@ import java.io.IOException;
 @Service
 @Slf4j
 public class FCMInitializer {
-    private static final String FIREBASE_CONFIG_PATH = "kuroom-90fb5-firebase-adminsdk-fbsvc-f264f66c64.json";
+    private static final String FIREBASE_CONFIG_PATH = "firebase-key.json";
 
     @PostConstruct
     public void init() {
@@ -32,4 +31,3 @@ public class FCMInitializer {
         }
     }
 }
-*/

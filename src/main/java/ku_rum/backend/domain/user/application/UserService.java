@@ -8,7 +8,7 @@ import ku_rum.backend.domain.user.dto.request.*;
 import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
 import ku_rum.backend.domain.user.dto.response.UserSaveResponse;
 import ku_rum.backend.global.exception.user.*;
-import ku_rum.backend.global.utils.UserUtils;
+import ku_rum.backend.global.utill.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -80,7 +80,7 @@ public class UserService {
     }
 
     private User getUser() {
-        Long memberId = UserUtils.getLongMemberId();
+        Long memberId = UserUtil.getLongMemberId();
         log.debug("현재 사용자 조회: userId={}", memberId);
         return userRepository.findUserById(memberId).orElseThrow(() -> new NoSuchUserException(NO_SUCH_USER));
     }

@@ -12,7 +12,7 @@ import ku_rum.backend.global.exception.notice.DuplicateNoticeException;
 import ku_rum.backend.global.exception.notice.NoSuchNoticeException;
 import ku_rum.backend.global.exception.user.NoSuchUserException;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
-import ku_rum.backend.global.utils.UserUtils;
+import ku_rum.backend.global.utill.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +59,7 @@ public class BookmarkService {
     }
 
     private User getUser() {
-        Long memberId = UserUtils.getLongMemberId();
+        Long memberId = UserUtil.getLongMemberId();
         return userRepository.findUserById(memberId).orElseThrow(() -> new NoSuchUserException(NO_SUCH_USER));
     }
 

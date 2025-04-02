@@ -13,10 +13,8 @@ spring:
             enable: true
 
   datasource:
-    url: jdbc:mysql://localhost:3307/mydb
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 1234
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1
   jpa:
     hibernate:
       ddl-auto: create
@@ -24,12 +22,6 @@ spring:
     redis:
       port: 6379
       host: localhost
-
-  batch:
-    job:
-      enabled: false
-    jdbc:
-      initialize-schema: always  
 
 
 # JWT 설정
@@ -43,4 +35,15 @@ openai:
   api:
     key: temp
     url: temp
+
+cloud:
+  aws:
+    region: ap-northeast-2
+    credentials:
+      access-key: testtest
+      secret-key: testtest
+  s3:
+    bucket: kuroom
+  stack:
+    auto: false
 

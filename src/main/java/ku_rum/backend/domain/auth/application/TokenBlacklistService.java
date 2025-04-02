@@ -1,7 +1,7 @@
 package ku_rum.backend.domain.auth.application;
 
 import ku_rum.backend.domain.auth.dto.request.ReissueRequest;
-import ku_rum.backend.global.utils.RedisUtil;
+import ku_rum.backend.global.utill.RedisUtil;
 import ku_rum.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

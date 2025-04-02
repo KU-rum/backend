@@ -1,4 +1,4 @@
-package ku_rum.backend.global.utils;
+package ku_rum.backend.global.utill;
 
 import ku_rum.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
-public class UserUtils {
+public class UserUtil {
 
     public static Long getLongMemberId() {
         CustomUserDetails userDetails = getCustomUserDetails();

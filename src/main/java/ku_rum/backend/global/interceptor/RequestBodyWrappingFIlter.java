@@ -1,4 +1,4 @@
-package ku_rum.backend.global.log.interceptior;
+package ku_rum.backend.global.interceptor;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

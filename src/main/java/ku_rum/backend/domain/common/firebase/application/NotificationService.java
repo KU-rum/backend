@@ -1,11 +1,11 @@
 package ku_rum.backend.domain.common.firebase.application;
 
-import ku_rum.backend.global.utils.RedisUtil;
+import ku_rum.backend.global.utill.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static ku_rum.backend.global.utils.UserUtils.getLongMemberId;
+import static ku_rum.backend.global.utill.UserUtil.getLongMemberId;
 
 @Slf4j
 @Service

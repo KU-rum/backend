@@ -1,4 +1,4 @@
-package ku_rum.backend.global.utils.redisutils;
+package ku_rum.backend.global.utill;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
