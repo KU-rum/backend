@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.place.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -7,8 +8,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull.List;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,8 +38,10 @@ public class Place {
     private String content;
 
     @NotNull
+    @Column(nullable = false, precision = 15, scale = 9)
     private BigDecimal latitude;
 
     @NotNull
+    @Column(nullable = false, precision = 15, scale = 9)
     private BigDecimal longitude;
 }
