@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
+import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipFriendListResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
@@ -101,6 +102,18 @@ public class PlaceService {
         List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
 
         return GetPlaceResponse.of(place, Collections.emptyList(), placeImages);
+    }
+
+    /**
+     * 장소 검색(비회원 로직)
+     *
+     * @param query 검색어
+     * @return
+     */
+    public List<SearchPlaceResponse> searchPlace(String query) {
+        return placeRepository.findByNameContaining(query).stream()
+                .map(SearchPlaceResponse::from)
+                .toList();
     }
 
     /**

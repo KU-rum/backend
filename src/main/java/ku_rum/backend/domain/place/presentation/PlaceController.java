@@ -8,6 +8,7 @@ import ku_rum.backend.domain.place.application.response.CurrentPositionConfirmRe
 import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
+import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
@@ -85,6 +86,12 @@ public class PlaceController {
             return BaseResponse.ok(placeService.getPlaceWithUser(userDetails, placeId));
         }
         return BaseResponse.ok(placeService.getPlace(placeId));
+    }
+
+    @GetMapping("/search")
+    public BaseResponse<List<SearchPlaceResponse>> searchPlace(@RequestParam("query") String query,
+                                                               @AuthenticationPrincipal final CustomUserDetails userDetails) {
+        return BaseResponse.ok(placeService.searchPlace(query));
     }
 
     private boolean isAuthenticated(final CustomUserDetails userDetails) {
