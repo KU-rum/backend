@@ -5,16 +5,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
+import ku_rum.backend.domain.place.application.response.SearchPlaceHistoryResponse;
 import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipFriendListResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
 import ku_rum.backend.domain.place.domain.Place;
+import ku_rum.backend.domain.place.domain.PlaceHistory;
 import ku_rum.backend.domain.place.domain.PlaceImage;
+import ku_rum.backend.domain.place.domain.repository.PlaceHistoryRepository;
 import ku_rum.backend.domain.place.domain.repository.PlaceImageRepository;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
+import ku_rum.backend.domain.user.application.UserService;
+import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
@@ -30,6 +35,8 @@ public class PlaceService {
     private final PlaceRepository placeRepository;
     private final PositionRepository positionRepository;
     private final PlaceImageRepository placeImageRepository;
+    private final PlaceHistoryRepository placeHistoryRepository;
+    private final UserService userService;
 
     /**
      * 지도 칩 조회(회원 로직)
@@ -79,10 +86,12 @@ public class PlaceService {
      * @param placeId     장소 PK
      * @return
      */
+    @Transactional
     public GetPlaceResponse getPlaceWithUser(
             final CustomUserDetails userDetails,
             final Long placeId) {
         Place place = findPlace(placeId);
+        updatePlaceHistory(place, userDetails);
         List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
         List<FriendUserDto> friendUserDtos = positionRepository.findPositionByFriendAndPlace(userDetails.getUserId(),
                 place);
@@ -113,6 +122,19 @@ public class PlaceService {
     public List<SearchPlaceResponse> searchPlace(String query) {
         return placeRepository.findByNameContaining(query).stream()
                 .map(SearchPlaceResponse::from)
+                .toList();
+    }
+
+    /**
+     * 지도 검색 히스토리 조회
+     *
+     * @param userDetails
+     * @return
+     */
+    public List<SearchPlaceHistoryResponse> searchPlaceHistory(final CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        return placeHistoryRepository.findTop5ByUserOrderByModifiedAtDesc(user).stream()
+                .map(SearchPlaceHistoryResponse::from)
                 .toList();
     }
 
@@ -191,5 +213,34 @@ public class PlaceService {
         return places.stream()
                 .map(SelectPlaceChipResponse::from)
                 .toList();
+    }
+
+    /**
+     * 검색 히스토리 업데이트
+     *
+     * @param place
+     * @param userDetails
+     */
+    private void updatePlaceHistory(final Place place, final CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        placeHistoryRepository.findByPlaceAndUser(place, user)
+                .ifPresentOrElse(
+                        PlaceHistory::refreshModifiedAt,
+                        () -> savePlaceHistory(place, user)
+                );
+    }
+
+    /**
+     * 검색 히스토리 저장
+     *
+     * @param place
+     * @param userDetails
+     */
+    private void savePlaceHistory(final Place place, final User user) {
+        PlaceHistory placeHistory = PlaceHistory.builder()
+                .place(place)
+                .user(user)
+                .build();
+        placeHistoryRepository.save(placeHistory);
     }
 }

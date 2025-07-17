@@ -8,6 +8,7 @@ import ku_rum.backend.domain.place.application.response.CurrentPositionConfirmRe
 import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
+import ku_rum.backend.domain.place.application.response.SearchPlaceHistoryResponse;
 import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
@@ -92,6 +93,12 @@ public class PlaceController {
     public BaseResponse<List<SearchPlaceResponse>> searchPlace(@RequestParam("query") String query,
                                                                @AuthenticationPrincipal final CustomUserDetails userDetails) {
         return BaseResponse.ok(placeService.searchPlace(query));
+    }
+
+    @GetMapping("/search/history")
+    public BaseResponse<List<SearchPlaceHistoryResponse>> searchPlaceHistory(
+            @AuthenticationPrincipal final CustomUserDetails userDetails) {
+        return BaseResponse.ok(placeService.searchPlaceHistory(userDetails));
     }
 
     private boolean isAuthenticated(final CustomUserDetails userDetails) {
