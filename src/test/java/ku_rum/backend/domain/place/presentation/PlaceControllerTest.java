@@ -25,9 +25,11 @@ import ku_rum.backend.domain.place.application.response.CurrentPositionConfirmRe
 import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
+import ku_rum.backend.domain.place.application.response.SearchPlaceHistoryResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
 import ku_rum.backend.domain.place.domain.Place;
+import ku_rum.backend.domain.place.domain.PlaceHistory;
 import ku_rum.backend.domain.place.domain.PlaceImage;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
@@ -277,5 +279,46 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 )
                                 .build())));
 
+    }
+
+    @DisplayName("장소 검색 기록를 확인한다")
+    @Test
+    void searchPlaceHistory() throws Exception {
+        //given
+        Long placeId = 1L;
+        Place place = Place.builder()
+                .placeId(placeId)
+                .categoryChip(CategoryChip.K_CUBE)
+                .name("상허기념도서관")
+                .subName("상허기념도서관 K-CUBE")
+                .content("상허기념도서관 K-CUBE입니다")
+                .latitude(BigDecimal.valueOf(37.541941000))
+                .longitude(BigDecimal.valueOf(127.073784000))
+                .build();
+        PlaceHistory placeHistory = PlaceHistory.builder()
+                .placeHistoryId(1L)
+                .place(place)
+                .build();
+        SearchPlaceHistoryResponse response = SearchPlaceHistoryResponse.from(placeHistory);
+
+        given(placeService.searchPlaceHistory(any(CustomUserDetails.class)))
+                .willReturn(List.of(response));
+
+        //when
+        mockMvc.perform(get("/api/v1/places/search/history")
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].placeId").value(placeId))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("지도 검색 히스토리 조회")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .build())));
     }
 }
