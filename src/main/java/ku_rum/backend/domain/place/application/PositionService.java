@@ -35,7 +35,7 @@ public class PositionService {
     private final UserService userService;
     private final RankService rankService;
 
-    private static final long CRITERION_TIME = 3600L;
+    public static final long CRITERION_TIME = 3600L;
 
     /**
      * 사용자 위치 공유 여부 확인
