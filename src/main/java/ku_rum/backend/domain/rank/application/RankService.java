@@ -8,7 +8,9 @@ import ku_rum.backend.domain.rank.domain.PlaceRank;
 import ku_rum.backend.domain.rank.domain.repository.PlaceRankRepository;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
+import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
+import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,5 +56,10 @@ public class RankService {
                 .place(place)
                 .build();
         placeRankRepository.save(rank);
+    }
+
+    public PlaceRank getUserPlaceRank(User user, Place place) {
+        return placeRankRepository.findByUserAndPlace(user, place).orElseThrow(() -> new GlobalException(
+                BaseExceptionResponseStatus.PLACE_RANK_NOT_FOUND));
     }
 }
