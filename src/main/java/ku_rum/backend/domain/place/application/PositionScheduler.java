@@ -22,8 +22,7 @@ public class PositionScheduler {
     private final PositionRepository positionRepository;
     private final PlaceRankRepository placeRankRepository;
 
-    /// @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(cron = "0 0 0 * * ?")
     public void resetPosition() {
         List<Long> positions = positionRepository.findAll().stream()
                 .filter(this::isUpperBound)
