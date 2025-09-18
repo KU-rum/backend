@@ -103,7 +103,7 @@ public class PositionService {
                 .orElseThrow(() -> new GlobalException(NO_SUCH_DEPARTMENT));
         positionRepository.deleteByUser(user);
 
-        Duration minusTime = between(LocalDateTime.now(), position.getCreatedAt());
+        Duration minusTime = between(position.getCreatedAt(), LocalDateTime.now());
         boolean isUpperBound = minusTime.getSeconds() >= CRITERION_TIME;
 
         try {

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -23,6 +24,7 @@ public class PositionScheduler {
     private final PlaceRankRepository placeRankRepository;
 
     @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
     public void resetPosition() {
         List<Long> positions = positionRepository.findAll().stream()
                 .filter(this::isUpperBound)
