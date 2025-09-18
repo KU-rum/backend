@@ -430,6 +430,18 @@ public class PlaceData {
                 .longitude(BigDecimal.valueOf(12.12))
                 .build();
         placeRepository.save(place27);
+
+        PlaceAlias placeAlias20 = PlaceAlias.builder()
+                .original("공A")
+                .replacement("공학관A")
+                .build();
+        placeAliasRepository.save(placeAlias20);
+
+        PlaceAlias placeAlias21 = PlaceAlias.builder()
+                .original("공C")
+                .replacement("공학관C")
+                .build();
+        placeAliasRepository.save(placeAlias21);
     }
 
     @Transactional

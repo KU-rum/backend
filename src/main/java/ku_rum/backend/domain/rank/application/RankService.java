@@ -41,7 +41,8 @@ public class RankService {
                 .collect(Collectors.groupingBy(
                         PlaceRank::getCount,
                         () -> new TreeMap<>(Comparator.reverseOrder()),
-                        Collectors.toList());
+                        Collectors.toList())
+                );
 
         return placeRanksGroupedByCount.values()
                 .stream()

@@ -444,6 +444,36 @@ public class SearchServiceTest {
         )).isTrue();
     }
 
+    @Test
+    @DisplayName("공A를 검색하면 공학관A를 검색한 것과 같은 결과를 반환한다")
+    void searchCase28() {
+        //given
+        String preQuery = "공학관A";
+        List<SearchPlaceResponse> preResponse = searchService.searchPlace(preQuery);
+
+        //when
+        String query = "공A";
+        List<SearchPlaceResponse> response = searchService.searchPlace(query);
+
+        //then
+        Assertions.assertThat(preResponse).isEqualTo(response);
+    }
+
+    @Test
+    @DisplayName("공C를 검색하면 공학관C를 검색한 것과 같은 결과를 반환한다")
+    void searchCase29() {
+        //given
+        String preQuery = "공학관C";
+        List<SearchPlaceResponse> preResponse = searchService.searchPlace(preQuery);
+
+        //when
+        String query = "공C";
+        List<SearchPlaceResponse> response = searchService.searchPlace(query);
+
+        //then
+        Assertions.assertThat(preResponse).isEqualTo(response);
+    }
+
     private void assertSearchResultMatches(String expectedQuery, String aliasQuery) {
         List<SearchPlaceResponse> expected = searchService.searchPlace(expectedQuery);
         List<SearchPlaceResponse> actual = searchService.searchPlace(aliasQuery);
