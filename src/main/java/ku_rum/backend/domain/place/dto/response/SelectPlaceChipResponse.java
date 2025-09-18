@@ -23,7 +23,8 @@ public record SelectPlaceChipResponse(String name,
                 .stream()
                 .map(PlaceImage::getImageUrl)
                 .toList();
-        return new SelectPlaceChipResponse(place.getName(), place.getSubName(), place.getContent(), place.getLatitude(),
+        return new SelectPlaceChipResponse(place.getName(), place.getSubName(), place.getContent(),
+                placetatus.getLatitude(),
                 place.getLongitude(), imgUrls, Collections.emptyList());
     }
 

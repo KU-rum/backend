@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
+import java.awt.Polygon;
 import ku_rum.backend.global.support.type.BaseEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -39,11 +39,6 @@ public class Place extends BaseEntity {
     @NotNull
     private String content;
 
-    @NotNull
-    @Column(nullable = false, precision = 15, scale = 9)
-    private BigDecimal latitude;
-
-    @NotNull
-    @Column(nullable = false, precision = 15, scale = 9)
-    private BigDecimal longitude;
+    @Column(columnDefinition = "POLYGON", nullable = false)
+    private Polygon boundary;
 }

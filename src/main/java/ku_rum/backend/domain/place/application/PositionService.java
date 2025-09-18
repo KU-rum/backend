@@ -16,6 +16,7 @@ import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
+import ku_rum.backend.domain.place.util.PointParser;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
 import ku_rum.backend.domain.user.application.UserService;
@@ -63,8 +64,8 @@ public class PositionService {
      */
     public CurrentPositionResponse getCurrentPosition(CustomUserDetails userDetails,
                                                       CurrentPositionRequest request) {
-        Place findPlace = placeRepository.findNearestPlace(request.latitude(),
-                request.longitude());
+        String point = PointParser.toWKT(request.latitude(), request.longitude());
+        Place findPlace = placeRepository.findContainingPoint(point);
         return new CurrentPositionResponse(findPlace.getName());
     }
 

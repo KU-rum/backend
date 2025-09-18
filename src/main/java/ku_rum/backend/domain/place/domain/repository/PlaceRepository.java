@@ -1,6 +1,5 @@
 package ku_rum.backend.domain.place.domain.repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import ku_rum.backend.domain.place.domain.CategoryChip;
@@ -13,15 +12,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Long> {
 
-    @Query("""
-                SELECT p
-                FROM Place p
-                WHERE p.categoryChip = "BUILDING"
-                ORDER BY
-                    ABS(p.latitude - :latitude) + ABS(p.longitude - :longitude)
-                LIMIT 1
-            """)
-    Place findNearestPlace(@Param("latitude") BigDecimal latitude, @Param("longitude") BigDecimal longitude);
+    @Query(value = """
+            SELECT * FROM buildings 
+            WHERE ST_Contains(boundary, ST_GeomFromText(:point, 4326))
+            """, nativeQuery = true)
+    Place findContainingPoint(@Param("point") String point);
 
     Optional<Place> findOneByName(String name);
 
