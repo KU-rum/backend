@@ -15,7 +15,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
 
-    List<PlaceRank> findTop3ByUserOrderByCountDesc(User user);
+    @Query(value = """
+            SELECT * FROM place_rank pr
+            WHERE pr.user_id = :userId
+              AND pr.count >= (
+                  SELECT MIN(sub.count) FROM (
+                      SELECT DISTINCT pr2.count
+                      FROM place_rank pr2
+                      WHERE pr2.user_id = :userId
+                      ORDER BY pr2.count DESC
+                      LIMIT 3
+                  ) AS sub
+              )
+            ORDER BY pr.count DESC
+            """, nativeQuery = true)
+    List<PlaceRank> findTop3RanksWithTiesByUser(@Param("userId") Long userId);
 
     Optional<PlaceRank> findByUserAndPlace(User user, Place place);
 

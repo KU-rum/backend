@@ -1,7 +1,11 @@
 package ku_rum.backend.domain.rank.application;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
@@ -31,7 +35,17 @@ public class RankService {
      */
     public List<GetPlaceUserRankResponse> getPlaceUserRank(final CustomUserDetails userDetails) {
         User user = userService.getUser();
-        return placeRankRepository.findTop3ByUserOrderByCountDesc(user).stream()
+        List<PlaceRank> PlaceRanks = placeRankRepository.findTop3RanksWithTiesByUser(user.getId());
+
+        Map<Integer, List<PlaceRank>> placeRanksGroupedByCount = PlaceRanks.stream()
+                .collect(Collectors.groupingBy(
+                        PlaceRank::getCount,
+                        () -> new TreeMap<>(Comparator.reverseOrder()),
+                        Collectors.toList())
+                );
+
+        return placeRanksGroupedByCount.values()
+                .stream()
                 .map(GetPlaceUserRankResponse::from)
                 .toList();
     }

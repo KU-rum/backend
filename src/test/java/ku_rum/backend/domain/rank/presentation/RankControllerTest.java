@@ -37,7 +37,7 @@ public class RankControllerTest extends RestDocsTestSupport {
         //given
         String placeName = "상허기념도서관";
         int count = 5;
-        GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(placeName, count);
+        GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
         List<GetPlaceUserRankResponse> response = List.of(getPlaceUserRankResponse);
 
         given(rankService.getPlaceUserRank(any(CustomUserDetails.class)))
