@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
-import java.awt.Polygon;
 import java.math.BigDecimal;
 import ku_rum.backend.global.support.type.BaseEntity;
 import lombok.AccessLevel;
@@ -16,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Polygon;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,6 +48,6 @@ public class Place extends BaseEntity {
     @Column(nullable = false, precision = 15, scale = 9)
     private BigDecimal longitude;
 
-    @Column(columnDefinition = "POLYGON", nullable = false)
+    @Column(columnDefinition = "POLYGON")
     private Polygon boundary;
 }
