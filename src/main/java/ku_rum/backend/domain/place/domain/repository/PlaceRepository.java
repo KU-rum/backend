@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public interface PlaceRepository extends JpaRepository<Place, Long> {
 
     @Query(value = """
-            SELECT * FROM buildings 
+            SELECT * FROM place
             WHERE ST_Contains(boundary, ST_GeomFromText(:point, 4326))
             """, nativeQuery = true)
     Place findContainingPoint(@Param("point") String point);
