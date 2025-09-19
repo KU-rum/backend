@@ -13,7 +13,9 @@ spring:
             enable: true
 
   datasource:
-    url: jdbc:tc:mysql:8.0.31:///testdb
+    url: jdbc:mysql://127.0.0.1:3307/testdb
+    username: root
+    password: testdb
   jpa:
     properties:
       hibernate:
