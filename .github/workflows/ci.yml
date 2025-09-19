@@ -18,6 +18,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       write-all
+    services: #mysql 설정
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: testdb
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - uses: actions/checkout@v4
       - name: JDK 17 를 준비한다.
