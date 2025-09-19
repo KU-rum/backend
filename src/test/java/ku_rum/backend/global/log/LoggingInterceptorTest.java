@@ -1,9 +1,18 @@
 package ku_rum.backend.global.log;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import ku_rum.backend.global.domain.ApiLog;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.interceptor.LoggingInterceptor;
@@ -11,21 +20,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import java.nio.charset.StandardCharsets;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-
-@DataJpaTest
-@AutoConfigureMockMvc(addFilters = false)
+@SpringBootTest
+@ActiveProfiles("test")
 class LoggingInterceptorTest {
 
     @InjectMocks
@@ -41,7 +44,8 @@ class LoggingInterceptorTest {
     @Test
     void afterCompletion_정상적인_요청이면_로그가_저장된다() throws Exception {
         // Given
-        ContentCachingRequestWrapper cachingRequest = mock(ContentCachingRequestWrapper.class); // 실제로 ContentCachingRequestWrapper를 mock
+        ContentCachingRequestWrapper cachingRequest = mock(
+                ContentCachingRequestWrapper.class); // 실제로 ContentCachingRequestWrapper를 mock
         HttpServletResponse response = mock(HttpServletResponse.class);
         Object handler = mock(Object.class);
 
@@ -51,7 +55,8 @@ class LoggingInterceptorTest {
         given(cachingRequest.getHeader(HttpHeaders.AUTHORIZATION)).willReturn("Bearer token");
         given(cachingRequest.getHeader("X-Forwarded-For")).willReturn("192.168.1.1");
 
-        byte[] content = "{\"test\":\"@konkuk.ac.kr\",\"email\":\"test123\",\"password\":\"test123\",\"studentId\":\"202112322\",\"department\":\"컴퓨터공학부\",\"nickname\":\"미미미누\"}".getBytes(StandardCharsets.UTF_8);
+        byte[] content = "{\"test\":\"@konkuk.ac.kr\",\"email\":\"test123\",\"password\":\"test123\",\"studentId\":\"202112322\",\"department\":\"컴퓨터공학부\",\"nickname\":\"미미미누\"}".getBytes(
+                StandardCharsets.UTF_8);
         given(cachingRequest.getContentAsByteArray()).willReturn(content);  // Mock the body content
 
         given(objectMapper.readTree(content)).willReturn(new ObjectNode(JsonNodeFactory.instance));
