@@ -125,7 +125,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    runtimeOnly 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -174,10 +173,7 @@ dependencies {
     swaggerUI 'org.webjars:swagger-ui:4.11.1'
     // 10. Assertj 추가
     testImplementation 'org.assertj:assertj-core:3.23.1'
-    // Testcontainers & Selenium
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:selenium'
-
+    
     //FireBase
     implementation 'com.google.firebase:firebase-admin:6.8.1'
 
@@ -194,6 +190,10 @@ dependencies {
     // postGIS
     implementation "org.hibernate.orm:hibernate-spatial"
     implementation "org.locationtech.jts:jts-core:1.19.0"
+
+    // Test Container
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
 }
 
 
