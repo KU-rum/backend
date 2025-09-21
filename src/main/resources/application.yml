@@ -5,7 +5,7 @@ logging:
 app:
   oauth2:
     authorizedRedirectUris:
-      - http://localhost:5173
+      - https://kuroom.shop/oauth/callback
 
 ---
 spring:
