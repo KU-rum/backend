@@ -58,7 +58,7 @@ class AuthControllerTest extends RestDocsTestSupport {
         // UserResponse 설정 (사용자 정보도 포함해야 하므로, 예시로 넣음)
         UserResponse userResponse = UserResponse.of(
                 1L, "oauthId", "kmw10693", "email@example.com", "nickname", "studentId", "imageUrl"
-        , departmentResponses, true);
+        , departmentResponses);
 
         // AuthResponse 설정
         AuthResponse authResponse = AuthResponse.of(tokenResponse, userResponse);
@@ -144,7 +144,7 @@ class AuthControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("data.userResponse.departmentResponse")
                                                         .type(JsonType.STRING)
                                                         .description("사용자 학과"),
-                                                fieldWithPath("data.userResponse.isFirstLogin")
+                                                fieldWithPath("data.tokenResponse.isFirstLogin")
                                                         .type(JsonType.BOOLEAN)
                                                         .description("사용자 최초 로그인 여부")
                                         ).build())));
@@ -239,7 +239,10 @@ class AuthControllerTest extends RestDocsTestSupport {
                                                         .description("엑세스 토큰 만료 기간"),
                                                 fieldWithPath("data.refreshExpireIn")
                                                         .type(JsonType.STRING)
-                                                        .description("리프레시 토큰 만료 기간")
+                                                        .description("리프레시 토큰 만료 기간"),
+                                                fieldWithPath("data.isFirstLogin")
+                                                        .type(JsonType.BOOLEAN)
+                                                        .description("사용자 최초 로그인 여부")
                                         ).build())));
     }
 
@@ -250,7 +253,7 @@ class AuthControllerTest extends RestDocsTestSupport {
         // given
         String tempToken = "temporary_token_value";
         List<DepartmentResponse> list = new ArrayList<>();
-        UserResponse userResponse = new UserResponse(1L, "oauthId", "loginId", "email", "nickname", "studentId", "imageUrl", list, true);
+        UserResponse userResponse = new UserResponse(1L, "oauthId", "loginId", "email", "nickname", "studentId", "imageUrl", list);
         TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", 1800000L, 604800000L, false);
         AuthResponse authResponse = new AuthResponse(
                 tokenResponse,
@@ -300,7 +303,8 @@ class AuthControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("data.userResponse.studentId").description("사용자 학생 ID"),
                                                 fieldWithPath("data.userResponse.imageUrl").description("사용자 이미지 URL"),
                                                 fieldWithPath("data.userResponse.departmentResponse").description("사용자 학과 정보"),
-                                                fieldWithPath("data.userResponse.isFirstLogin").description("사용자 최초 로그인 여부")
+                                                fieldWithPath("data.tokenResponse.isFirstLogin").description("사용자 최초 로그인 여부")
+
                                         )
                                         .build()
                         )
