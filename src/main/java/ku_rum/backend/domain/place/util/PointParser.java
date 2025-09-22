@@ -32,8 +32,8 @@ public class PointParser {
      * @param latitude  위도 (y)
      * @return
      */
-    public static String toWKT(BigDecimal longitude, BigDecimal latitude) {
-        return String.format("POINT(%f %f)", longitude, latitude);
+    public static String toPointString(BigDecimal latitude, BigDecimal longitude) {
+        return String.format("POINT(%f %f)", latitude, longitude);
     }
 
 }

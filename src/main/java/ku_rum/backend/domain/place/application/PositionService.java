@@ -65,7 +65,7 @@ public class PositionService {
      */
     public CurrentPositionResponse getCurrentPosition(CustomUserDetails userDetails,
                                                       CurrentPositionRequest request) {
-        String point = PointParser.toWKT(request.latitude(), request.longitude());
+        String point = PointParser.toPointString(request.latitude(), request.longitude());
         Place findPlace = placeRepository.findContainingPoint(point)
                 .orElseThrow(() -> new GlobalException(PLACE_BUILDING_NOT_FOUND));
         return new CurrentPositionResponse(findPlace.getName());
