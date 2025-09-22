@@ -239,7 +239,7 @@ class UserServiceTest {
 
         userRepository.save(user);
 
-        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345");
+        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
         NicknameChangeRequest request = new NicknameChangeRequest("abcd1234");
@@ -266,7 +266,7 @@ class UserServiceTest {
         userRepository.save(user);
         userRepository.flush();
 
-        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345");
+        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
 

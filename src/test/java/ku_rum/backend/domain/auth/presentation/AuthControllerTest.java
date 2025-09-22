@@ -53,7 +53,7 @@ class AuthControllerTest extends RestDocsTestSupport {
         LoginRequest request = new LoginRequest("kmw10693", "testtest");
 
         // TokenResponse 설정
-        TokenResponse tokenResponse = TokenResponse.of("accessToken", "refreshToken", 1800000L, 604800000L);
+        TokenResponse tokenResponse = TokenResponse.of("accessToken", "refreshToken", 1800000L, 604800000L, false);
         List<DepartmentResponse> departmentResponses = List.of();
         // UserResponse 설정 (사용자 정보도 포함해야 하므로, 예시로 넣음)
         UserResponse userResponse = UserResponse.of(
@@ -195,7 +195,7 @@ class AuthControllerTest extends RestDocsTestSupport {
     @WithMockUser
     void reissue() throws Exception {
         ReissueRequest request = new ReissueRequest("refreshToken");
-        TokenResponse tokenResponse = TokenResponse.of("accessToken", "refreshToken", 1800000L, 604800000L);
+        TokenResponse tokenResponse = TokenResponse.of("accessToken", "refreshToken", 1800000L, 604800000L, false);
         Mockito.when(authService.reissue(request)).thenReturn(tokenResponse);
 
         // when then
@@ -251,7 +251,7 @@ class AuthControllerTest extends RestDocsTestSupport {
         String tempToken = "temporary_token_value";
         List<DepartmentResponse> list = new ArrayList<>();
         UserResponse userResponse = new UserResponse(1L, "oauthId", "loginId", "email", "nickname", "studentId", "imageUrl", list, true);
-        TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", 1800000L, 604800000L);
+        TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", 1800000L, 604800000L, false);
         AuthResponse authResponse = new AuthResponse(
                 tokenResponse,
                 userResponse
