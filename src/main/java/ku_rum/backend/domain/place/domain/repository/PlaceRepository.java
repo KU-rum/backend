@@ -15,6 +15,7 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
     @Query(value = """
             SELECT * FROM place
             WHERE ST_Contains(boundary, ST_GeomFromText(:point, 4326))
+            LIMIT 1
             """, nativeQuery = true)
     Optional<Place> findContainingPoint(@Param("point") String point);
 
