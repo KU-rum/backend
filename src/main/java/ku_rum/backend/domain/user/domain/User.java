@@ -122,7 +122,6 @@ public class User extends BaseEntity {
         return User.builder()
                 .oauthId(memberInfo.getId())
                 .nickname(memberInfo.getName())
-                .email(memberInfo.getEmail())
                 .providerType(providerType) // enum 변환
                 .build();
     }

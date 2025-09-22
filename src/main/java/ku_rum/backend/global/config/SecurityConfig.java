@@ -4,10 +4,10 @@ import ku_rum.backend.domain.oauth.application.CustomOAuth2UserService;
 import ku_rum.backend.domain.oauth.handler.HttpCookieOAuth2AuthorizationRequestRepository;
 import ku_rum.backend.domain.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.global.utill.RedisUtil;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import ku_rum.backend.global.security.JwtTokenProvider;
+import ku_rum.backend.global.utill.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +32,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -107,7 +106,8 @@ public class SecurityConfig {
                 .map(u -> CustomUserDetails.of(u.getId(),
                         u.getEmail(),
                         AuthorityUtils.createAuthorityList(u.getRoles().toArray(new String[0])),
-                        u.getPassword()))
+                        u.getPassword(),
+                        u.isFirstLogin()))
                 .orElseThrow(() -> new UsernameNotFoundException(NO_SUCH_USER.getMessage()));
     }
 

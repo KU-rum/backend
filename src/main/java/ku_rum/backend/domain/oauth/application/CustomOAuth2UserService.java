@@ -48,6 +48,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                                 " account. Please use your " + member.getProviderType() + " account to login."
                 );
             }
+            if (member.isFirstLogin()) {
+                member.changeFirstLogin(false);
+                userRepository.save(member);
+            }
         } else {
             member = createUser(memberInfo, providerType);
         }
