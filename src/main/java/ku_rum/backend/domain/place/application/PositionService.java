@@ -2,6 +2,7 @@ package ku_rum.backend.domain.place.application;
 
 import static java.time.Duration.between;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_BUILDING_NOT_FOUND;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_NOT_FOUND;
 
 import java.time.Duration;
@@ -65,7 +66,8 @@ public class PositionService {
     public CurrentPositionResponse getCurrentPosition(CustomUserDetails userDetails,
                                                       CurrentPositionRequest request) {
         String point = PointParser.toWKT(request.latitude(), request.longitude());
-        Place findPlace = placeRepository.findContainingPoint(point);
+        Place findPlace = placeRepository.findContainingPoint(point)
+                .orElseThrow(() -> new GlobalException(PLACE_BUILDING_NOT_FOUND));
         return new CurrentPositionResponse(findPlace.getName());
     }
 
