@@ -50,12 +50,40 @@ public class RankControllerTest extends RestDocsTestSupport {
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
-                //.andExpect(jsonPath("$.data[0].placeName").value(placeName))
-                //.andExpect(jsonPath("$.data[0].count").value(count))
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
                                 .tag("지도 관련 API")
                                 .description("지도 장소 유저 랭킹 조회")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .build())));
+
+    }
+
+    @DisplayName("친구 장소 공유 순위를 확인한다")
+    @Test
+    void getPlaceFriendRank() throws Exception {
+        //given
+        String placeName = "상허기념도서관";
+        int count = 5;
+        GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
+        List<GetPlaceUserRankResponse> response = List.of(getPlaceUserRankResponse);
+
+        given(rankService.getPlaceUserRank(any(CustomUserDetails.class)))
+                .willReturn(response);
+
+        //when
+        mockMvc.perform(get("/api/v1/places/users/ranks/2")
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("지도 장소 친구 랭킹 조회")
                                 .requestHeaders(
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
                                 )
