@@ -263,7 +263,7 @@ class UserControllerTest extends RestDocsTestSupport {
     void changeProfile() throws Exception {
         // given
         ProfileChangeRequest profileChangeRequest = new ProfileChangeRequest("test.com");
-        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345");
+        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
 
         // when then
         mockMvc.perform(patch("/api/v1/users/profile")

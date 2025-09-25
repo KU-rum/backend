@@ -146,7 +146,6 @@ public class AuthService {
                 user.getNickname(),
                 user.getStudentId(),
                 user.getImageUrl(),
-                list,
-                user.isFirstLogin());
+                list);
     }
 }

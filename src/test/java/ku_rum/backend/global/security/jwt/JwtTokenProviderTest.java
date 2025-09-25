@@ -60,7 +60,7 @@ class JwtTokenProviderTest {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 CustomUserDetails.of(1L, "test", "test",
                         authorities,
-                        "test"
+                        "test", false
                 ), null, authorities);
 
         // When
@@ -134,7 +134,7 @@ class JwtTokenProviderTest {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 CustomUserDetails.of(1L, "test", "test",
                         authorities,
-                        "test"
+                        "test", false
                 ), null, authorities);
 
         doThrow(new RuntimeException("Redis error")).when(redisUtil)
@@ -155,7 +155,7 @@ class JwtTokenProviderTest {
                 "test",
                 "test",
                 authorities,
-                "test"
+                "test",false
         );
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(

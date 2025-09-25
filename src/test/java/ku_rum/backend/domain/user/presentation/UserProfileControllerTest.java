@@ -56,7 +56,7 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
     void changeNickname_Success() throws Exception {
         // Given
         NicknameChangeRequest request = new NicknameChangeRequest("안녕안녕");
-        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345");
+        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
         String requestBody = new ObjectMapper().writeValueAsString(request);
 
         // When & Then
@@ -150,7 +150,7 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
     void passwordReset() throws Exception {
         // given
         ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest("test1234", "test12345");
-        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345");
+        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
 
         // when then
         mockMvc.perform(post("/api/v1/users/password-reset")
