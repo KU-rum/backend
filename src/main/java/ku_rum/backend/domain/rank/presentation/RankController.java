@@ -8,6 +8,7 @@ import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,5 +23,11 @@ public class RankController {
     public BaseResponse<List<GetPlaceUserRankResponse>> getPlaceUserRank(
             @AuthenticationPrincipal final CustomUserDetails userDetails) {
         return BaseResponse.ok(rankService.getPlaceUserRank(userDetails));
+    }
+
+    @GetMapping("/users/ranks/{friendId}")
+    public BaseResponse<List<GetPlaceUserRankResponse>> getPlaceFriendRank(
+            @AuthenticationPrincipal final CustomUserDetails userDetails, @PathVariable("friendId") Long friendId) {
+        return BaseResponse.ok(rankService.getPlaceFriendRank(userDetails, friendId));
     }
 }

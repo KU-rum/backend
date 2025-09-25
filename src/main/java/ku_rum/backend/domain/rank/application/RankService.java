@@ -104,4 +104,20 @@ public class RankService {
                 .map(placeRanks -> PlaceUserRankResponse.from(placeRanks, user))
                 .toList();
     }
+
+    public List<GetPlaceUserRankResponse> getPlaceFriendRank(CustomUserDetails userDetails, Long friendId) {
+        List<PlaceRank> PlaceRanks = placeRankRepository.findTop3RanksWithTiesByUser(friendId);
+
+        Map<Integer, List<PlaceRank>> placeRanksGroupedByCount = PlaceRanks.stream()
+                .collect(Collectors.groupingBy(
+                        PlaceRank::getCount,
+                        () -> new TreeMap<>(Comparator.reverseOrder()),
+                        toList())
+                );
+
+        return placeRanksGroupedByCount.values()
+                .stream()
+                .map(GetPlaceUserRankResponse::from)
+                .toList();
+    }
 }
