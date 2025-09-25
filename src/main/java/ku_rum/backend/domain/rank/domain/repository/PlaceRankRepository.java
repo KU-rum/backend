@@ -31,6 +31,20 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
             """, nativeQuery = true)
     List<PlaceRank> findTop3RanksWithTiesByUser(@Param("userId") Long userId);
 
+    @Query(value = """
+            SELECT * FROM place_rank pr
+                WHERE pr.count >= (
+                  SELECT MIN(sub.count) FROM (
+                      SELECT DISTINCT pr2.count
+                      FROM place_rank pr2
+                      ORDER BY pr2.count DESC
+                      LIMIT 3
+                  ) AS sub
+              )
+            ORDER BY pr.count DESC
+            """, nativeQuery = true)
+    List<PlaceRank> findTop3RanksWithTies();
+
     Optional<PlaceRank> findByUserAndPlace(User user, Place place);
 
     @Modifying

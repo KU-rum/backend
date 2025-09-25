@@ -258,7 +258,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                 .build();
 
         List<PlaceImage> placeImages = List.of(placeImage);
-        GetPlaceResponse response = GetPlaceResponse.of(place, friendUserDtos, placeImages);
+        GetPlaceResponse response = GetPlaceResponse.of(place, friendUserDtos, placeImages, null);
 
         given(placeService.getPlaceWithUser(any(CustomUserDetails.class), eq(placeId)))
                 .willReturn(response);

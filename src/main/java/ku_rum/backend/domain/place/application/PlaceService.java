@@ -15,6 +15,8 @@ import ku_rum.backend.domain.place.domain.repository.PlaceImageRepository;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
+import ku_rum.backend.domain.rank.application.RankService;
+import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
@@ -32,6 +34,7 @@ public class PlaceService {
     private final PlaceImageRepository placeImageRepository;
     private final PlaceHistoryService placeHistoryService;
     private final SearchService searchService;
+    private final RankService rankService;
 
     /**
      * 지도 칩 조회(회원 로직)
@@ -88,8 +91,9 @@ public class PlaceService {
         List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
         List<FriendUserDto> friendUserDtos = positionRepository.findPositionByFriendAndPlace(userDetails.getUserId(),
                 place);
+        List<GetPlaceUserRankResponse> placeRanks = rankService.getPlaceRanks();
 
-        return GetPlaceResponse.of(place, friendUserDtos, placeImages);
+        return GetPlaceResponse.of(place, friendUserDtos, placeImages, placeRanks);
     }
 
     /**
@@ -103,7 +107,7 @@ public class PlaceService {
         Place place = findPlace(placeId);
         List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
 
-        return GetPlaceResponse.of(place, Collections.emptyList(), placeImages);
+        return GetPlaceResponse.of(place, Collections.emptyList(), placeImages, null);
     }
 
     /**

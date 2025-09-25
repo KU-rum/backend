@@ -76,4 +76,25 @@ public class RankService {
         return placeRankRepository.findByUserAndPlace(user, place).orElseThrow(() -> new GlobalException(
                 BaseExceptionResponseStatus.PLACE_RANK_NOT_FOUND));
     }
+
+    /**
+     * 장소 전체 유저공유 랭킹 조회(3개)
+     *
+     * @return
+     */
+    public List<GetPlaceUserRankResponse> getPlaceRanks() {
+        List<PlaceRank> PlaceRanks = placeRankRepository.findTop3RanksWithTies();
+
+        Map<Integer, List<PlaceRank>> placeRanksGroupedByCount = PlaceRanks.stream()
+                .collect(Collectors.groupingBy(
+                        PlaceRank::getCount,
+                        () -> new TreeMap<>(Comparator.reverseOrder()),
+                        Collectors.toList())
+                );
+
+        return placeRanksGroupedByCount.values()
+                .stream()
+                .map(GetPlaceUserRankResponse::from)
+                .toList();
+    }
 }
