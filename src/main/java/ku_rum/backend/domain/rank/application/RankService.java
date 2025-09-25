@@ -1,5 +1,7 @@
 package ku_rum.backend.domain.rank.application;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
+import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
 import ku_rum.backend.domain.rank.domain.repository.PlaceRankRepository;
 import ku_rum.backend.domain.user.application.UserService;
@@ -41,7 +44,7 @@ public class RankService {
                 .collect(Collectors.groupingBy(
                         PlaceRank::getCount,
                         () -> new TreeMap<>(Comparator.reverseOrder()),
-                        Collectors.toList())
+                        toList())
                 );
 
         return placeRanksGroupedByCount.values()
@@ -82,19 +85,21 @@ public class RankService {
      *
      * @return
      */
-    public List<GetPlaceUserRankResponse> getPlaceRanks() {
+    public List<PlaceUserRankResponse> getPlaceRanks(User user) {
         List<PlaceRank> PlaceRanks = placeRankRepository.findTop3RanksWithTies();
 
         Map<Integer, List<PlaceRank>> placeRanksGroupedByCount = PlaceRanks.stream()
                 .collect(Collectors.groupingBy(
                         PlaceRank::getCount,
                         () -> new TreeMap<>(Comparator.reverseOrder()),
-                        Collectors.toList())
+                        toList())
                 );
+
+        placeRanksGroupedByCount.values().stream().toList();
 
         return placeRanksGroupedByCount.values()
                 .stream()
-                .map(GetPlaceUserRankResponse::from)
+                .map(placeRanks -> PlaceUserRankResponse.from(placeRanks, user))
                 .toList();
     }
 }
