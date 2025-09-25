@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
+import ku_rum.backend.domain.rank.dto.PlaceRankWithRankingProjection;
 import ku_rum.backend.domain.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -32,18 +33,26 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
     List<PlaceRank> findTop3RanksWithTiesByUser(@Param("userId") Long userId);
 
     @Query(value = """
-            SELECT * FROM place_rank pr
-                WHERE pr.count >= (
-                  SELECT MIN(sub.count) FROM (
-                      SELECT DISTINCT pr2.count
-                      FROM place_rank pr2
-                      ORDER BY pr2.count DESC
-                      LIMIT 3
-                  ) AS sub
-              )
-            ORDER BY pr.count DESC
+                SELECT 
+                    ranked.rank_id,
+                    ranked.count,
+                    u.nickname,
+                    ranked.place_place_id,
+                    ranked.created_at,
+                    ranked.modified_at,
+                    ranked.ranking
+                FROM (
+                    SELECT 
+                        pr.*, 
+                        RANK() OVER (ORDER BY pr.count DESC) AS ranking
+                    FROM place_rank pr
+                ) ranked
+                JOIN users u
+                            ON u.id = ranked.user_id
+                WHERE ranking <= 3 OR ranked.user_id = :userId
+                ORDER BY ranking
             """, nativeQuery = true)
-    List<PlaceRank> findTop3RanksWithTies();
+    List<PlaceRankWithRankingProjection> findTop3RanksWithTies(@Param("userId") Long userId);
 
     Optional<PlaceRank> findByUserAndPlace(User user, Place place);
 

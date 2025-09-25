@@ -13,6 +13,7 @@ import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
 import ku_rum.backend.domain.rank.domain.repository.PlaceRankRepository;
+import ku_rum.backend.domain.rank.dto.PlaceRankWithRankingProjection;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
@@ -86,11 +87,12 @@ public class RankService {
      * @return
      */
     public List<PlaceUserRankResponse> getPlaceRanks(User user) {
-        List<PlaceRank> PlaceRanks = placeRankRepository.findTop3RanksWithTies();
+        List<PlaceRankWithRankingProjection> placeRankWithRankings = placeRankRepository.findTop3RanksWithTies(
+                user.getId());
 
-        Map<Integer, List<PlaceRank>> placeRanksGroupedByCount = PlaceRanks.stream()
+        Map<Integer, List<PlaceRankWithRankingProjection>> placeRanksGroupedByCount = placeRankWithRankings.stream()
                 .collect(Collectors.groupingBy(
-                        PlaceRank::getCount,
+                        PlaceRankWithRankingProjection::getRanking,
                         () -> new TreeMap<>(Comparator.reverseOrder()),
                         toList())
                 );

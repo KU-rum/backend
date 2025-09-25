@@ -37,7 +37,7 @@ public class PlaceService {
     private final PlaceHistoryService placeHistoryService;
     private final SearchService searchService;
     private final RankService rankService;
-    private UserService userService;
+    private final UserService userService;
 
     /**
      * 지도 칩 조회(회원 로직)
