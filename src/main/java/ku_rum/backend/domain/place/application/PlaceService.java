@@ -111,7 +111,7 @@ public class PlaceService {
         Place place = findPlace(placeId);
         List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
 
-        return GetPlaceResponse.of(place, Collections.emptyList(), placeImages, null);
+        return GetPlaceResponse.of(place, Collections.emptyList(), placeImages, Collections.emptyList());
     }
 
     /**

@@ -8,6 +8,10 @@ import ku_rum.backend.domain.user.domain.User;
 public record PlaceUserRankResponse(int ranking, List<String> nickname, int sharingCount, boolean isSelf) {
 
     public static PlaceUserRankResponse from(List<PlaceRankWithRankingProjection> placeRanks, User user) {
+        if (placeRanks.isEmpty()) {
+            throw new IllegalArgumentException("랭크가 없습니다");
+        }
+
         List<String> names = placeRanks.stream()
                 .sorted(Comparator.comparing(PlaceRankWithRankingProjection::getModifiedAt))
                 .map(placeRankWithRankingProjection -> placeRankWithRankingProjection.getNickname())

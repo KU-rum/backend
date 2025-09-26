@@ -93,11 +93,9 @@ public class RankService {
         Map<Integer, List<PlaceRankWithRankingProjection>> placeRanksGroupedByCount = placeRankWithRankings.stream()
                 .collect(Collectors.groupingBy(
                         PlaceRankWithRankingProjection::getRanking,
-                        () -> new TreeMap<>(Comparator.reverseOrder()),
+                        TreeMap::new,
                         toList())
                 );
-
-        placeRanksGroupedByCount.values().stream().toList();
 
         return placeRanksGroupedByCount.values()
                 .stream()

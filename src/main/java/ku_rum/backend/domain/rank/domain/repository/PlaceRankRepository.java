@@ -34,13 +34,13 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
 
     @Query(value = """
                 SELECT 
-                    ranked.rank_id,
-                    ranked.count,
-                    u.nickname,
-                    ranked.place_place_id,
-                    ranked.created_at,
-                    ranked.modified_at,
-                    ranked.ranking
+                    ranked.rank_id          AS rankId,
+                    ranked.count            AS count,
+                    u.nickname              AS nickname,
+                    ranked.place_place_id   AS placePlaceId,
+                    ranked.created_at       AS createdAt,
+                    ranked.modified_at      AS modifiedAt,
+                    ranked.ranking          AS ranking
                 FROM (
                     SELECT 
                         pr.*, 

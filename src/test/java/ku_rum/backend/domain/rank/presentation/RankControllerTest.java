@@ -2,6 +2,7 @@ package ku_rum.backend.domain.rank.presentation;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -70,7 +71,7 @@ public class RankControllerTest extends RestDocsTestSupport {
         GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
         List<GetPlaceUserRankResponse> response = List.of(getPlaceUserRankResponse);
 
-        given(rankService.getPlaceUserRank(any(CustomUserDetails.class)))
+        given(rankService.getPlaceFriendRank(any(CustomUserDetails.class), eq(2L)))
                 .willReturn(response);
 
         //when
