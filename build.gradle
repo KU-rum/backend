@@ -2,213 +2,216 @@
 //import org.hidetake.gradle.swagger.generator.GenerateSwaggerUI
 
 buildscript {
-	ext {
-		restdocsApiSpecVersion = '0.18.3' // restdocsApiSpecVersion 버전 변수 설정
-	}
+    ext {
+        restdocsApiSpecVersion = '0.18.3' // restdocsApiSpecVersion 버전 변수 설정
+    }
 }
 
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.4'
-	id 'io.spring.dependency-management' version '1.1.6'
-	id 'org.asciidoctor.jvm.convert' version '3.3.2'
-	// epages-restdocs 플러그인 추가
-	id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
-	//swagger generator 플러그인 추가
-	id 'org.hidetake.swagger.generator' version '2.18.2'
-	id 'jacoco'
+    id 'java'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    // epages-restdocs 플러그인 추가
+    id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+    //swagger generator 플러그인 추가
+    id 'org.hidetake.swagger.generator' version '2.18.2'
+    id 'jacoco'
 }
 
 group = 'ku-rum'
 version = '0.0.1-SNAPSHOT'
 
 jacoco {
-	toolVersion = "0.8.8"
-	reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+    toolVersion = "0.8.8"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
 }
 
 test {
-	finalizedBy jacocoTestReport // test 작업이 끝나고 jacocoTestReport를 실행
+    finalizedBy jacocoTestReport // test 작업이 끝나고 jacocoTestReport를 실행
 }
 
 jacocoTestReport {
-	dependsOn test // test 종속성 추가
+    dependsOn test // test 종속성 추가
 
-	reports {
-		xml.required = true
-		csv.required = false
-		html.required = true
-	}
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
 
-	def QDomainList = []
-	for (qPattern in '**/QA'..'**/QZ') { // QClass 대응
-		QDomainList.add(qPattern + '*')
-	}
+    def QDomainList = []
+    for (qPattern in '**/QA'..'**/QZ') { // QClass 대응
+        QDomainList.add(qPattern + '*')
+    }
 
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-					'**/dto/**',
-					'**/event/**',
-					'**/*InitData*',
-					'**/*Application*',
-					'**/exception/**',
-					'**/service/alarm/**',
-					'**/aop/**',
-					'**/config/**',
-					'**/MemberRole*',
-					'**/oauth/**'
-			] + QDomainList)
-		}))
-	}
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/dto/**',
+                    '**/event/**',
+                    '**/*InitData*',
+                    '**/*Application*',
+                    '**/exception/**',
+                    '**/service/alarm/**',
+                    '**/aop/**',
+                    '**/config/**',
+                    '**/MemberRole*',
+                    '**/oauth/**'
+            ] + QDomainList)
+        }))
+    }
 
-	finalizedBy 'jacocoTestCoverageVerification' // jacocoTestReport 태스크가 끝난 후 실행
+    finalizedBy 'jacocoTestCoverageVerification' // jacocoTestReport 태스크가 끝난 후 실행
 }
 
 jacocoTestCoverageVerification {
-	violationRules {
+    violationRules {
 
-		rule {
-			enabled = true
-			//코드 버커리지 체크 기준
-			element = 'CLASS'
+        rule {
+            enabled = true
+            //코드 버커리지 체크 기준
+            element = 'CLASS'
 
-			limit {
-				counter = 'CLASS'
-				value = 'COVEREDRATIO'
-				minimum = 0.0
-			}
-		}
-	}
+            limit {
+                counter = 'CLASS'
+                value = 'COVEREDRATIO'
+                minimum = 0.0
+            }
+        }
+    }
 }
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 // 5. 생성된 API 스펙이 어느 위치에 있는지 지정
 swaggerSources {
-	sample {
-		setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
-	}
+    sample {
+        setInputFile(file("${project.buildDir}/api-spec/openapi3.yaml"))
+    }
 }
 
 // 6. openapi3 스펙 생성시 설정 정보
 openapi3 {
-	servers = [
-			{ url = "https://kuroom.shop" },
-			{ url = "http://localhost:8080" }
-	]
-	title = "쿠룸 백엔드 API 문서"
-	description = "RestDocs를 이용한 Swagger API 문서입니다."
-	version = "1.0"
-	format = "yaml"
+    servers = [
+            { url = "https://kuroom.shop" },
+            { url = "http://localhost:8080" }
+    ]
+    title = "쿠룸 백엔드 API 문서"
+    description = "RestDocs를 이용한 Swagger API 문서입니다."
+    version = "1.0"
+    format = "yaml"
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok:1.18.22'
-	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	runtimeOnly 'com.h2database:h2'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
-	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-	// redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'com.mysql:mysql-connector-j'
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.mysql:mysql-connector-j'
 
-	// Mail Service
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // Mail Service
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-	// Spring Security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.security:spring-security-test'
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
 
-	implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
-	implementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
-	implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
+    implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
 
-	// Selenium Java
-	implementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
+    // Selenium Java
+    implementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
 
-	// WebDriver Manager
-	implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
-	implementation 'org.jsoup:jsoup:1.15.3'
+    // WebDriver Manager
+    implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
+    implementation 'org.jsoup:jsoup:1.15.3'
 
-	// JWT
-	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
-	// OAUTH
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    // OAUTH
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-	// JSOUP
-	implementation 'org.jsoup:jsoup:1.17.2'
+    // JSOUP
+    implementation 'org.jsoup:jsoup:1.17.2'
 
-	// Spring REST Docs 의존성
-	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-	// 8. openAPI3 추가
-	testImplementation 'com.epages:restdocs-api-spec-mockmvc:' + restdocsApiSpecVersion
-	// 9. SwaggerUI 추가
-	swaggerUI 'org.webjars:swagger-ui:4.11.1'
-	// 10. Assertj 추가
-	testImplementation 'org.assertj:assertj-core:3.23.1'
-	// Testcontainers & Selenium
-	testImplementation 'org.testcontainers:junit-jupiter'
-	testImplementation 'org.testcontainers:selenium'
+    // Spring REST Docs 의존성
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    // 8. openAPI3 추가
+    testImplementation 'com.epages:restdocs-api-spec-mockmvc:' + restdocsApiSpecVersion
+    // 9. SwaggerUI 추가
+    swaggerUI 'org.webjars:swagger-ui:4.11.1'
+    // 10. Assertj 추가
+    testImplementation 'org.assertj:assertj-core:3.23.1'
+    
+    //FireBase
+    implementation 'com.google.firebase:firebase-admin:6.8.1'
 
-	//FireBase
-	implementation 'com.google.firebase:firebase-admin:6.8.1'
+    //actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-	//actuator
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    //micrometer
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 
-	//micrometer
-	implementation 'io.micrometer:micrometer-registry-prometheus'
+    // AWS
+    implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
+    implementation 'io.awspring.cloud:spring-cloud-starter-aws-secrets-manager-config:2.4.4'
 
-	// AWS
-	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
-	implementation 'io.awspring.cloud:spring-cloud-starter-aws-secrets-manager-config:2.4.4'
+    // postGIS
+    implementation "org.hibernate.orm:hibernate-spatial"
+    implementation "org.locationtech.jts:jts-core:1.19.0"
 
+    // Test Container
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
 }
 
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 tasks.named('jar') {
-	enabled = false
+    enabled = false
 }
 
 // 10. openapi3가 먼저 실행
 tasks.withType(GenerateSwaggerUI) {
-	dependsOn 'openapi3'
-	doFirst {
-		def swaggerUIFile = file("${openapi3.outputDirectory}/openapi3.yaml")
+    dependsOn 'openapi3'
+    doFirst {
+        def swaggerUIFile = file("${openapi3.outputDirectory}/openapi3.yaml")
 
-		/*	def securitySchemesContent =  "  securitySchemes:\n" +  \
+        /*	def securitySchemesContent =  "  securitySchemes:\n" +  \
                                           "    APIKey:\n" +  \
                                           "      type: apiKey\n" +  \
                                           "      name: Authorization\n" +  \
@@ -217,13 +220,13 @@ tasks.withType(GenerateSwaggerUI) {
                     "  - APIKey: []  # Apply the security scheme here"
 
             swaggerUIFile.append securitySchemesContent*/
-	}
+    }
 }
 
 def querydslSrcDir = 'src/main/generated'
 
 clean {
-	delete file(querydslSrcDir)
+    delete file(querydslSrcDir)
 }
 
 //tasks.register("copySwaggerDocs", Copy) {
@@ -234,8 +237,8 @@ clean {
 
 // 11. 생성된 openapi3 스펙을 기반으로 SwaggerUISample 생성 및 static/docs 패키지에 복사
 bootJar {
-	dependsOn generateSwaggerUISample
-	from("${generateSwaggerUISample.outputDir}") {
-		into 'static/docs'
-	}
+    dependsOn generateSwaggerUISample
+    from("${generateSwaggerUISample.outputDir}") {
+        into 'static/docs'
+    }
 }

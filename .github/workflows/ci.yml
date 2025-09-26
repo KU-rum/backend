@@ -18,8 +18,27 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       write-all
+    services: #mysql 설정
+      mysql:
+        image: mysql:latest
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: testdb
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - uses: actions/checkout@v4
+
+      - name: MySQL 접속해서 공간 함수를 테스트 한다
+        run: |
+          sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -P 3306 -u root -ptestdb -e "SELECT ST_Contains(ST_GeomFromText('POLYGON((0 0,0 10,10 10,10 0,0 0))'), ST_GeomFromText('POINT(5 5)'));" testdb
+
       - name: JDK 17 를 준비한다.
         uses: actions/setup-java@v4
         with:

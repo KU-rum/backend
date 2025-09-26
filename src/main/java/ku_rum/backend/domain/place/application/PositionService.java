@@ -2,6 +2,7 @@ package ku_rum.backend.domain.place.application;
 
 import static java.time.Duration.between;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_BUILDING_NOT_FOUND;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_NOT_FOUND;
 
 import java.time.Duration;
@@ -16,6 +17,7 @@ import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
+import ku_rum.backend.domain.place.util.PointParser;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
 import ku_rum.backend.domain.user.application.UserService;
@@ -63,8 +65,9 @@ public class PositionService {
      */
     public CurrentPositionResponse getCurrentPosition(CustomUserDetails userDetails,
                                                       CurrentPositionRequest request) {
-        Place findPlace = placeRepository.findNearestPlace(request.latitude(),
-                request.longitude());
+        String point = PointParser.toPointString(request.latitude(), request.longitude());
+        Place findPlace = placeRepository.findContainingPoint(point)
+                .orElseThrow(() -> new GlobalException(PLACE_BUILDING_NOT_FOUND));
         return new CurrentPositionResponse(findPlace.getName());
     }
 

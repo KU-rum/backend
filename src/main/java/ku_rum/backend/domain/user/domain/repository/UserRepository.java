@@ -1,11 +1,12 @@
 package ku_rum.backend.domain.user.domain.repository;
 
-import ku_rum.backend.domain.user.domain.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+import ku_rum.backend.domain.user.domain.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -28,4 +29,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByOauthId(String oauthId);
 
     List<User> findByNicknameContainingIgnoreCase(String nickname);
+
+    @Modifying
+    @Query("DELETE FROM User")
+    void deleteAllHard();
 }

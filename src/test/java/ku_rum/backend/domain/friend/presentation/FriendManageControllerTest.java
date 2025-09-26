@@ -1,5 +1,16 @@
 package ku_rum.backend.domain.friend.presentation;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.friend.application.FriendManageService;
@@ -15,16 +26,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
-
-import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -45,7 +46,8 @@ class FriendManageControllerTest extends RestDocsTestSupport {
 
         mockMvc.perform(post("/api/v1/friends/request")
 
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(friendSendRequest)))
 
@@ -60,7 +62,8 @@ class FriendManageControllerTest extends RestDocsTestSupport {
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
                                 )
                                 .requestFields(
-                                        fieldWithPath("receiverId").type(JsonFieldType.NUMBER).description("친구 요청 대상 유저 ID")
+                                        fieldWithPath("receiverId").type(JsonFieldType.NUMBER)
+                                                .description("친구 요청 대상 유저 ID")
                                 )
                                 .responseFields(RestDocsFieldSnippets.COMMON_RESPONSE_FIELDS)
                                 .build())
@@ -76,7 +79,8 @@ class FriendManageControllerTest extends RestDocsTestSupport {
         doNothing().when(friendManageService).respondToFriend(friendRequest, true);
 
         mockMvc.perform(put("/api/v1/friends/accept")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(friendRequest)))
                 .andDo(print())
