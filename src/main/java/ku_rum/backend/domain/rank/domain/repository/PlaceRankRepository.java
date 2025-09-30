@@ -46,13 +46,15 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
                         pr.*, 
                         RANK() OVER (ORDER BY pr.count DESC) AS ranking
                     FROM place_rank pr
+                    WHERE place_place_id =:placeId
                 ) ranked
                 JOIN users u
                             ON u.id = ranked.user_id
                 WHERE ranking <= 3 OR ranked.user_id = :userId
                 ORDER BY ranking
             """, nativeQuery = true)
-    List<PlaceRankWithRankingProjection> findTop3RanksWithTies(@Param("userId") Long userId);
+    List<PlaceRankWithRankingProjection> findTop3RanksWithTies(@Param("userId") Long userId,
+                                                               @Param("placeId") Long placeId);
 
     Optional<PlaceRank> findByUserAndPlace(User user, Place place);
 

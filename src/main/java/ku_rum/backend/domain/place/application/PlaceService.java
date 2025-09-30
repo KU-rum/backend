@@ -95,7 +95,7 @@ public class PlaceService {
         List<FriendUserDto> friendUserDtos = positionRepository.findPositionByFriendAndPlace(userDetails.getUserId(),
                 place);
         User user = userService.getUser();
-        List<PlaceUserRankResponse> placeRanks = rankService.getPlaceRanks(user);
+        List<PlaceUserRankResponse> placeRanks = rankService.getPlaceRanks(user, placeId);
 
         return GetPlaceResponse.of(place, friendUserDtos, placeImages, placeRanks);
     }
