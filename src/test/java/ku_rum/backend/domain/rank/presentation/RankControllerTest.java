@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -67,15 +68,16 @@ public class RankControllerTest extends RestDocsTestSupport {
     void getPlaceFriendRank() throws Exception {
         //given
         String placeName = "상허기념도서관";
+        Long placeId = 2L;
         int count = 5;
         GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
         List<GetPlaceUserRankResponse> response = List.of(getPlaceUserRankResponse);
 
-        given(rankService.getPlaceFriendRank(any(CustomUserDetails.class), eq(2L)))
+        given(rankService.getPlaceFriendRank(any(CustomUserDetails.class), eq(placeId)))
                 .willReturn(response);
 
         //when
-        mockMvc.perform(get("/api/v1/places/users/ranks/2")
+        mockMvc.perform(get("/api/v1/places/users/ranks/{placeId}", placeId)
                         .header("Authorization",
                                 "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
                 //then
@@ -87,6 +89,9 @@ public class RankControllerTest extends RestDocsTestSupport {
                                 .description("지도 장소 친구 랭킹 조회")
                                 .requestHeaders(
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("건물id")
                                 )
                                 .build())));
 
