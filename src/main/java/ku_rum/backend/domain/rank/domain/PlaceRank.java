@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.user.domain.User;
@@ -38,6 +39,9 @@ public class PlaceRank extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Place place;
+
+    @Transient
+    private Integer ranking;
 
     public void increaseCount() {
         count++;
