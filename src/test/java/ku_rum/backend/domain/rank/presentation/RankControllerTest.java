@@ -68,16 +68,16 @@ public class RankControllerTest extends RestDocsTestSupport {
     void getPlaceFriendRank() throws Exception {
         //given
         String placeName = "상허기념도서관";
-        Long placeId = 2L;
+        Long friendId = 2L;
         int count = 5;
         GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
         List<GetPlaceUserRankResponse> response = List.of(getPlaceUserRankResponse);
 
-        given(rankService.getPlaceFriendRank(any(CustomUserDetails.class), eq(placeId)))
+        given(rankService.getPlaceFriendRank(any(CustomUserDetails.class), eq(friendId)))
                 .willReturn(response);
 
         //when
-        mockMvc.perform(get("/api/v1/places/users/ranks/{placeId}", placeId)
+        mockMvc.perform(get("/api/v1/places/users/ranks/{friendId}", friendId)
                         .header("Authorization",
                                 "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
                 //then
@@ -91,7 +91,7 @@ public class RankControllerTest extends RestDocsTestSupport {
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
                                 )
                                 .pathParameters(
-                                        RequestDocumentation.parameterWithName("placeId").description("건물id")
+                                        RequestDocumentation.parameterWithName("friendId").description("친구id")
                                 )
                                 .build())));
 
