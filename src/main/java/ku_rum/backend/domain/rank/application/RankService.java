@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import ku_rum.backend.domain.friend.application.FriendQueryService;
 import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
@@ -30,6 +31,7 @@ public class RankService {
 
     private final PlaceRankRepository placeRankRepository;
     private final UserService userService;
+    private final FriendQueryService friendQueryService;
 
     /**
      * 유저 장소 공유 랭킹 조회(3개)
@@ -104,6 +106,7 @@ public class RankService {
     }
 
     public List<GetPlaceUserRankResponse> getPlaceFriendRank(CustomUserDetails userDetails, Long friendId) {
+        friendQueryService.validateFriend(userDetails, friendId);
         List<PlaceRank> PlaceRanks = placeRankRepository.findTop3RanksWithTiesByUser(friendId);
 
         Map<Integer, List<PlaceRank>> placeRanksGroupedByCount = PlaceRanks.stream()

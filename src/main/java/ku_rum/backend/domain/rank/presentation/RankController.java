@@ -27,7 +27,8 @@ public class RankController {
 
     @GetMapping("/users/ranks/{friendId}")
     public BaseResponse<List<GetPlaceUserRankResponse>> getPlaceFriendRank(
-            @AuthenticationPrincipal final CustomUserDetails userDetails, @PathVariable final Long friendId) {
+            @AuthenticationPrincipal final CustomUserDetails userDetails,
+            @PathVariable("friendId") final Long friendId) {
         return BaseResponse.ok(rankService.getPlaceFriendRank(userDetails, friendId));
     }
 }
