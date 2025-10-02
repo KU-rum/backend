@@ -44,7 +44,7 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
                 FROM (
                     SELECT 
                         pr.*, 
-                        RANK() OVER (ORDER BY pr.count DESC) AS ranking
+                        DENSE_RANK() OVER (ORDER BY pr.count DESC) AS ranking
                     FROM place_rank pr
                     WHERE place_place_id =:placeId
                 ) ranked
