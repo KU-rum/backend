@@ -24,7 +24,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeDetailRepository noticeDetailRepository;
 
-    public Page<NoticeResponse> findByCategory(Integer categoryId, Pageable pageable) {
+    public Page<NoticeResponse> findByCategory(Long categoryId, Pageable pageable) {
         return noticeRepository.findByCategoryIdAndPublishStatus(categoryId, PublishStatus.SUCCESS_CRAWLING, pageable)
                 .map(NoticeResponse::from);
     }

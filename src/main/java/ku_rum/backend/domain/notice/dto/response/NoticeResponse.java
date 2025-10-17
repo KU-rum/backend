@@ -5,7 +5,7 @@ import ku_rum.backend.domain.notice.domain.Notice;
 
 public record NoticeResponse(
         Long id,
-        Integer categoryId,
+        Long categoryId,
         String categoryName,
         String title,
         String link,

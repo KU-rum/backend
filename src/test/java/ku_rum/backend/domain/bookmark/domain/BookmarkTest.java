@@ -1,14 +1,14 @@
 package ku_rum.backend.domain.bookmark.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ku_rum.backend.domain.college.domain.College;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.notice.domain.Notice;
-import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.AgreementStatus;
+import ku_rum.backend.domain.user.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
 
 class BookmarkTest {
 
@@ -19,7 +19,7 @@ class BookmarkTest {
         User user = createUser("사용자1", "202112322");
         Notice notice = Notice.builder()
                 .id(1L)
-                .categoryId(234)
+                .categoryId(Long.valueOf(234))
                 .categoryName("학사")
                 .title("타이틀")
                 .pubDate("2024-01-03")
@@ -38,6 +38,7 @@ class BookmarkTest {
     private User createUser(String username, String studentID) {
         College college = College.of("공과대학");
         Department department = Department.of("컴퓨터공학부", college);
-        return User.of(username, "kmw106933@konkuk.ac.kr",studentID, "password123", "202112322", department, AgreementStatus.AGREED, null);
+        return User.of(username, "kmw106933@konkuk.ac.kr", studentID, "password123", "202112322", department,
+                AgreementStatus.AGREED, null);
     }
 }

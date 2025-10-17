@@ -22,7 +22,7 @@ public class Notice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer categoryId;
+    private Long categoryId;
 
     private String categoryName;
 

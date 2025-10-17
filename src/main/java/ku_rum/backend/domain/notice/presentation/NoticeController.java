@@ -20,7 +20,7 @@ public class NoticeController {
 
     @GetMapping
     public Page<NoticeResponse> getNoticesByCategory(
-            @RequestParam("category") Integer categoryId,
+            @RequestParam("category") Long categoryId,
             Pageable pageable
     ) {
         return noticeService.findByCategory(categoryId, pageable);
