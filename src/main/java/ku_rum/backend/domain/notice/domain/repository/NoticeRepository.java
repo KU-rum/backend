@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Page<Notice> findByCategoryId(Integer categoryId, Pageable pageable);
 
-    Page<Notice> findByCategoryIdAndPublishStatus(Integer categoryId, PublishStatus publishStatus, Pageable pageable);
+    Page<Notice> findByCategoryIdAndPublishStatus(Long categoryId, PublishStatus publishStatus, Pageable pageable);
 }

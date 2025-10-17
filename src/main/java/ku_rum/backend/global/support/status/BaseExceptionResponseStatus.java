@@ -83,6 +83,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     NO_SUCH_NOTICE(800, HttpStatus.NOT_FOUND, "해당 공지사항은 존재하지 않습니다."),
     DUPLICATE_NOTICE(801, HttpStatus.BAD_REQUEST, "이미 북마크된 공지사항입니다."),
     INVALID_PAGE(802, HttpStatus.BAD_REQUEST, "유효하지 않은 페이지입니다.(페이지는 1 이상부터 가능합니다)"),
+    NO_SUCH_NOTICE_DETAIL(804, HttpStatus.NOT_FOUND, "해당 공지사항 상세정보는 존재하지 않습니다."),
 
     /**
      * 900: Server, DataBase
