@@ -3,6 +3,7 @@ package ku_rum.backend.domain.notice.application;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE_DETAIL;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.NoticeDetail;
@@ -33,9 +34,9 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE));
         NoticeDetail noticeDetail = noticeDetailRepository.findByNotice(notice)
                 .orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE_DETAIL));
-        String encodedHtml = noticeDetail.getHtml_content(); // DB에 저장된 Base64 문자열
+        String encodedHtml = noticeDetail.getHtml_content();
         byte[] decodedBytes = Base64.getDecoder().decode(encodedHtml);
-        String htmlContent = new String(decodedBytes, java.nio.charset.StandardCharsets.UTF_8);
+        String htmlContent = new String(decodedBytes, StandardCharsets.UTF_8);
         return new NoticeDetailResponse(noticeDetail.getNotice().getId(), htmlContent);
     }
 }
