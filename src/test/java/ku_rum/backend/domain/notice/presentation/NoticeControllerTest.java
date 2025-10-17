@@ -9,6 +9,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -98,33 +100,28 @@ public class NoticeControllerTest extends RestDocsTestSupport {
                                 .build())));
     }
 
-    @DisplayName("공지사항 ID로 공지 상세 정보를 조회한다.")
+    @DisplayName("공지사항 ID로 공지 상세 HTML을 조회한다.")
     @Test
     void getNoticeDetailById() throws Exception {
         // given
         Long noticeId = 1L;
         String htmlContent = "<div>공지 상세 내용</div>";
 
-        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent);
-
         given(noticeService.findByNoticeId(eq(noticeId)))
-                .willReturn(noticeDetailResponse);
+                .willReturn(new NoticeDetailResponse(noticeId, htmlContent));
 
         // when & then
         mockMvc.perform(get("/api/v1/notices/{noticeId}", noticeId))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.htmlContent").value(htmlContent))
+                .andExpect(content().contentType(MediaType.TEXT_HTML))
                 .andDo(restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("공지사항 관련 API")
-                                        .description("공지사항 ID로 상세 정보 조회")
+                                        .description("공지사항 ID로 HTML 상세 정보 조회")
                                         .pathParameters(
                                                 parameterWithName("noticeId").description("조회할 공지사항 ID")
-                                        )
-                                        .responseFields(
-                                                fieldWithPath("htmlContent").description("공지사항 상세 HTML 내용")
                                         )
                                         .build()
                         )
