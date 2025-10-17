@@ -1,10 +1,13 @@
 package ku_rum.backend.domain.notice.domain.repository;
 
 import ku_rum.backend.domain.notice.domain.Notice;
+import ku_rum.backend.domain.notice.domain.PublishStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Page<Notice> findByCategoryId(Integer categoryId, Pageable pageable);
+
+    Page<Notice> findByCategoryIdAndPublishStatus(Integer categoryId, PublishStatus publishStatus, Pageable pageable);
 }
