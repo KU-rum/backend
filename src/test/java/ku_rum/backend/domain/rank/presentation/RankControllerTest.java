@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,17 +14,21 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.rank.application.RankService;
+import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
+import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.CustomUserDetails;
+import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.restdocs.request.RequestDocumentation;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@WebMvcTest(RankController.class)
 @ActiveProfiles("test")
 public class RankControllerTest extends RestDocsTestSupport {
 
@@ -31,7 +36,13 @@ public class RankControllerTest extends RestDocsTestSupport {
     RankService rankService;
 
     @MockBean
+    private ApiLogRepository apiLogRepository;
+
+    @MockBean
     private SecurityFilterChain securityFilterChain;
+
+    @MockBean
+    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("장소 공유 순위를 확인한다")
     @Test
@@ -95,5 +106,58 @@ public class RankControllerTest extends RestDocsTestSupport {
                                 )
                                 .build())));
 
+    }
+
+    @DisplayName("특정 장소의 랭킹을 구간별로 조회한다")
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    void getPlaceRank() throws Exception {
+        // given
+        Long placeId = 75L;
+        int startRank = 1;
+        int endRank = 10;
+
+        List<GetPlaceRankResponse> response = List.of(
+                new GetPlaceRankResponse(2, List.of("테스트8"), 8, false),
+                new GetPlaceRankResponse(3, List.of("테스트7"), 7, false),
+                new GetPlaceRankResponse(4, List.of("테스트6"), 6, false)
+        );
+
+        given(rankService.getPlaceRanks(any(), eq(placeId), eq(startRank), eq(endRank)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/places/ranks/{placeId}", placeId)
+                        .param("startRank", String.valueOf(startRank))
+                        .param("endRank", String.valueOf(endRank))
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("랭킹 관련 API")
+                                .description("특정 장소의 랭킹을 구간별로 조회합니다.")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급받은 엑세스 토큰")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("조회할 장소의 ID")
+                                )
+                                .queryParameters(
+                                        RequestDocumentation.parameterWithName("startRank").description("조회 시작 랭크"),
+                                        RequestDocumentation.parameterWithName("endRank").description("조회 종료 랭크")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지"),
+                                        fieldWithPath("data[].ranking").description("순위"),
+                                        fieldWithPath("data[].nickname").description("닉네임 목록"),
+                                        fieldWithPath("data[].sharingCount").description("공유 횟수"),
+                                        fieldWithPath("data[].isSelf").description("본인 여부")
+                                )
+                                .build()
+                )));
     }
 }
