@@ -68,4 +68,29 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
                 WHERE po.position_id IN (:positionIds)
             """, nativeQuery = true)
     void updatePlaceRankByPositions(@Param("positionIds") List<Long> positionIds);
+
+    @Query(value = """
+                SELECT 
+                    ranked.rank_id          AS rankId,
+                    ranked.count            AS count,
+                    u.nickname              AS nickname,
+                    ranked.place_place_id   AS placePlaceId,
+                    ranked.created_at       AS createdAt,
+                    ranked.modified_at      AS modifiedAt,
+                    ranked.ranking          AS ranking
+                FROM (
+                    SELECT 
+                        pr.*, 
+                        DENSE_RANK() OVER (ORDER BY pr.count DESC) AS ranking
+                    FROM place_rank pr
+                    WHERE place_place_id =:placeId
+                ) ranked
+                JOIN users u
+                            ON u.id = ranked.user_id
+                WHERE ranking >= :startRank AND ranking <= :endRank
+                ORDER BY ranking
+            """, nativeQuery = true)
+    List<PlaceRankWithRankingProjection> findRankByRange(@Param("placeId") Long placeId,
+                                                         @Param("startRank") int startRank,
+                                                         @Param("endRank") int endRank);
 }

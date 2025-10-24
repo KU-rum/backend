@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import ku_rum.backend.domain.friend.application.FriendQueryService;
 import ku_rum.backend.domain.place.domain.Place;
+import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
@@ -119,6 +120,26 @@ public class RankService {
         return placeRanksGroupedByCount.values()
                 .stream()
                 .map(GetPlaceUserRankResponse::from)
+                .toList();
+    }
+
+    public List<GetPlaceRankResponse> getPlaceRanks(CustomUserDetails customUserDetails, Long placeId, int startRank,
+                                                    int endRank) {
+        User user = userService.getUser();
+        List<PlaceRankWithRankingProjection> placeRankWithRankings = placeRankRepository.findRankByRange(placeId,
+                startRank,
+                endRank);
+
+        Map<Integer, List<PlaceRankWithRankingProjection>> placeRanksGroupedByCount = placeRankWithRankings.stream()
+                .collect(Collectors.groupingBy(
+                        PlaceRankWithRankingProjection::getRanking,
+                        TreeMap::new,
+                        toList())
+                );
+
+        return placeRanksGroupedByCount.values()
+                .stream()
+                .map(placeRanks -> GetPlaceRankResponse.from(placeRanks, user))
                 .toList();
     }
 }

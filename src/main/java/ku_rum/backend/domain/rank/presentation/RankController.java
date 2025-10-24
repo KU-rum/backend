@@ -2,6 +2,7 @@ package ku_rum.backend.domain.rank.presentation;
 
 import java.util.List;
 import ku_rum.backend.domain.rank.application.RankService;
+import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,4 +33,14 @@ public class RankController {
             @PathVariable("friendId") final Long friendId) {
         return BaseResponse.ok(rankService.getPlaceFriendRank(userDetails, friendId));
     }
+
+    @GetMapping("/ranks/{placeId}")
+    public BaseResponse<List<GetPlaceRankResponse>> getPlaceRank(
+            @AuthenticationPrincipal final CustomUserDetails userDetails,
+            @PathVariable("placeId") Long placeId,
+            @RequestParam("startRank") int startRank,
+            @RequestParam("endRank") int endRank) {
+        return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, startRank, endRank));
+    }
+
 }
