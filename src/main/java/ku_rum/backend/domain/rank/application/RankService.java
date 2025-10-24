@@ -125,6 +125,7 @@ public class RankService {
 
     public List<GetPlaceRankResponse> getPlaceRanks(CustomUserDetails customUserDetails, Long placeId, int startRank,
                                                     int endRank) {
+        validateRankRange(startRank, endRank);
         User user = userService.getUser();
         List<PlaceRankWithRankingProjection> placeRankWithRankings = placeRankRepository.findRankByRange(placeId,
                 startRank,
@@ -141,5 +142,11 @@ public class RankService {
                 .stream()
                 .map(placeRanks -> GetPlaceRankResponse.from(placeRanks, user))
                 .toList();
+    }
+
+    private void validateRankRange(int startRank, int endRank) {
+        if (startRank < 1 || endRank < 1 || startRank > endRank) {
+            throw new GlobalException(BaseExceptionResponseStatus.INVALID_RANK_RANGE);
+        }
     }
 }

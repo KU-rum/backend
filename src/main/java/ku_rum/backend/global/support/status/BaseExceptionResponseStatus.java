@@ -124,7 +124,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     UNSUPPORTED_FRIEND_CHIP_ERROR(1202, HttpStatus.UNAUTHORIZED, "비회원으로 친구를 조회할 수 없습니다"),
     PLACE_RANK_NOT_FOUND(1203, HttpStatus.NOT_FOUND, "해당되는 랭크장소가 없습니다."),
     PLACE_BUILDING_NOT_FOUND(1204, HttpStatus.NOT_FOUND, "해당 위치가 속한 건물이 없습니다."),
-    RANK_NOT_FOUND(1205, HttpStatus.NOT_FOUND, "랭크가 없습니다");
+    RANK_NOT_FOUND(1205, HttpStatus.NOT_FOUND, "랭크가 없습니다"),
+    INVALID_RANK_RANGE(1206, HttpStatus.BAD_REQUEST, "잘못된 랭킹입니다"),
+    ;
 
     private final int code;
     private final HttpStatus status;
