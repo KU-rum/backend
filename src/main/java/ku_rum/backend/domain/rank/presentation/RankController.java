@@ -37,9 +37,9 @@ public class RankController {
     @GetMapping("/ranks/{placeId}")
     public BaseResponse<List<GetPlaceRankResponse>> getPlaceRank(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
-            @PathVariable("placeId") Long placeId,
-            @RequestParam("startRank") int startRank,
-            @RequestParam("endRank") int endRank) {
+            @PathVariable("placeId") final Long placeId,
+            @RequestParam("startRank") final int startRank,
+            @RequestParam("endRank") final int endRank) {
         return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, startRank, endRank));
     }
 

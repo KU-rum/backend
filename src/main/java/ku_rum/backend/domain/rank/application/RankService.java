@@ -34,6 +34,8 @@ public class RankService {
     private final UserService userService;
     private final FriendQueryService friendQueryService;
 
+    private static final int MIN_RANK = 1;
+
     /**
      * 유저 장소 공유 랭킹 조회(3개)
      *
@@ -145,7 +147,7 @@ public class RankService {
     }
 
     private void validateRankRange(int startRank, int endRank) {
-        if (startRank < 1 || endRank < 1 || startRank > endRank) {
+        if (startRank < MIN_RANK || endRank < MIN_RANK || startRank > endRank) {
             throw new GlobalException(BaseExceptionResponseStatus.INVALID_RANK_RANGE);
         }
     }
