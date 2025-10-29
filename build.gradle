@@ -209,7 +209,7 @@ tasks.named('jar') {
 tasks.withType(GenerateSwaggerUI) {
     dependsOn 'openapi3'
     doFirst {
-        def swaggerFile = file("${openapi3.outputDirectory}/ㅎ.yaml")
+        def swaggerFile = file("${openapi3.outputDirectory}/openapi3.yaml")
 
         def securitySchemesContent = "security:\n" +
                 "  - bearerAuthJWT: []"
@@ -223,12 +223,6 @@ def querydslSrcDir = 'src/main/generated'
 clean {
     delete file(querydslSrcDir)
 }
-
-//tasks.register("copySwaggerDocs", Copy) {
-//	dependsOn generateSwaggerUISample
-//	from("${generateSwaggerUISample.outputDir}")
-//	into("${project.projectDir}/src/main/resources/static/docs")
-//}
 
 // 11. 생성된 openapi3 스펙을 기반으로 SwaggerUISample 생성 및 static/docs 패키지에 복사
 bootJar {
