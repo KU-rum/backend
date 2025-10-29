@@ -50,6 +50,7 @@ public class BookmarkService {
                 .toList();
     }
 
+    @Transactional
     public void deleteBookmark(CustomUserDetails userDetails, Long bookmarkId) {
         User user = userService.getUser();
         NoticeBookmark noticeBookmark = findById(bookmarkId);
