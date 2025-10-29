@@ -1,5 +1,7 @@
 package ku_rum.backend.domain.bookmark.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_BOOKMARK;
+
 import ku_rum.backend.domain.bookmark.domain.NoticeBookmark;
 import ku_rum.backend.domain.bookmark.domain.repository.BookmarkRepository;
 import ku_rum.backend.domain.bookmark.dto.request.CreateBookmarkRequest;
@@ -8,6 +10,7 @@ import ku_rum.backend.domain.notice.application.NoticeService;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
+import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ public class BookmarkService {
         User user = userService.getUser();
         Notice notice = noticeService.findNoticeByNoticeId(request.noticeId());
         NoticeBookmark noticeBookmark = save(user, notice);
+        validateDuplicateBookmark(user, notice);
         return CreateBookmarkResponse.from(noticeBookmark);
     }
 
@@ -35,5 +39,11 @@ public class BookmarkService {
                 .notice(notice)
                 .build();
         return bookmarkRepository.save(noticeBookmark);
+    }
+
+    private void validateDuplicateBookmark(User user, Notice notice) {
+        if (bookmarkRepository.existsByUserAndNotice(user, notice)) {
+            throw new GlobalException(DUPLICATE_BOOKMARK);
+        }
     }
 }
