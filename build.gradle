@@ -173,7 +173,7 @@ dependencies {
     swaggerUI 'org.webjars:swagger-ui:4.11.1'
     // 10. Assertj 추가
     testImplementation 'org.assertj:assertj-core:3.23.1'
-    
+
     //FireBase
     implementation 'com.google.firebase:firebase-admin:6.8.1'
 
@@ -209,17 +209,12 @@ tasks.named('jar') {
 tasks.withType(GenerateSwaggerUI) {
     dependsOn 'openapi3'
     doFirst {
-        def swaggerUIFile = file("${openapi3.outputDirectory}/openapi3.yaml")
+        def swaggerFile = file("${openapi3.outputDirectory}/ㅎ.yaml")
 
-        /*	def securitySchemesContent =  "  securitySchemes:\n" +  \
-                                          "    APIKey:\n" +  \
-                                          "      type: apiKey\n" +  \
-                                          "      name: Authorization\n" +  \
-                                          "      in: header\n" + \
-                                          "security:\n" +
-                    "  - APIKey: []  # Apply the security scheme here"
+        def securitySchemesContent = "security:\n" +
+                "  - bearerAuthJWT: []"
 
-            swaggerUIFile.append securitySchemesContent*/
+        swaggerFile.append securitySchemesContent
     }
 }
 
