@@ -1,23 +1,42 @@
 package ku_rum.backend.domain.bookmark.presentation;
 
+import ku_rum.backend.domain.bookmark.application.BookmarkService;
+import ku_rum.backend.domain.bookmark.dto.request.CreateBookmarkRequest;
+import ku_rum.backend.domain.bookmark.dto.response.CreateBookmarkResponse;
+import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/bookmark")
+@RequiredArgsConstructor
 public class BookmarkController {
 
-    @PostMapping
-    public BaseResponse<Void> createBookmark() {
+    private final BookmarkService bookmarkService;
 
+    @PostMapping
+    public BaseResponse<CreateBookmarkResponse> createBookmark(
+            @AuthenticationPrincipal final CustomUserDetails userDetails,
+            @RequestBody CreateBookmarkRequest request) {
+        CreateBookmarkResponse response = bookmarkService.createBookmark(userDetails, request);
         return BaseResponse.ok();
     }
 
     @GetMapping
     public BaseResponse<Void> getBookmark() {
+
+        return BaseResponse.ok();
+    }
+
+    @DeleteMapping
+    public BaseResponse<Void> deleteBookmark() {
 
         return BaseResponse.ok();
     }
