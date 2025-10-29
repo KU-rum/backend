@@ -1,6 +1,8 @@
 package ku_rum.backend.domain.bookmark.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.BOOKMARK_NOT_FOUND;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_BOOKMARK;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.UNAUTHORIZED_BOOKMARK;
 
 import java.util.List;
 import ku_rum.backend.domain.bookmark.domain.NoticeBookmark;
@@ -48,6 +50,13 @@ public class BookmarkService {
                 .toList();
     }
 
+    public void deleteBookmark(CustomUserDetails userDetails, Long bookmarkId) {
+        User user = userService.getUser();
+        NoticeBookmark noticeBookmark = findById(bookmarkId);
+        validateBookmarkAuthorization(user, noticeBookmark);
+        bookmarkRepository.deleteById(bookmarkId);
+    }
+
     private NoticeBookmark save(User user, Notice notice) {
         NoticeBookmark noticeBookmark = NoticeBookmark.builder()
                 .user(user)
@@ -60,5 +69,16 @@ public class BookmarkService {
         if (bookmarkRepository.existsByUserAndNotice(user, notice)) {
             throw new GlobalException(DUPLICATE_BOOKMARK);
         }
+    }
+
+    private void validateBookmarkAuthorization(User user, NoticeBookmark noticeBookmark) {
+        if (noticeBookmark.getUser().getId() != user.getId()) {
+            throw new GlobalException(UNAUTHORIZED_BOOKMARK);
+        }
+    }
+
+    private NoticeBookmark findById(Long bookmarkId) {
+        return bookmarkRepository.findById(bookmarkId)
+                .orElseThrow(() -> new GlobalException(BOOKMARK_NOT_FOUND));
     }
 }
