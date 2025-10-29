@@ -1,9 +1,13 @@
 package ku_rum.backend.domain.bookmark.domain;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -134,4 +138,40 @@ class BookmarkControllerTest extends RestDocsTestSupport {
                                 .build()
                 )));
     }
+
+    @DisplayName("공지사항 북마크를 삭제한다")
+    @Test
+    void deleteBookmark() throws Exception {
+        // given
+        Long bookmarkId = 10L;
+
+        doNothing().when(bookmarkService).deleteBookmark(any(), eq(bookmarkId));
+
+        // when
+        mockMvc.perform(delete("/api/v1/bookmark/{bookmarkId}", bookmarkId)
+                        .header("Authorization", "Bearer test-access-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8"))
+                // then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("공지사항 북마크 API")
+                                .description("사용자가 특정 북마크를 삭제합니다.")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 액세스 토큰")
+                                )
+                                .pathParameters(
+                                        parameterWithName("bookmarkId").description("삭제할 북마크 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지")
+                                )
+                                .build()
+                )));
+    }
+
 }
