@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/bookmark")
-public class BookMarkController {
+public class BookmarkController {
 
     @PostMapping
-    public BaseResponse<Void> createBookMark() {
+    public BaseResponse<Void> createBookmark() {
 
         return BaseResponse.ok();
     }
 
     @GetMapping
-    public BaseResponse<Void> getBookMark() {
+    public BaseResponse<Void> getBookmark() {
 
         return BaseResponse.ok();
     }

@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-public class NoticeBookMark {
+public class NoticeBookmark {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
