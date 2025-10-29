@@ -32,8 +32,8 @@ public class BookmarkService {
     public CreateBookmarkResponse createBookmark(CustomUserDetails userDetails, CreateBookmarkRequest request) {
         User user = userService.getUser();
         Notice notice = noticeService.findNoticeByNoticeId(request.noticeId());
-        NoticeBookmark noticeBookmark = save(user, notice);
         validateDuplicateBookmark(user, notice);
+        NoticeBookmark noticeBookmark = save(user, notice);
         return CreateBookmarkResponse.from(noticeBookmark);
     }
 
@@ -72,7 +72,7 @@ public class BookmarkService {
     }
 
     private void validateBookmarkAuthorization(User user, NoticeBookmark noticeBookmark) {
-        if (noticeBookmark.getUser().getId() != user.getId()) {
+        if (!java.util.Objects.equals(noticeBookmark.getUser().getId(), user.getId())) {
             throw new GlobalException(UNAUTHORIZED_BOOKMARK);
         }
     }
