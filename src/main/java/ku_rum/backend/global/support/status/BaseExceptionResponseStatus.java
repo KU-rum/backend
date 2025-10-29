@@ -127,7 +127,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     RANK_NOT_FOUND(1205, HttpStatus.NOT_FOUND, "랭크가 없습니다"),
     INVALID_RANK_RANGE(1206, HttpStatus.BAD_REQUEST, "잘못된 랭킹입니다"),
 
-    DUPLICATE_BOOKMARK(1300,HttpStatus.BAD_REQUEST,"이미 북마크 공지사항입니다",)
+    DUPLICATE_BOOKMARK(1300, HttpStatus.BAD_REQUEST, "이미 북마크 공지사항입니다"),
     ;
 
     private final int code;

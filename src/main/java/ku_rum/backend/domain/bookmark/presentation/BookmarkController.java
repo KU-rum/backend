@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.bookmark.presentation;
 
+import jakarta.validation.Valid;
 import ku_rum.backend.domain.bookmark.application.BookmarkService;
 import ku_rum.backend.domain.bookmark.dto.request.CreateBookmarkRequest;
 import ku_rum.backend.domain.bookmark.dto.response.CreateBookmarkResponse;
@@ -24,9 +25,9 @@ public class BookmarkController {
     @PostMapping
     public BaseResponse<CreateBookmarkResponse> createBookmark(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
-            @RequestBody CreateBookmarkRequest request) {
+            @RequestBody @Valid CreateBookmarkRequest request) {
         CreateBookmarkResponse response = bookmarkService.createBookmark(userDetails, request);
-        return BaseResponse.ok();
+        return BaseResponse.ok(response);
     }
 
     @GetMapping

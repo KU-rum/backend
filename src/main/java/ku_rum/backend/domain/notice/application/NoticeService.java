@@ -41,7 +41,7 @@ public class NoticeService {
     }
 
     public Notice findNoticeByNoticeId(Long noticeId) {
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE));
+        return noticeRepository.findById(noticeId).orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE));
     }
 }
 
