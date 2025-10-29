@@ -2,10 +2,12 @@ package ku_rum.backend.domain.bookmark.application;
 
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_BOOKMARK;
 
+import java.util.List;
 import ku_rum.backend.domain.bookmark.domain.NoticeBookmark;
 import ku_rum.backend.domain.bookmark.domain.repository.BookmarkRepository;
 import ku_rum.backend.domain.bookmark.dto.request.CreateBookmarkRequest;
 import ku_rum.backend.domain.bookmark.dto.response.CreateBookmarkResponse;
+import ku_rum.backend.domain.bookmark.dto.response.GetBookmarkResponse;
 import ku_rum.backend.domain.notice.application.NoticeService;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.user.application.UserService;
@@ -31,6 +33,19 @@ public class BookmarkService {
         NoticeBookmark noticeBookmark = save(user, notice);
         validateDuplicateBookmark(user, notice);
         return CreateBookmarkResponse.from(noticeBookmark);
+    }
+
+
+    public List<GetBookmarkResponse> getBookmark(CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        List<NoticeBookmark> notices = bookmarkRepository.findByUser(user);
+
+        return notices.stream()
+                .map(noticeBookmark -> {
+                    Notice notice = noticeBookmark.getNotice();
+                    return GetBookmarkResponse.of(noticeBookmark, notice);
+                })
+                .toList();
     }
 
     private NoticeBookmark save(User user, Notice notice) {

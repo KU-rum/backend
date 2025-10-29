@@ -1,9 +1,11 @@
 package ku_rum.backend.domain.bookmark.presentation;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import ku_rum.backend.domain.bookmark.application.BookmarkService;
 import ku_rum.backend.domain.bookmark.dto.request.CreateBookmarkRequest;
 import ku_rum.backend.domain.bookmark.dto.response.CreateBookmarkResponse;
+import ku_rum.backend.domain.bookmark.dto.response.GetBookmarkResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +33,11 @@ public class BookmarkController {
     }
 
     @GetMapping
-    public BaseResponse<Void> getBookmark() {
+    public BaseResponse<List<GetBookmarkResponse>> getBookmark(
+            @AuthenticationPrincipal final CustomUserDetails userDetails) {
 
-        return BaseResponse.ok();
+        List<GetBookmarkResponse> response = bookmarkService.getBookmark(userDetails);
+        return BaseResponse.ok(response);
     }
 
     @DeleteMapping
