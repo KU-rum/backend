@@ -1,4 +1,4 @@
-FROM amazoncorretto:17.0.17-al2023-headless
+FROM amazoncorretto:17-al2023-headless
 
 WORKDIR /app
 
