@@ -27,14 +27,14 @@ public class RankController {
         return BaseResponse.ok(rankService.getPlaceUserRank(userDetails));
     }
 
-    @GetMapping("/users/ranks/{friendId}")
+    @GetMapping("/users/{friendId}/ranks")
     public BaseResponse<List<GetPlaceUserRankResponse>> getPlaceFriendRank(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @PathVariable("friendId") final Long friendId) {
         return BaseResponse.ok(rankService.getPlaceFriendRank(userDetails, friendId));
     }
 
-    @GetMapping("/ranks/{placeId}")
+    @GetMapping("/{placeId}/ranks")
     public BaseResponse<List<GetPlaceRankResponse>> getPlaceRank(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @PathVariable("placeId") final Long placeId,
@@ -42,5 +42,4 @@ public class RankController {
             @RequestParam("endRank") final int endRank) {
         return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, startRank, endRank));
     }
-
 }
