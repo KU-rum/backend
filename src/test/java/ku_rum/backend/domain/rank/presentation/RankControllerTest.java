@@ -14,8 +14,10 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.rank.application.RankService;
+import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
+import ku_rum.backend.domain.rank.dto.request.PlaceRankPaginationRequest;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
@@ -117,13 +119,15 @@ public class RankControllerTest extends RestDocsTestSupport {
         int startRank = 1;
         int endRank = 10;
 
-        List<GetPlaceRankResponse> response = List.of(
-                new GetPlaceRankResponse(2, List.of("테스트8"), 8, false),
-                new GetPlaceRankResponse(3, List.of("테스트7"), 7, false),
-                new GetPlaceRankResponse(4, List.of("테스트6"), 6, false)
+        List<GetPlaceRankResponse> getPlaceRankResponses = List.of(
+                new GetPlaceRankResponse(2, "테스트8", 8),
+                new GetPlaceRankResponse(3, "테스트7", 7),
+                new GetPlaceRankResponse(4, "테스트6", 6)
         );
-
-        given(rankService.getPlaceRanks(any(), eq(placeId), eq(startRank), eq(endRank)))
+        GetPlaceRankPaginationResponse response = GetPlaceRankPaginationResponse.of(getPlaceRankResponses, false,
+                "4_2");
+        PlaceRankPaginationRequest placeRankPaginationRequest = new PlaceRankPaginationRequest(null, 3);
+        given(rankService.getPlaceRanks(any(), eq(placeId), eq(placeRankPaginationRequest)))
                 .willReturn(response);
 
         // when & then
