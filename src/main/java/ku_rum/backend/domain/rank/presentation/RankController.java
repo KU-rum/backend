@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.rank.presentation;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
@@ -39,7 +40,7 @@ public class RankController {
     @GetMapping("/{placeId}/ranks")
     public BaseResponse<GetPlaceRankPaginationResponse> getPlaceRank(
             @PathVariable("placeId") final Long placeId,
-            @ModelAttribute PlaceRankPaginationRequest request) {
+            @Valid @ModelAttribute PlaceRankPaginationRequest request) {
         rankService.getPlaceRanks(placeId, request);
         return BaseResponse.ok(rankService.getPlaceRanks(placeId, request));
     }
@@ -52,7 +53,7 @@ public class RankController {
         return BaseResponse.ok(response);
     }
 
-    @GetMapping("{placeId}/top")
+    @GetMapping("/{placeId}/top")
     public BaseResponse<List<GetPlaceRankResponse>> getPlaceTopRank(
             @PathVariable("placeId") final Long placeId) {
         List<GetPlaceRankResponse> response = rankService.getPlaceTopRank(placeId);
