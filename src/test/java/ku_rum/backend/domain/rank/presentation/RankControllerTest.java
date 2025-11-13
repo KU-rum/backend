@@ -17,7 +17,6 @@ import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
-import ku_rum.backend.domain.rank.dto.request.PlaceRankPaginationRequest;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
@@ -26,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.restdocs.request.RequestDocumentation;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -112,7 +110,6 @@ public class RankControllerTest extends RestDocsTestSupport {
 
     @DisplayName("특정 장소의 랭킹을 구간별로 조회한다")
     @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
     void getPlaceRank() throws Exception {
         // given
         Long placeId = 75L;
@@ -126,42 +123,39 @@ public class RankControllerTest extends RestDocsTestSupport {
         );
         GetPlaceRankPaginationResponse response = GetPlaceRankPaginationResponse.of(getPlaceRankResponses, false,
                 "4_2");
-        PlaceRankPaginationRequest placeRankPaginationRequest = new PlaceRankPaginationRequest(null, 3);
-        given(rankService.getPlaceRanks(any(), eq(placeId), eq(placeRankPaginationRequest)))
+        given(rankService.getPlaceRanks(eq(placeId), any()))
                 .willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/v1/places/ranks/{placeId}", placeId)
-                        .param("startRank", String.valueOf(startRank))
-                        .param("endRank", String.valueOf(endRank))
-                        .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+        mockMvc.perform(get("/api/v1/places/{placeId}/ranks", placeId)
+                        .param("lastKnown", "")
+                        .param("limit", "3"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
                                 .tag("랭킹 관련 API")
                                 .description("특정 장소의 랭킹을 구간별로 조회합니다.")
-                                .requestHeaders(
-                                        headerWithName("Authorization").description("발급받은 엑세스 토큰")
-                                )
                                 .pathParameters(
                                         RequestDocumentation.parameterWithName("placeId").description("조회할 장소의 ID")
                                 )
                                 .queryParameters(
-                                        RequestDocumentation.parameterWithName("startRank").description("조회 시작 랭크"),
-                                        RequestDocumentation.parameterWithName("endRank").description("조회 종료 랭크")
+                                        RequestDocumentation.parameterWithName("lastKnown").description("가장 최근 커서"),
+                                        RequestDocumentation.parameterWithName("limit").description("갯수")
                                 )
                                 .responseFields(
                                         fieldWithPath("code").description("응답 코드"),
                                         fieldWithPath("status").description("응답 상태"),
                                         fieldWithPath("message").description("응답 메시지"),
-                                        fieldWithPath("data[].ranking").description("순위"),
-                                        fieldWithPath("data[].nickname").description("닉네임 목록"),
-                                        fieldWithPath("data[].sharingCount").description("공유 횟수"),
-                                        fieldWithPath("data[].isSelf").description("본인 여부")
+                                        fieldWithPath("data.ranks[].ranking").description("순위"),
+                                        fieldWithPath("data.ranks[].nickname").description("닉네임 목록"),
+                                        fieldWithPath("data.ranks[].sharingCount").description("공유 횟수"),
+                                        fieldWithPath("data.hasNext").description("마지막 여부"),
+                                        fieldWithPath("data.nextCursor").description("nextCursor")
                                 )
                                 .build()
                 )));
     }
+
+
 }
