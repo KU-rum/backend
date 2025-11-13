@@ -10,12 +10,15 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import ku_rum.backend.domain.friend.application.FriendQueryService;
 import ku_rum.backend.domain.place.domain.Place;
+import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
 import ku_rum.backend.domain.rank.domain.repository.PlaceRankRepository;
 import ku_rum.backend.domain.rank.dto.PlaceRankWithRankingProjection;
+import ku_rum.backend.domain.rank.dto.PlaceRankingLastKnownCursor;
+import ku_rum.backend.domain.rank.dto.request.PlaceRankPaginationRequest;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
@@ -125,30 +128,40 @@ public class RankService {
                 .toList();
     }
 
-    public List<GetPlaceRankResponse> getPlaceRanks(CustomUserDetails customUserDetails, Long placeId, int startRank,
-                                                    int endRank) {
-        validateRankRange(startRank, endRank);
+    public GetPlaceRankPaginationResponse getPlaceRanks(CustomUserDetails customUserDetails, Long placeId,
+                                                        PlaceRankPaginationRequest request) {
         User user = userService.getUser();
-        List<PlaceRankWithRankingProjection> placeRankWithRankings = placeRankRepository.findRankByRange(placeId,
-                startRank,
-                endRank);
+        PlaceRankingLastKnownCursor page = PlaceRankingLastKnownCursor.from(request.lastKnown());
 
-        Map<Integer, List<PlaceRankWithRankingProjection>> placeRanksGroupedByCount = placeRankWithRankings.stream()
+        List<PlaceRankWithRankingProjection> placeRankWithRankings = placeRankRepository.findRankByRange(placeId,
+                page.lastRank(),
+                page.lastRankId(),
+                request.limit() + 1);
+
+        List<PlaceRankWithRankingProjection> placeRankWithRankingProjections = placeRankWithRankings.stream()
+                .limit(request.limit())
+                .toList();
+
+        Map<Integer, List<PlaceRankWithRankingProjection>> placeRanksGroupedByCount = placeRankWithRankingProjections.stream()
                 .collect(Collectors.groupingBy(
                         PlaceRankWithRankingProjection::getRanking,
                         TreeMap::new,
                         toList())
                 );
 
-        return placeRanksGroupedByCount.values()
+        List<GetPlaceRankResponse> response = placeRanksGroupedByCount.values()
                 .stream()
                 .map(placeRanks -> GetPlaceRankResponse.from(placeRanks, user))
                 .toList();
-    }
 
-    private void validateRankRange(int startRank, int endRank) {
-        if (startRank < MIN_RANK || endRank < MIN_RANK || startRank > endRank) {
-            throw new GlobalException(BaseExceptionResponseStatus.INVALID_RANK_RANGE);
+        boolean hasNext = placeRankWithRankings.size() > request.limit();
+        String nextCursor = null;
+        if (hasNext) {
+            PlaceRankWithRankingProjection lastItem = placeRankWithRankingProjections.get(
+                    placeRankWithRankingProjections.size() - 1);
+            nextCursor = PlaceRankingLastKnownCursor.of(lastItem.getRanking(), lastItem.getRankId())
+                    .toCursorString();
         }
+        return GetPlaceRankPaginationResponse.of(response, hasNext, nextCursor);
     }
 }

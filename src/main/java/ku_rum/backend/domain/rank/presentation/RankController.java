@@ -2,8 +2,9 @@ package ku_rum.backend.domain.rank.presentation;
 
 import java.util.List;
 import ku_rum.backend.domain.rank.application.RankService;
-import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
+import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
+import ku_rum.backend.domain.rank.dto.request.PlaceRankPaginationRequest;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,11 +36,11 @@ public class RankController {
     }
 
     @GetMapping("/{placeId}/ranks")
-    public BaseResponse<List<GetPlaceRankResponse>> getPlaceRank(
+    public BaseResponse<GetPlaceRankPaginationResponse> getPlaceRank(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @PathVariable("placeId") final Long placeId,
-            @RequestParam("startRank") final int startRank,
-            @RequestParam("endRank") final int endRank) {
-        return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, startRank, endRank));
+            @RequestParam PlaceRankPaginationRequest request){
+        rankService.getPlaceRanks(userDetails.getUserId(),placeId,request)
+        return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, placeRankPaginationRequest));
     }
 }
