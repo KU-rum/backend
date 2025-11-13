@@ -82,22 +82,36 @@ public class RankControllerTest extends RestDocsTestSupport {
 
     @DisplayName("친구 장소 공유 순위를 확인한다")
     @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
     void getPlaceFriendRank() throws Exception {
-        //given
-        String placeName = "상허기념도서관";
+        // given
         Long friendId = 2L;
+        String placeName = "상허기념도서관";
         int count = 5;
-        GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
-        List<GetPlaceUserRankResponse> response = List.of(getPlaceUserRankResponse);
+
+        CustomUserDetails userDetails = CustomUserDetails.of(
+                1L,
+                "testUser",
+                AuthorityUtils.createAuthorityList("ROLE_USER"),
+                "password",
+                false
+        );
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+        ));
+        SecurityContextHolder.setContext(context);
+        GetPlaceUserRankResponse friendRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
+        List<GetPlaceUserRankResponse> response = List.of(friendRankResponse);
 
         given(rankService.getPlaceFriendRank(any(CustomUserDetails.class), eq(friendId)))
                 .willReturn(response);
 
-        //when
-        mockMvc.perform(get("/api/v1/places/users/ranks/{friendId}", friendId)
-                        .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
-                //then
+        // when & then
+        mockMvc.perform(get("/api/v1/places/users/{friendId}/ranks", friendId)
+                        .header("Authorization", "Bearer test-access-token"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(restDocs.document(resource(
@@ -105,13 +119,20 @@ public class RankControllerTest extends RestDocsTestSupport {
                                 .tag("지도 관련 API")
                                 .description("지도 장소 친구 랭킹 조회")
                                 .requestHeaders(
-                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                        headerWithName("Authorization").description("발급 받은 액세스 토큰")
                                 )
                                 .pathParameters(
-                                        RequestDocumentation.parameterWithName("friendId").description("친구id")
+                                        RequestDocumentation.parameterWithName("friendId").description("조회할 친구 ID")
                                 )
-                                .build())));
-
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지"),
+                                        fieldWithPath("data[].name").description("친구가 공유한 장소 목록"),
+                                        fieldWithPath("data[].sharingCount").description("친구의 공유 횟수")
+                                )
+                                .build()
+                )));
     }
 
     @DisplayName("특정 장소의 랭킹을 구간별로 조회한다")
@@ -144,9 +165,6 @@ public class RankControllerTest extends RestDocsTestSupport {
                                 .pathParameters(
                                         RequestDocumentation.parameterWithName("placeId").description("조회할 장소의 ID")
                                 )
-                                .requestHeaders(
-                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
-                                )
                                 .queryParameters(
                                         RequestDocumentation.parameterWithName("lastKnown").description("가장 최근 커서"),
                                         RequestDocumentation.parameterWithName("limit").description("갯수")
@@ -165,7 +183,7 @@ public class RankControllerTest extends RestDocsTestSupport {
                 )));
     }
 
-    @DisplayName("사용자의 특정 장소 랭킹을 조회한다")
+    @DisplayName("사용자의 특정 장소 내랭킹을 조회한다")
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void getPlaceMyRank() throws Exception {
@@ -214,6 +232,43 @@ public class RankControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("data.ranking").description("순위"),
                                         fieldWithPath("data.nickname").description("닉네임"),
                                         fieldWithPath("data.sharingCount").description("공유 횟수")
+                                )
+                                .build()
+                )));
+    }
+
+    @DisplayName("특정 장소의 상위 랭킹을 조회한다")
+    @Test
+    void getPlaceTopRank() throws Exception {
+        // given
+        Long placeId = 75L;
+
+        List<GetPlaceRankResponse> topRanks = List.of(
+                new GetPlaceRankResponse(1, "UserA", 15),
+                new GetPlaceRankResponse(2, "UserB", 12),
+                new GetPlaceRankResponse(3, "UserC", 10)
+        );
+
+        given(rankService.getPlaceTopRank(eq(placeId))).willReturn(topRanks);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/places/{placeId}/top", placeId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("랭킹 관련 API")
+                                .description("특정 장소의 상위 랭킹을 조회합니다.")
+                                .pathParameters(
+                                        parameterWithName("placeId").description("조회할 장소의 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지"),
+                                        fieldWithPath("data[].ranking").description("순위"),
+                                        fieldWithPath("data[].nickname").description("닉네임"),
+                                        fieldWithPath("data[].sharingCount").description("공유 횟수")
                                 )
                                 .build()
                 )));
