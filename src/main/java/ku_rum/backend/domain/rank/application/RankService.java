@@ -89,6 +89,17 @@ public class RankService {
                 BaseExceptionResponseStatus.PLACE_RANK_NOT_FOUND));
     }
 
+    public GetPlaceRankResponse getUserPlaceRank(Long userId, Long placeId) {
+        Optional<PlaceRankWithRankingProjection> rankByPlaceAndUser = placeRankRepository.findRankByPlaceAndUser(
+                placeId,
+                userId);
+        if (rankByPlaceAndUser.isEmpty()) {
+            User user = userService.getUser();
+            return GetPlaceRankResponse.emptyFrom(user);
+        }
+        return GetPlaceRankResponse.from(rankByPlaceAndUser.get());
+    }
+
     /**
      * 장소 전체 유저공유 랭킹 조회(3개)
      *
@@ -155,5 +166,15 @@ public class RankService {
                     .toCursorString();
         }
         return GetPlaceRankPaginationResponse.of(response, hasNext, nextCursor);
+    }
+
+    public List<GetPlaceRankResponse> getPlaceTopRank(Long placeId) {
+        List<PlaceRankWithRankingProjection> placeRankWithRankingProjections = placeRankRepository.findRankByRange(
+                placeId, 1, 3);
+
+        return placeRankWithRankingProjections
+                .stream()
+                .map(placeRanks -> GetPlaceRankResponse.from(placeRanks))
+                .toList();
     }
 }
