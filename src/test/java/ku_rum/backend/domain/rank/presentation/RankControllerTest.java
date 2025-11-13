@@ -211,6 +211,7 @@ public class RankControllerTest extends RestDocsTestSupport {
 
         // when & then
         mockMvc.perform(get("/api/v1/places/{placeId}/ranks/me", placeId)
+                        .header("Authorization", "Bearer test-access-token")
                         .principal(new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 userDetails.getPassword(),
@@ -273,4 +274,6 @@ public class RankControllerTest extends RestDocsTestSupport {
                                 .build()
                 )));
     }
+
+
 }
