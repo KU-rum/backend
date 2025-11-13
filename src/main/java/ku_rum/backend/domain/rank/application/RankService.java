@@ -141,13 +141,6 @@ public class RankService {
                 .limit(request.limit())
                 .toList();
 
-        Map<Integer, List<PlaceRankWithRankingProjection>> placeRanksGroupedByCount = placeRankWithRankingProjections.stream()
-                .collect(Collectors.groupingBy(
-                        PlaceRankWithRankingProjection::getRanking,
-                        TreeMap::new,
-                        toList())
-                );
-
         List<GetPlaceRankResponse> response = placeRankWithRankingProjections
                 .stream()
                 .map(placeRanks -> GetPlaceRankResponse.from(placeRanks))
