@@ -6,7 +6,7 @@ public record PlaceRankingLastKnownCursor(int lastRank, Long lastRankId) {
 
     public static PlaceRankingLastKnownCursor from(String lastKnown) {
         if (lastKnown == null || lastKnown.isBlank()) {
-            return new PlaceRankingLastKnownCursor(0, 0);
+            return new PlaceRankingLastKnownCursor(0, 0L);
         }
 
         String[] parts = lastKnown.split(DELIMITER);

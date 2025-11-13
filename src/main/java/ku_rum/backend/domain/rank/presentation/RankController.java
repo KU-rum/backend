@@ -39,8 +39,15 @@ public class RankController {
     public BaseResponse<GetPlaceRankPaginationResponse> getPlaceRank(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @PathVariable("placeId") final Long placeId,
-            @RequestParam PlaceRankPaginationRequest request){
-        rankService.getPlaceRanks(userDetails.getUserId(),placeId,request)
-        return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, placeRankPaginationRequest));
+            @RequestParam PlaceRankPaginationRequest request) {
+        rankService.getPlaceRanks(userDetails, placeId, request);
+        return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, request));
+    }
+
+    @GetMapping("/{placeId}/ranks/me")
+    public BaseResponse<List<GetPlaceUserRankResponse>> getPlaceMyRank(
+            @AuthenticationPrincipal final CustomUserDetails userDetails,
+            @PathVariable("placeId") final Long placeId) {
+        return BaseResponse.ok();
     }
 }

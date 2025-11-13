@@ -149,7 +149,7 @@ public class RankService {
                         toList())
                 );
 
-        List<GetPlaceRankResponse> response = placeRanksGroupedByCount.values()
+        List<GetPlaceRankResponse> response = placeRankWithRankingProjections
                 .stream()
                 .map(placeRanks -> GetPlaceRankResponse.from(placeRanks, user))
                 .toList();
