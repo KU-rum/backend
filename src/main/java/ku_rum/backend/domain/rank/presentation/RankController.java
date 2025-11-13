@@ -10,9 +10,9 @@ import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,11 +37,10 @@ public class RankController {
 
     @GetMapping("/{placeId}/ranks")
     public BaseResponse<GetPlaceRankPaginationResponse> getPlaceRank(
-            @AuthenticationPrincipal final CustomUserDetails userDetails,
             @PathVariable("placeId") final Long placeId,
-            @RequestParam PlaceRankPaginationRequest request) {
-        rankService.getPlaceRanks(userDetails, placeId, request);
-        return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, request));
+            @ModelAttribute PlaceRankPaginationRequest request) {
+        rankService.getPlaceRanks(placeId, request);
+        return BaseResponse.ok(rankService.getPlaceRanks(placeId, request));
     }
 
     @GetMapping("/{placeId}/ranks/me")

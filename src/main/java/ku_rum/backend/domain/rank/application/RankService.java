@@ -128,9 +128,8 @@ public class RankService {
                 .toList();
     }
 
-    public GetPlaceRankPaginationResponse getPlaceRanks(CustomUserDetails customUserDetails, Long placeId,
+    public GetPlaceRankPaginationResponse getPlaceRanks(Long placeId,
                                                         PlaceRankPaginationRequest request) {
-        User user = userService.getUser();
         PlaceRankingLastKnownCursor page = PlaceRankingLastKnownCursor.from(request.lastKnown());
 
         List<PlaceRankWithRankingProjection> placeRankWithRankings = placeRankRepository.findRankByRange(placeId,
@@ -151,7 +150,7 @@ public class RankService {
 
         List<GetPlaceRankResponse> response = placeRankWithRankingProjections
                 .stream()
-                .map(placeRanks -> GetPlaceRankResponse.from(placeRanks, user))
+                .map(placeRanks -> GetPlaceRankResponse.from(placeRanks))
                 .toList();
 
         boolean hasNext = placeRankWithRankings.size() > request.limit();
