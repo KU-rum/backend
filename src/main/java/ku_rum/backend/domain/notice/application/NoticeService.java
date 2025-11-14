@@ -5,6 +5,7 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.N
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.NoticeDetail;
 import ku_rum.backend.domain.notice.domain.PublishStatus;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NoticeService {
 
+    private final int POPULAR_NOTICE_COUNT = 3;
     private final NoticeRepository noticeRepository;
     private final NoticeDetailRepository noticeDetailRepository;
 
@@ -42,6 +44,14 @@ public class NoticeService {
 
     public Notice findNoticeByNoticeId(Long noticeId) {
         return noticeRepository.findById(noticeId).orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE));
+    }
+
+    public List<NoticeResponse> findPopularNotice() {
+        Long limit = Long.valueOf(POPULAR_NOTICE_COUNT);
+        return noticeRepository.findTopByBookmark(limit)
+                .stream()
+                .map(NoticeResponse::from)
+                .toList();
     }
 }
 
