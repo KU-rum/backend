@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NoticeService {
 
-    private final int POPULAR_NOTICE_COUNT = 3;
+    private static final int POPULAR_NOTICE_COUNT = 3;
     private final NoticeRepository noticeRepository;
     private final NoticeDetailRepository noticeDetailRepository;
 

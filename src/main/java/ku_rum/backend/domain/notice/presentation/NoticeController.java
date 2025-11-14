@@ -40,7 +40,7 @@ public class NoticeController {
     }
 
     @GetMapping("/popular")
-    public BaseResponse<List<NoticeResponse>> getPopularCategory() {
+    public BaseResponse<List<NoticeResponse>> getPopularNotices() {
         List<NoticeResponse> response = noticeService.findPopularNotice();
         return BaseResponse.ok(response);
     }

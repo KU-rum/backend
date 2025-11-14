@@ -133,9 +133,9 @@ public class NoticeControllerTest extends RestDocsTestSupport {
     void getPopularNotices() throws Exception {
         // given
         List<NoticeResponse> fakeResponse = List.of(
-                new NoticeResponse(1L, 1L, "link1", "공지 제목 1", "내용 1", "date1", "작성장1", "설명1"),
-                new NoticeResponse(2L, 2L, "link2", "공지 제목 2", "내용 2", "date2", "작성장2", "설명2"),
-                new NoticeResponse(3L, 3L, "link3", "공지 제목 3", "내용 3", "date3", "작성장3", "설명3")
+                new NoticeResponse(1L, 1L, "학사", "공지 제목 1", "https://link1.com", "2024-01-01", "관리자", "설명1"),
+                new NoticeResponse(2L, 2L, "학사", "공지 제목 2", "https://link2.com", "2024-01-02", "관리자", "설명2"),
+                new NoticeResponse(3L, 3L, "장학", "공지 제목 3", "https://link3.com", "2024-01-03", "관리자", "설명3")
         );
 
         given(noticeService.findPopularNotice())

@@ -16,8 +16,9 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @Query(value = """
             SELECT n.*
-            FROM notice_bookmark nb
-            JOIN notice n ON nb.notice_id = n.id
+            FROM notice n
+            LEFT JOIN notice_bookmark nb ON nb.notice_id = n.id
+            WHERE n.publish_status = 'SUCCESS_CRAWLING'
             GROUP BY n.id
             ORDER BY COUNT(nb.id) DESC
             LIMIT :limit
