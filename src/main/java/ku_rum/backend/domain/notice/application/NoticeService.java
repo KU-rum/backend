@@ -33,7 +33,7 @@ public class NoticeService {
         NoticeDetail noticeDetail = noticeDetailRepository.findByNotice(notice)
                 .orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE_DETAIL));
         String encodedHtml = noticeDetail.getHtmlContent();
-        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), htmlContent);
+        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink());
         //byte[] decodedBytes = Base64.getDecoder().decode(encodedHtml);
         //String htmlContent = new String(decodedBytes, StandardCharsets.UTF_8);
         //return new NoticeDetailResponse(noticeDetail.getNotice().getId(), htmlContent);
