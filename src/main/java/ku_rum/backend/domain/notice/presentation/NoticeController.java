@@ -1,8 +1,10 @@
 package ku_rum.backend.domain.notice.presentation;
 
+import java.util.List;
 import ku_rum.backend.domain.notice.application.NoticeService;
 import ku_rum.backend.domain.notice.dto.response.NoticeDetailResponse;
 import ku_rum.backend.domain.notice.dto.response.NoticeResponse;
+import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,5 +37,11 @@ public class NoticeController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML_VALUE) // HTML로 전달
                 .body(response.content());
+    }
+
+    @GetMapping("/popular")
+    public BaseResponse<List<NoticeResponse>> getPopularNotices() {
+        List<NoticeResponse> response = noticeService.findPopularNotice();
+        return BaseResponse.ok(response);
     }
 }

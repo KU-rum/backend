@@ -136,4 +136,50 @@ public class NoticeControllerTest extends RestDocsTestSupport {
                         )
                 ));
     }
+
+    @DisplayName("인기 공지사항 목록을 조회한다.")
+    @Test
+    void getPopularNotices() throws Exception {
+        // given
+        List<NoticeResponse> fakeResponse = List.of(
+                new NoticeResponse(1L, 1L, "학사", "공지 제목 1", "https://link1.com", "2024-01-01", "관리자", "설명1"),
+                new NoticeResponse(2L, 2L, "학사", "공지 제목 2", "https://link2.com", "2024-01-02", "관리자", "설명2"),
+                new NoticeResponse(3L, 3L, "장학", "공지 제목 3", "https://link3.com", "2024-01-03", "관리자", "설명3")
+        );
+
+        given(noticeService.findPopularNotice())
+                .willReturn(fakeResponse);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/notices/popular"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("OK")) // BaseResponse 기준
+                .andExpect(jsonPath("$.data[0].id").value(1))
+                .andExpect(jsonPath("$.data[0].title").value("공지 제목 1"))
+                .andExpect(jsonPath("$.data[1].id").value(2))
+                .andExpect(jsonPath("$.data[1].title").value("공지 제목 2"))
+                .andDo(restDocs.document(
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("공지사항 관련 API")
+                                        .description("북마크 기준 인기 공지사항 목록 조회")
+                                        .responseFields(
+                                                fieldWithPath("code").description("응답 코드"),
+                                                fieldWithPath("message").description("응답 메시지"),
+                                                fieldWithPath("status").description("상태"),
+                                                fieldWithPath("data[].id").description("공지ID"),
+                                                fieldWithPath("data[].title").description("공지제목"),
+                                                fieldWithPath("data[].categoryId").description("카테고리 ID"),
+                                                fieldWithPath("data[].categoryName").description("카테고리 이름"),
+                                                fieldWithPath("data[].link").description("공지 링크"),
+                                                fieldWithPath("data[].pubDate").description("발행일"),
+                                                fieldWithPath("data[].author").description("작성자"),
+                                                fieldWithPath("data[].description").description("설명")
+                                        )
+                                        .build()
+                        )
+                ));
+    }
 }
