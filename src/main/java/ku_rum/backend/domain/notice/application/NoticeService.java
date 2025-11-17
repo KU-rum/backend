@@ -3,8 +3,6 @@ package ku_rum.backend.domain.notice.application;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE_DETAIL;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.NoticeDetail;
