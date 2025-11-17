@@ -25,5 +25,5 @@ public class NoticeDetail {
     @ManyToOne
     private Notice notice;
 
-    private String html_content;
+    private String htmlContent;
 }

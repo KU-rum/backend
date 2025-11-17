@@ -19,9 +19,11 @@ import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.notice.application.NoticeService;
 import ku_rum.backend.domain.notice.dto.response.NoticeDetailResponse;
 import ku_rum.backend.domain.notice.dto.response.NoticeResponse;
+import ku_rum.backend.global.domain.repository.ApiLogRepository;
+import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,7 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@WebMvcTest(NoticeController.class)
 @ActiveProfiles("test")
 public class NoticeControllerTest extends RestDocsTestSupport {
 
@@ -39,7 +41,13 @@ public class NoticeControllerTest extends RestDocsTestSupport {
     private NoticeService noticeService;
 
     @MockBean
+    private ApiLogRepository apiLogRepository;
+
+    @MockBean
     private SecurityFilterChain securityFilterChain;
+
+    @MockBean
+    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("카테고리 ID로 공지사항 목록을 조회한다.")
     @Test
@@ -106,9 +114,10 @@ public class NoticeControllerTest extends RestDocsTestSupport {
         // given
         Long noticeId = 1L;
         String htmlContent = "<div>공지 상세 내용</div>";
-
+        String link = "url";
+        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link);
         given(noticeService.findByNoticeId(eq(noticeId)))
-                .willReturn(new NoticeDetailResponse(noticeId, htmlContent));
+                .willReturn(noticeDetailResponse);
 
         // when & then
         mockMvc.perform(get("/api/v1/notices/{noticeId}", noticeId))

@@ -1,17 +1,20 @@
 package ku_rum.backend.domain.rank.presentation;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import ku_rum.backend.domain.rank.application.RankService;
+import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
+import ku_rum.backend.domain.rank.dto.request.PlaceRankPaginationRequest;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,20 +30,32 @@ public class RankController {
         return BaseResponse.ok(rankService.getPlaceUserRank(userDetails));
     }
 
-    @GetMapping("/users/ranks/{friendId}")
+    @GetMapping("/users/{friendId}/ranks")
     public BaseResponse<List<GetPlaceUserRankResponse>> getPlaceFriendRank(
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @PathVariable("friendId") final Long friendId) {
         return BaseResponse.ok(rankService.getPlaceFriendRank(userDetails, friendId));
     }
 
-    @GetMapping("/ranks/{placeId}")
-    public BaseResponse<List<GetPlaceRankResponse>> getPlaceRank(
-            @AuthenticationPrincipal final CustomUserDetails userDetails,
+    @GetMapping("/{placeId}/ranks")
+    public BaseResponse<GetPlaceRankPaginationResponse> getPlaceRank(
             @PathVariable("placeId") final Long placeId,
-            @RequestParam("startRank") final int startRank,
-            @RequestParam("endRank") final int endRank) {
-        return BaseResponse.ok(rankService.getPlaceRanks(userDetails, placeId, startRank, endRank));
+            @Valid @ModelAttribute PlaceRankPaginationRequest request) {
+        return BaseResponse.ok(rankService.getPlaceRanks(placeId, request));
     }
 
+    @GetMapping("/{placeId}/ranks/me")
+    public BaseResponse<GetPlaceRankResponse> getPlaceMyRank(
+            @AuthenticationPrincipal final CustomUserDetails userDetails,
+            @PathVariable("placeId") final Long placeId) {
+        GetPlaceRankResponse response = rankService.getUserPlaceRank(userDetails.getUserId(), placeId);
+        return BaseResponse.ok(response);
+    }
+
+    @GetMapping("/{placeId}/top")
+    public BaseResponse<List<GetPlaceRankResponse>> getPlaceTopRank(
+            @PathVariable("placeId") final Long placeId) {
+        List<GetPlaceRankResponse> response = rankService.getPlaceTopRank(placeId);
+        return BaseResponse.ok(response);
+    }
 }

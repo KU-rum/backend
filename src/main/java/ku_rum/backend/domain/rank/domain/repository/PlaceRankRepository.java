@@ -93,4 +93,57 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
     List<PlaceRankWithRankingProjection> findRankByRange(@Param("placeId") Long placeId,
                                                          @Param("startRank") int startRank,
                                                          @Param("endRank") int endRank);
+
+    @Query(value = """
+                SELECT 
+                    ranked.rank_id          AS rankId,
+                    ranked.count            AS count,
+                    u.nickname              AS nickname,
+                    ranked.place_place_id   AS placePlaceId,
+                    ranked.created_at       AS createdAt,
+                    ranked.modified_at      AS modifiedAt,
+                    ranked.ranking          AS ranking
+                FROM (
+                    SELECT 
+                        pr.*, 
+                        DENSE_RANK() OVER (ORDER BY pr.count DESC) AS ranking
+                    FROM place_rank pr
+                    WHERE place_place_id =:placeId
+                ) ranked
+                JOIN users u
+                    ON u.id = ranked.user_id
+                WHERE (ranked.ranking > :lastRank)
+                   OR (ranked.ranking = :lastRank AND ranked.rank_id > :lastRankId)
+                ORDER BY ranked.ranking, ranked.rank_id
+                LIMIT :limit
+            """, nativeQuery = true)
+    List<PlaceRankWithRankingProjection> findRankByRange(@Param("placeId") Long placeId,
+                                                         @Param("lastRank") int lastRank,
+                                                         @Param("lastRankId") Long lastRankId,
+                                                         @Param("limit") int limit);
+
+    @Query(value = """
+                SELECT 
+                    ranked.rank_id          AS rankId,
+                    ranked.count            AS count,
+                    u.nickname              AS nickname,
+                    ranked.place_place_id   AS placePlaceId,
+                    ranked.created_at       AS createdAt,
+                    ranked.modified_at      AS modifiedAt,
+                    ranked.ranking          AS ranking
+                FROM (
+                    SELECT 
+                        pr.*, 
+                        DENSE_RANK() OVER (ORDER BY pr.count DESC) AS ranking
+                    FROM place_rank pr
+                    WHERE place_place_id = :placeId
+                ) ranked
+                JOIN users u
+                    ON u.id = ranked.user_id
+                WHERE ranked.user_id = :userId
+                   AND ranked.place_place_id = :placeId
+                LIMIT 1
+            """, nativeQuery = true)
+    Optional<PlaceRankWithRankingProjection> findRankByPlaceAndUser(@Param("placeId") Long placeId,
+                                                                    @Param("userId") Long userId);
 }
