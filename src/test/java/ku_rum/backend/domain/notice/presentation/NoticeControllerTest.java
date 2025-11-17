@@ -123,7 +123,11 @@ public class NoticeControllerTest extends RestDocsTestSupport {
         mockMvc.perform(get("/api/v1/notices/{noticeId}", noticeId))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("OK")) // BaseResponse 기준
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.content").value("<div>공지 상세 내용</div>"))
+                .andExpect(jsonPath("$.data.link").value("url"))
                 .andDo(restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()
