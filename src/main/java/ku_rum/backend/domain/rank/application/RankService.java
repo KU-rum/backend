@@ -38,6 +38,8 @@ public class RankService {
     private final FriendQueryService friendQueryService;
 
     private static final int MIN_RANK = 1;
+    private static final int TOP_3_START = 1;
+    private static final int TOP_3_END = 3;
 
     /**
      * 유저 장소 공유 랭킹 조회(3개)
@@ -170,7 +172,7 @@ public class RankService {
 
     public List<GetPlaceRankResponse> getPlaceTopRank(Long placeId) {
         List<PlaceRankWithRankingProjection> placeRankWithRankingProjections = placeRankRepository.findRankByRange(
-                placeId, 1, 3);
+                placeId, TOP_3_START, TOP_3_END);
 
         return placeRankWithRankingProjections
                 .stream()

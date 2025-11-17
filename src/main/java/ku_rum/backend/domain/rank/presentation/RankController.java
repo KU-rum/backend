@@ -41,7 +41,6 @@ public class RankController {
     public BaseResponse<GetPlaceRankPaginationResponse> getPlaceRank(
             @PathVariable("placeId") final Long placeId,
             @Valid @ModelAttribute PlaceRankPaginationRequest request) {
-        rankService.getPlaceRanks(placeId, request);
         return BaseResponse.ok(rankService.getPlaceRanks(placeId, request));
     }
 
