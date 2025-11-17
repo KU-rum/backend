@@ -1,5 +1,9 @@
 package ku_rum.backend.domain.rank.dto;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.INVALID_LAST_KNOWN;
+
+import ku_rum.backend.global.exception.global.GlobalException;
+
 public record PlaceRankingLastKnownCursor(int lastRank, Long lastRankId) {
 
     private static final String DELIMITER = "_"; // 구분자, 예: "10_12345"
@@ -11,7 +15,7 @@ public record PlaceRankingLastKnownCursor(int lastRank, Long lastRankId) {
 
         String[] parts = lastKnown.split(DELIMITER);
         if (parts.length != 2) {
-            throw new IllegalArgumentException("잘못된 lastKnown" + lastKnown);
+            throw new GlobalException(INVALID_LAST_KNOWN);
         }
 
         try {
@@ -19,7 +23,7 @@ public record PlaceRankingLastKnownCursor(int lastRank, Long lastRankId) {
             Long lastRankId = Long.parseLong(parts[1]);
             return new PlaceRankingLastKnownCursor(lastRank, lastRankId);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("잘못된 lastKnown" + lastKnown);
+            throw new GlobalException(INVALID_LAST_KNOWN);
         }
     }
 
