@@ -18,6 +18,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.place.application.PlaceHistoryService;
 import ku_rum.backend.domain.place.application.PlaceService;
@@ -171,11 +172,12 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 .build())));
     }
 
-    @DisplayName("현재 유저의 위치를 공유한다")
+    @DisplayName("현재 유저의 위치를 해제한다")
     @Test
     void disableSharingPosition() throws Exception {
         //given
-        doNothing().when(positionService).disableSharingPosition(any(CustomUserDetails.class));
+        given(positionService.disableSharingPosition(any(CustomUserDetails.class)))
+                .willReturn(Optional.empty());
 
         //when
         mockMvc.perform(delete("/api/v1/places/sharing/confirm")
