@@ -24,6 +24,7 @@ import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
 import ku_rum.backend.domain.place.util.PointParser;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
+import ku_rum.backend.domain.rank.domain.repository.PlaceRankRepository;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
@@ -42,6 +43,7 @@ public class PositionService {
     private final RankService rankService;
     private final FriendQueryService friendQueryService;
     private final AlarmService alarmService;
+    private final PlaceRankRepository placeRankRepository;
 
     public static final long CRITERION_TIME = 3600L;
 
@@ -116,7 +118,7 @@ public class PositionService {
      *
      * @param userDetails 사용자 인증정보
      */
-    public void disableSharingPosition(CustomUserDetails userDetails) {
+    public Optional<RankingChangeDto> disableSharingPosition(CustomUserDetails userDetails) {
         User user = userService.getUser();
         Position position = positionRepository.findPositionByUser(user)
                 .orElseThrow(() -> new GlobalException(NO_SUCH_DEPARTMENT));
@@ -127,12 +129,16 @@ public class PositionService {
 
         try {
             PlaceRank userPlaceRank = rankService.getUserPlaceRank(user, position.getPlace());
+            Integer beforeRank = placeRankRepository.findRankingByRankId(userPlaceRank.getRankId());
             if (isUpperBound) {
                 userPlaceRank.increaseCount();
+                Integer afterRank = placeRankRepository.findRankingByRankId(userPlaceRank.getRankId());
+                return Optional.of(new RankingChangeDto(beforeRank, afterRank, userPlaceRank));
             }
         } catch (Exception ignored) {
 
         }
+        return Optional.empty();
     }
 
     /**

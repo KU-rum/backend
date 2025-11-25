@@ -6,6 +6,7 @@ import java.util.Optional;
 import ku_rum.backend.domain.place.application.PlaceHistoryService;
 import ku_rum.backend.domain.place.application.PlaceService;
 import ku_rum.backend.domain.place.application.PositionService;
+import ku_rum.backend.domain.place.application.RankingChangeDto;
 import ku_rum.backend.domain.place.application.response.CurrentPositionConfirmResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
@@ -17,7 +18,6 @@ import ku_rum.backend.domain.place.domain.CategoryChip;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
 import ku_rum.backend.domain.rank.application.RankService;
-import ku_rum.backend.domain.rank.domain.PlaceRank;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -68,10 +68,12 @@ public class PlaceController {
 
     @DeleteMapping("/sharing/confirm")
     public BaseResponse<Void> disableSharingPosition(@AuthenticationPrincipal final CustomUserDetails userDetails) {
-        //Position position = positionService.findCurrentPosition(userDetails);
-        Optional<PlaceRank> placeRankOptional = rankService.getCurrentTopRank(userDetails);
-        positionService.disableSharingPosition(userDetails);
-        rankService.checkoutRankChange(placeRankOptional, userDetails);
+        Optional<RankingChangeDto> rankingChangeDtoOptional = positionService.disableSharingPosition(userDetails);
+        if (rankingChangeDtoOptional.isEmpty()) {
+            return BaseResponse.ok();
+        }
+        RankingChangeDto rankingChangeDto = rankingChangeDtoOptional.get();
+        rankService.checkoutRankChange(rankingChangeDto, userDetails);
         return BaseResponse.ok();
     }
 

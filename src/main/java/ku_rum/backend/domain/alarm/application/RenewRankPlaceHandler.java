@@ -6,6 +6,6 @@ import org.springframework.stereotype.Component;
 public class RenewRankPlaceHandler implements AlarmMessageHandler {
     @Override
     public String create(Object payload) {
-        return "";
+        return String.format("내 장소 랭킹의 순위가 바뀌었어요!");
     }
 }
