@@ -28,18 +28,24 @@ public class SearchKeywordService {
         return new GetKeywordResponse(keywords);
     }
 
-    public void save(SaveKeywordRequest request, CustomUserDetails userDetail) {
+    /**
+     * 키워드 저장 이미 있으면 삭제
+     *
+     * @param request
+     * @param userDetail
+     */
+    public void update(SaveKeywordRequest request, CustomUserDetails userDetail) {
         User user = userService.getUser();
         String keyword = request.keyword();
         Optional<SearchKeyword> searchKeywordOptional = searchKeywordRepository.findByUserAndKeyword(user, keyword);
 
-        if(searchKeywordOptional.isEmpty()){
+        if (searchKeywordOptional.isEmpty()) {
             SearchKeyword searchKeyword = SearchKeyword.builder()
                     .keyword(keyword)
                     .user(user)
                     .build();
             searchKeywordRepository.save(searchKeyword);
-            return
+            return;
         }
 
         SearchKeyword searchKeyword = searchKeywordOptional.get();
