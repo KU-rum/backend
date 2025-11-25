@@ -33,14 +33,20 @@ public class FriendQueryService {
 
     // 친구 목록 조회
     public List<FriendListResponse> getFriendList() {
+        return getFriends().stream()
+                .map(FriendListResponse::from)
+                .toList();
+    }
+
+    public List<User> getFriends() {
         User currentUser = userUtil.getUser();
 
         List<Friend> sent = friendRepository.findByFromUserAndStatus(currentUser, FriendStatus.ACCEPT);
         List<Friend> received = friendRepository.findByToUserAndStatus(currentUser, FriendStatus.ACCEPT);
 
         return Stream.concat(
-                sent.stream().map(f -> FriendListResponse.from(f.getToUser())),
-                received.stream().map(f -> FriendListResponse.from(f.getFromUser()))
+                sent.stream().map(Friend::getToUser),
+                received.stream().map(Friend::getFromUser)
         ).collect(Collectors.toList());
     }
 

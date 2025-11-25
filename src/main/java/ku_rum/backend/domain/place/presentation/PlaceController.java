@@ -57,6 +57,8 @@ public class PlaceController {
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @Valid @RequestBody CurrentPositionConfirmRequest request) {
         CurrentPositionConfirmResponse response = positionService.confirmCurrentPosition(userDetails, request);
+
+        positionService.alarmConfirmCurrentPosition(userDetails, response);
         return BaseResponse.ok(response);
     }
 

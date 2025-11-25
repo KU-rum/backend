@@ -8,6 +8,9 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.P
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import ku_rum.backend.domain.alarm.application.AlarmService;
+import ku_rum.backend.domain.alarm.domain.AlarmType;
+import ku_rum.backend.domain.friend.application.FriendQueryService;
 import ku_rum.backend.domain.place.application.response.CurrentPositionConfirmResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
@@ -15,6 +18,7 @@ import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.place.domain.Position;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
+import ku_rum.backend.domain.place.dto.UserPlaceAlarmDto;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
 import ku_rum.backend.domain.place.util.PointParser;
@@ -36,6 +40,8 @@ public class PositionService {
     private final PlaceRepository placeRepository;
     private final UserService userService;
     private final RankService rankService;
+    private final FriendQueryService friendQueryService;
+    private final AlarmService alarmService;
 
     public static final long CRITERION_TIME = 3600L;
 
@@ -93,6 +99,16 @@ public class PositionService {
         Position savePosition = positionRepository.save(position);
 
         return new CurrentPositionConfirmResponse(savePosition.getPlace().getName());
+    }
+
+
+    public void alarmConfirmCurrentPosition(CustomUserDetails userDetails, CurrentPositionConfirmResponse response) {
+        User user = userService.getUser();
+
+        UserPlaceAlarmDto userPlaceAlarmDto = new UserPlaceAlarmDto(user, response.placeName());
+        friendQueryService.getFriends().stream()
+                .forEach(sender -> alarmService.notifyAlarm(AlarmType.NEW_FRIEND_PLACE_SHARING, userPlaceAlarmDto,
+                        sender));
     }
 
     /**
