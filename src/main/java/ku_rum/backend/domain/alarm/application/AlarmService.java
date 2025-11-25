@@ -29,6 +29,10 @@ public class AlarmService {
     @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object, User user) {
         AlarmMessageHandler alarmMessageHandler = alarmMessageHandlers.get(alarmType);
+        if (alarmMessageHandler == null) {
+            throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
+        }
+
         String message = alarmMessageHandler.create(object);
 
         Alarm alarm = Alarm.builder()
@@ -43,6 +47,9 @@ public class AlarmService {
     @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object) {
         AlarmMessageHandler alarmMessageHandler = alarmMessageHandlers.get(alarmType);
+        if (alarmMessageHandler == null) {
+            throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
+        }
         String message = alarmMessageHandler.create(object);
 
         Announcement announcement = Announcement.builder()

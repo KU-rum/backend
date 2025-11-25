@@ -13,10 +13,10 @@ public enum AlarmType {
     RENEW_RANK_PLACE("내 장소 랭킹의 순위가 바뀌었어요!", Alarm.class);
 
     private String template;
-    private Class Classtype;
+    private Class<?> classType;
 
-    AlarmType(String template, Class Classtype) {
+    AlarmType(String template, Class<?> classType) {
         this.template = template;
-        this.Classtype = Classtype;
+        this.classType = classType;
     }
 }

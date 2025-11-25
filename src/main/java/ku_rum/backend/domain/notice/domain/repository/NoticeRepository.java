@@ -1,5 +1,7 @@
 package ku_rum.backend.domain.notice.domain.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.PublishStatus;
 import org.springframework.data.domain.Page;
@@ -7,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Page<Notice> findByCategoryId(Long categoryId, Pageable pageable);
@@ -28,18 +28,26 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     // 키워드 검색 (제목/본문에서 검색)
     @Query("""
-        select n
-        from Notice n
-        where n.publishStatus = :status
-          and (
-                lower(n.title)       like lower(concat('%', :keyword, '%'))
-             or lower(n.description) like lower(concat('%', :keyword, '%'))
-          )
-        """)
+            select n
+            from Notice n
+            where n.publishStatus = :status
+              and (
+                    lower(n.title)       like lower(concat('%', :keyword, '%'))
+                 or lower(n.description) like lower(concat('%', :keyword, '%'))
+              )
+            """)
     Page<Notice> searchByKeyword(@Param("keyword") String keyword,
                                  @Param("status") PublishStatus status,
                                  Pageable pageable);
 
     Page<Notice> findByIsImportantTrueAndPublishStatus(PublishStatus publishStatus,
                                                        Pageable pageable);
+
+    @Query("SELECT n FROM Notice n " +
+            "WHERE n.publishStatus = :status " +
+            "AND n.pubDate >= :sinceTime")
+    List<Notice> findByPublishStatusAndPubDateAfter(
+            @Param("status") PublishStatus status,
+            @Param("sinceTime") LocalDateTime sinceTime
+    );
 }
