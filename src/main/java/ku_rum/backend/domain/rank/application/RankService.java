@@ -179,4 +179,19 @@ public class RankService {
                 .map(placeRanks -> GetPlaceRankResponse.from(placeRanks))
                 .toList();
     }
+
+    public Optional<PlaceRank> getCurrentTopRank(CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        return placeRankRepository.findTopByUserOrderByCountDesc(user);
+    }
+
+    public void checkoutRankChange(Optional<PlaceRank> placeRankOptional, CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        Optional<PlaceRank> afterPlaceRankOptional = placeRankRepository.findTopByUserOrderByCountDesc(user);
+        if (afterPlaceRankOptional.isEmpty()) {
+            return;
+        }
+        PlaceRank placeRank = placeRankOptional.get();
+        PlaceRank afterPlaceRank = afterPlaceRankOptional.get();
+    }
 }

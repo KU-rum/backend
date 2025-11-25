@@ -146,4 +146,6 @@ public interface PlaceRankRepository extends JpaRepository<PlaceRank, Long> {
             """, nativeQuery = true)
     Optional<PlaceRankWithRankingProjection> findRankByPlaceAndUser(@Param("placeId") Long placeId,
                                                                     @Param("userId") Long userId);
+
+    Optional<PlaceRank> findTopByUserOrderByCountDesc(User user);
 }
