@@ -2,10 +2,12 @@ package ku_rum.backend.domain.notice.application;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.PublishStatus;
+import ku_rum.backend.domain.notice.domain.SearchKeyword;
 import ku_rum.backend.domain.notice.domain.repository.NoticeDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,12 +21,23 @@ public class NoticeAlarmService {
 
     private final NoticeDetailRepository noticeDetailRepository;
     private final AlarmService alarmService;
+    private final SearchKeywordService searchKeywordService;
 
-    @Scheduled
+    @Scheduled(cron = "0 0 12 * * ?")
     public void checkNewAlarm() {
         LocalDateTime sinceTime = LocalDateTime.now().minusHours(PAST_HOUR);
         List<Notice> notice = noticeDetailRepository.findByPublishStatusAndPubDateAfter(
                 PublishStatus.SUCCESS_CRAWLING, sinceTime);
-        alarmService.notifyAlarm(AlarmType.NEW_NOTICE, new Object());
+        if (notice.isEmpty()) {
+            return;
+        }
+        checkNewKeywordAlarm(notice);
+        alarmService.notifyAlarm(AlarmType.NEW_NOTICE, notice.get(9));
+    }
+
+    private void checkNewKeywordAlarm(List<Notice> notices) {
+        Map<SearchKeyword, Notice> noticeWithKeyword = searchKeywordService.findNoticeWithKeyword(notices);
+        noticeWithKeyword.entrySet().stream()
+                .forEach(entry -> alarmService.notifyAlarm(AlarmType.NEW_KEYWORD_NOTICE, entry));
     }
 }

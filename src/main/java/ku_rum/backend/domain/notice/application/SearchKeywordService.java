@@ -1,7 +1,10 @@
 package ku_rum.backend.domain.notice.application;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.SearchKeyword;
 import ku_rum.backend.domain.notice.domain.repository.SearchKeywordRepository;
 import ku_rum.backend.domain.notice.dto.request.SaveKeywordRequest;
@@ -50,5 +53,20 @@ public class SearchKeywordService {
 
         SearchKeyword searchKeyword = searchKeywordOptional.get();
         searchKeywordRepository.delete(searchKeyword);
+    }
+
+    public Map<SearchKeyword, Notice> findNoticeWithKeyword(List<Notice> notices) {
+        List<SearchKeyword> searchKeywords = searchKeywordRepository.findAll();
+
+        Map<SearchKeyword, Notice> result = new HashMap<>();
+
+        for (SearchKeyword searchKeyword : searchKeywords) {
+            for (Notice notice : notices) {
+                if (notice.getTitle().contains(searchKeyword.getKeyword())) {
+                    result.put(searchKeyword, notice);
+                }
+            }
+        }
+        return result;
     }
 }
