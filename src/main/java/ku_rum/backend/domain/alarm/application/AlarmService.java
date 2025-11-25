@@ -1,13 +1,17 @@
 package ku_rum.backend.domain.alarm.application;
 
 
+import java.util.List;
 import java.util.Map;
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.domain.Announcement;
+import ku_rum.backend.domain.alarm.domain.UserAnnouncement;
 import ku_rum.backend.domain.alarm.domain.repository.AlarmRepository;
 import ku_rum.backend.domain.alarm.domain.repository.AnnouncementRepository;
+import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
 import ku_rum.backend.domain.user.domain.User;
+import ku_rum.backend.domain.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +23,8 @@ public class AlarmService {
     private final Map<AlarmType, AlarmMessageHandler> alarmMessageHandlers;
     private final AlarmRepository alarmRepository;
     private final AnnouncementRepository announcementRepository;
+    private final UserAnnouncementRepository userAnnouncementRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object, User user) {
@@ -44,6 +50,18 @@ public class AlarmService {
                 .message(message)
                 .isChecked(false)
                 .build();
-        announcementRepository.save(announcement);
+        Announcement saveAnnouncement = announcementRepository.save(announcement);
+        saveUserAnnouncement(saveAnnouncement);
+    }
+
+    private void saveUserAnnouncement(Announcement announcement) {
+        List<UserAnnouncement> userAnnouncements = userRepository.findAll().stream()
+                .map(user -> UserAnnouncement.builder()
+                        .isChecked(false)
+                        .user(user)
+                        .announcement(announcement)
+                        .build())
+                .toList();
+        userAnnouncementRepository.saveAll(userAnnouncements);
     }
 }
