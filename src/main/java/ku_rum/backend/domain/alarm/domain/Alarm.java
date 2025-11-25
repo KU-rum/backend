@@ -1,4 +1,4 @@
-package ku_rum.backend.domain.alim.domain;
+package ku_rum.backend.domain.alarm.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
