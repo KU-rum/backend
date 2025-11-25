@@ -1,5 +1,14 @@
 package ku_rum.backend.domain.friend.application;
 
+import static ku_rum.backend.domain.friend.domain.vo.FriendStatus.PENDING;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_FRIENDS;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_RESPONSE;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NOT_EQUAL_TO_USER;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_FRIEND_REQUEST;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_PENDING_LIST;
+
+import ku_rum.backend.domain.alarm.application.AlarmService;
+import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.friend.domain.Friend;
 import ku_rum.backend.domain.friend.domain.repository.FriendRepository;
 import ku_rum.backend.domain.friend.domain.vo.FriendStatus;
@@ -12,9 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static ku_rum.backend.domain.friend.domain.vo.FriendStatus.PENDING;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.*;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -23,6 +29,7 @@ public class FriendManageService {
     private final FriendRepository friendRepository;
     private final UserUtil userUtil;
     private final UserQueryService userQueryService;
+    private final AlarmService alarmService;
 
     // 친구 요청
     public void requestFriend(final FriendRequest friendSendRequest) {
@@ -33,6 +40,8 @@ public class FriendManageService {
             throw new GlobalException(DUPLICATE_FRIENDS);
         }
         friendRepository.save(Friend.of(fromUser, toUser, PENDING));
+
+        alarmService.notifyAlarm(AlarmType.NEW_FRIEND_REQUEST, toUser);
     }
 
     // 친구 수락 및 거절
@@ -72,8 +81,10 @@ public class FriendManageService {
         User currentUser = userUtil.getUser();
         User targetUser = userQueryService.getUserById(targetUserId);
 
-        boolean isFriend = friendRepository.existsByFromUserAndToUserAndStatus(currentUser, targetUser, FriendStatus.ACCEPT) ||
-                friendRepository.existsByFromUserAndToUserAndStatus(targetUser, currentUser, FriendStatus.ACCEPT);
+        boolean isFriend =
+                friendRepository.existsByFromUserAndToUserAndStatus(currentUser, targetUser, FriendStatus.ACCEPT) ||
+                        friendRepository.existsByFromUserAndToUserAndStatus(targetUser, currentUser,
+                                FriendStatus.ACCEPT);
 
         if (!isFriend) {
             throw new GlobalException(NO_FRIEND_REQUEST);
