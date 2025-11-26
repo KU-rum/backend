@@ -17,6 +17,7 @@ import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
+import ku_rum.backend.domain.rank.application.response.GetPlaceTopRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.CustomUserDetails;
@@ -244,10 +245,10 @@ public class RankControllerTest extends RestDocsTestSupport {
         // given
         Long placeId = 75L;
 
-        List<GetPlaceRankResponse> topRanks = List.of(
-                new GetPlaceRankResponse(1, "UserA", 15),
-                new GetPlaceRankResponse(2, "UserB", 12),
-                new GetPlaceRankResponse(3, "UserC", 10)
+        List<GetPlaceTopRankResponse> topRanks = List.of(
+                new GetPlaceTopRankResponse(1, List.of("UserA"), 15),
+                new GetPlaceTopRankResponse(2, List.of("UserA"), 12),
+                new GetPlaceTopRankResponse(3, List.of("UserA"), 10)
         );
 
         given(rankService.getPlaceTopRank(eq(placeId))).willReturn(topRanks);
