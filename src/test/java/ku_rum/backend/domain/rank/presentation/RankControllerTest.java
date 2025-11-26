@@ -246,9 +246,9 @@ public class RankControllerTest extends RestDocsTestSupport {
         Long placeId = 75L;
 
         List<GetPlaceTopRankResponse> topRanks = List.of(
-                new GetPlaceTopRankResponse(1, List.of("UserA"), 15),
-                new GetPlaceTopRankResponse(2, List.of("UserA"), 12),
-                new GetPlaceTopRankResponse(3, List.of("UserA"), 10)
+                new GetPlaceTopRankResponse(1, List.of("UserA", "UserB"), 15),
+                new GetPlaceTopRankResponse(2, List.of("UserC"), 12),
+                new GetPlaceTopRankResponse(3, List.of("UserD", "UserE", "UserF"), 10)
         );
 
         given(rankService.getPlaceTopRank(eq(placeId))).willReturn(topRanks);

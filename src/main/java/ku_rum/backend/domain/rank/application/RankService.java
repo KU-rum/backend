@@ -157,7 +157,7 @@ public class RankService {
 
         List<GetPlaceRankResponse> response = placeRankWithRankingProjections
                 .stream()
-                .map(placeRanks -> GetPlaceRankResponse.from(placeRanks))
+                .map(GetPlaceRankResponse::from)
                 .toList();
 
         boolean hasNext = placeRankWithRankings.size() > request.limit();
