@@ -5,6 +5,7 @@ import java.util.List;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
+import ku_rum.backend.domain.rank.application.response.GetPlaceTopRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.domain.rank.dto.request.PlaceRankPaginationRequest;
 import ku_rum.backend.global.security.CustomUserDetails;
@@ -53,9 +54,9 @@ public class RankController {
     }
 
     @GetMapping("/{placeId}/top")
-    public BaseResponse<List<GetPlaceRankResponse>> getPlaceTopRank(
+    public BaseResponse<List<GetPlaceTopRankResponse>> getPlaceTopRank(
             @PathVariable("placeId") final Long placeId) {
-        List<GetPlaceRankResponse> response = rankService.getPlaceTopRank(placeId);
+        List<GetPlaceTopRankResponse> response = rankService.getPlaceTopRank(placeId);
         return BaseResponse.ok(response);
     }
 }
