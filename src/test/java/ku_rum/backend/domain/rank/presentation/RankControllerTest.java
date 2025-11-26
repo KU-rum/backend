@@ -9,6 +9,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
@@ -60,19 +61,20 @@ public class RankControllerTest extends RestDocsTestSupport {
         GetPlaceUserRankResponse getPlaceUserRankResponse = new GetPlaceUserRankResponse(List.of(placeName), count);
         List<GetPlaceUserRankResponse> response = List.of(getPlaceUserRankResponse);
 
-        given(rankService.getPlaceUserRank(any(CustomUserDetails.class)))
+        given(rankService.getPlaceUserRank(any()))
                 .willReturn(response);
 
         //when
         mockMvc.perform(get("/api/v1/places/users/ranks")
-                        .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                        .header("Authorization", "Bearer test-access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value(placeName))
+                .andExpect(jsonPath("$.data[0].sharingCount").value(count))
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
-                                .tag("지도 관련 API")
+                                .tag("랭킹 관련 API")
                                 .description("지도 장소 유저 랭킹 조회")
                                 .requestHeaders(
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
@@ -115,9 +117,11 @@ public class RankControllerTest extends RestDocsTestSupport {
                         .header("Authorization", "Bearer test-access-token"))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value(placeName))
+                .andExpect(jsonPath("$.data[0].sharingCount").value(count))
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
-                                .tag("지도 관련 API")
+                                .tag("랭킹 관련 API")
                                 .description("지도 장소 친구 랭킹 조회")
                                 .requestHeaders(
                                         headerWithName("Authorization").description("발급 받은 액세스 토큰")
@@ -159,6 +163,9 @@ public class RankControllerTest extends RestDocsTestSupport {
 
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.ranks[0].ranking").value(2))
+                .andExpect(jsonPath("$.data.ranks[0].nickname").value("테스트8"))
+                .andExpect(jsonPath("$.data.ranks[0].sharingCount").value(8))
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
                                 .tag("랭킹 관련 API")
@@ -220,6 +227,9 @@ public class RankControllerTest extends RestDocsTestSupport {
                         )))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.ranking").value(5))
+                .andExpect(jsonPath("$.data.nickname").value("testUser"))
+                .andExpect(jsonPath("$.data.sharingCount").value(10))
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
                                 .tag("랭킹 관련 API")
@@ -257,6 +267,10 @@ public class RankControllerTest extends RestDocsTestSupport {
         mockMvc.perform(get("/api/v1/places/{placeId}/top", placeId))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].ranking").value(1))
+                .andExpect(jsonPath("$.data[0].nickname").isArray())
+                .andExpect(jsonPath("$.data[0].nickname[0]").value("UserA"))
+                .andExpect(jsonPath("$.data[0].sharingCount").value(15))
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
                                 .tag("랭킹 관련 API")
