@@ -10,9 +10,16 @@ import ku_rum.backend.domain.alarm.domain.UserAnnouncement;
 import ku_rum.backend.domain.alarm.domain.repository.AlarmRepository;
 import ku_rum.backend.domain.alarm.domain.repository.AnnouncementRepository;
 import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
+import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
+import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
+import ku_rum.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +32,7 @@ public class AlarmService {
     private final AnnouncementRepository announcementRepository;
     private final UserAnnouncementRepository userAnnouncementRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object, User user) {
@@ -48,6 +56,27 @@ public class AlarmService {
         Announcement announcement = alarmMessageHandler.create(alarmType, object);
         Announcement saveAnnouncement = announcementRepository.save(announcement);
         saveUserAnnouncement(saveAnnouncement);
+    }
+
+    public GetAlarmResponse getAlarmResponse(CustomUserDetails userDetails, AlarmPaginationRequest request) {
+        User user = userService.getUser();
+        Pageable pageable = PageRequest.of(0, request.limit() + 1);
+        Long lastId = Long.valueOf(request.lastKnown());
+        List<Alarm> alarms = alarmRepository.findAlarms(user, lastId, pageable);
+
+        boolean hasNext = alarms.size() > request.limit();
+
+        String nextCursor = null;
+        if (hasNext) {
+            Alarm lastItem = alarms.get(
+                    alarms.size() - 1);
+            nextCursor = String.valueOf(lastItem.getId());
+        }
+        List<GetAlarmDto> getAlarmDtos = alarms.stream()
+                .map(GetAlarmDto::from)
+                .toList();
+
+        return new GetAlarmResponse(getAlarmDtos, hasNext, nextCursor);
     }
 
     private void saveUserAnnouncement(Announcement announcement) {
