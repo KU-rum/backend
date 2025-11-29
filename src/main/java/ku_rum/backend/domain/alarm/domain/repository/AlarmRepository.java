@@ -1,6 +1,7 @@
 package ku_rum.backend.domain.alarm.domain.repository;
 
 import java.util.List;
+import java.util.Optional;
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.user.domain.User;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +19,6 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
             ORDER BY a.createdAt desc 
             """)
     List<Alarm> findAlarms(User user, Long lastId, Pageable pageable);
+
+    Optional<Alarm> findById(Long AlarmId);
 }

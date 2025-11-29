@@ -38,4 +38,8 @@ public class Alarm extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    public void checkAlarm() {
+        this.isChecked = true;
+    }
 }

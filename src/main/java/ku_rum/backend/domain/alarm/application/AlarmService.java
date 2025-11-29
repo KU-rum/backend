@@ -16,7 +16,9 @@ import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
+import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
+import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -79,6 +81,17 @@ public class AlarmService {
         return new GetAlarmResponse(getAlarmDtos, hasNext, nextCursor);
     }
 
+    @Transactional
+    public void patchUserAlarm(CustomUserDetails userDetails, Long alarmId) {
+        Long userId = userService.getUser().getId();
+        Alarm alarm = findById(alarmId);
+
+        if (!userId.equals(alarm.getUser().getId())) {
+            throw new GlobalException(BaseExceptionResponseStatus.UNAUTHORIZED_ALARM);
+        }
+        alarm.checkAlarm();
+    }
+
     private void saveUserAnnouncement(Announcement announcement) {
         List<UserAnnouncement> userAnnouncements = userRepository.findAll().stream()
                 .map(user -> UserAnnouncement.builder()
@@ -88,5 +101,10 @@ public class AlarmService {
                         .build())
                 .toList();
         userAnnouncementRepository.saveAll(userAnnouncements);
+    }
+
+    private Alarm findById(Long alarmId) {
+        return alarmRepository.findById(alarmId).orElseThrow(
+                () -> new GlobalException(BaseExceptionResponseStatus.ALARM_NOT_FOUND));
     }
 }

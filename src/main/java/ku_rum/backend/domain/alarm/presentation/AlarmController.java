@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,5 +28,13 @@ public class AlarmController {
             @Valid @ModelAttribute AlarmPaginationRequest request) {
         GetAlarmResponse response = alarmService.getAlarmResponse(userDetails, request);
         return BaseResponse.ok(response);
+    }
+
+    @PatchMapping("{alarmId}")
+    public BaseResponse<Void> patchAlarm(
+            @PathVariable Long alarmId,
+            @AuthenticationPrincipal final CustomUserDetails userDetails) {
+        alarmService.patchUserAlarm(userDetails, alarmId);
+        return BaseResponse.ok();
     }
 }

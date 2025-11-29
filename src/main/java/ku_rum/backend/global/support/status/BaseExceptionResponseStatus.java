@@ -127,10 +127,19 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     RANK_NOT_FOUND(1205, HttpStatus.NOT_FOUND, "랭크가 없습니다"),
     INVALID_RANK_RANGE(1206, HttpStatus.BAD_REQUEST, "잘못된 랭킹입니다"),
 
+    /**
+     * 1300: 북마크
+     */
     DUPLICATE_BOOKMARK(1300, HttpStatus.BAD_REQUEST, "이미 북마크 공지사항입니다."),
     BOOKMARK_NOT_FOUND(1301, HttpStatus.NOT_FOUND, "해당되는 북마크가 없습니다."),
     UNAUTHORIZED_BOOKMARK(1302, HttpStatus.UNAUTHORIZED, "권한이 없는 북마크 입니다."),
     INVALID_LAST_KNOWN(1303, HttpStatus.BAD_REQUEST, "잘못된 lastknown 입니다"),
+
+    /**
+     * 1400: 알람
+     */
+    ALARM_NOT_FOUND(1400, HttpStatus.NOT_FOUND, "해당하는 알림이 없습니다."),
+    UNAUTHORIZED_ALARM(1401, HttpStatus.NOT_FOUND, "권한이 없는 알람입니다."),
     ;
 
     private final int code;
