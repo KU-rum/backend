@@ -13,6 +13,7 @@ import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
@@ -82,7 +83,7 @@ public class AlarmService {
     }
 
     @Transactional
-    public void patchUserAlarm(CustomUserDetails userDetails, Long alarmId) {
+    public PatchAlarmResponse patchUserAlarm(CustomUserDetails userDetails, Long alarmId) {
         Long userId = userService.getUser().getId();
         Alarm alarm = findById(alarmId);
 
@@ -90,6 +91,8 @@ public class AlarmService {
             throw new GlobalException(BaseExceptionResponseStatus.UNAUTHORIZED_ALARM);
         }
         alarm.checkAlarm();
+
+        return PatchAlarmResponse.from(alarm);
     }
 
     private void saveUserAnnouncement(Announcement announcement) {

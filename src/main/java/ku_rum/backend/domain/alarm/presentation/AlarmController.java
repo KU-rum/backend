@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +32,10 @@ public class AlarmController {
     }
 
     @PatchMapping("{alarmId}")
-    public BaseResponse<Void> patchAlarm(
-            @PathVariable Long alarmId,
+    public BaseResponse<PatchAlarmResponse> patchAlarm(
+            @PathVariable("alarmId") Long alarmId,
             @AuthenticationPrincipal final CustomUserDetails userDetails) {
-        alarmService.patchUserAlarm(userDetails, alarmId);
-        return BaseResponse.ok();
+        PatchAlarmResponse response = alarmService.patchUserAlarm(userDetails, alarmId);
+        return BaseResponse.ok(response);
     }
 }
