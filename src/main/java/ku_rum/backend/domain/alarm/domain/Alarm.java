@@ -33,6 +33,8 @@ public class Alarm {
 
     private boolean isChecked;
 
+    private String dataId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 }

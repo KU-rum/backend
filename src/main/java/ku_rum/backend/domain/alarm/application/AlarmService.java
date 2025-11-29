@@ -33,14 +33,8 @@ public class AlarmService {
             throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
         }
 
-        String message = alarmMessageHandler.create(object);
+        Alarm alarm = alarmMessageHandler.create(alarmType, object, user);
 
-        Alarm alarm = Alarm.builder()
-                .alarmType(alarmType)
-                .message(message)
-                .isChecked(false)
-                .user(user)
-                .build();
         alarmRepository.save(alarm);
     }
 
@@ -50,13 +44,8 @@ public class AlarmService {
         if (alarmMessageHandler == null) {
             throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
         }
-        String message = alarmMessageHandler.create(object);
 
-        Announcement announcement = Announcement.builder()
-                .alarmType(alarmType)
-                .message(message)
-                .isChecked(false)
-                .build();
+        Announcement announcement = alarmMessageHandler.create(alarmType, object);
         Announcement saveAnnouncement = announcementRepository.save(announcement);
         saveUserAnnouncement(saveAnnouncement);
     }
