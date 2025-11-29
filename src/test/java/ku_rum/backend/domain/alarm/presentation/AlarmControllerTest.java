@@ -50,7 +50,7 @@ public class AlarmControllerTest extends RestDocsTestSupport {
 
     @DisplayName("알림을 조회한다")
     @Test
-    void createBookmark() throws Exception {
+    void getAlarms() throws Exception {
 
         // given
         List<GetAlarmDto> getAlarmDtos = List.of(new GetAlarmDto(1L, AlarmType.NEW_NOTICE, "새로운 알람이 도착했습니다.", "1L"));
@@ -98,7 +98,7 @@ public class AlarmControllerTest extends RestDocsTestSupport {
 
     @DisplayName("알림을 확인한다")
     @Test
-    void patchBookmark() throws Exception {
+    void patchAlarm() throws Exception {
 
         // given
         PatchAlarmResponse response = new PatchAlarmResponse(1L, AlarmType.NEW_NOTICE, "메세지", "1");
@@ -124,7 +124,7 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("code").description("응답 코드"),
                                         fieldWithPath("status").description("응답 상태"),
                                         fieldWithPath("message").description("응답 메시지"),
-                                        fieldWithPath("data").description("null"),
+                                        fieldWithPath("data").description("알림 확인 응답 데이터"),
                                         fieldWithPath("data.id").description("알림 ID"),
                                         fieldWithPath("data.alarmType").description("알림 타입"),
                                         fieldWithPath("data.message").description("알림 메세지"),
