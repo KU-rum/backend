@@ -57,3 +57,10 @@ src/main/resources/static/docs/
 
 ### ngrinder ###
 ngrinder-controller/
+
+### FCM Configuration
+/src/main/resources/firebase
+
+### DB import
+/scripts/import_db.sh
+/scripts/*.sql
