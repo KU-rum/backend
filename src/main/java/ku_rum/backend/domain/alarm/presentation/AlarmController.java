@@ -32,7 +32,7 @@ public class AlarmController {
         return BaseResponse.ok(response);
     }
 
-    @PatchMapping("{alarmId}")
+    @PatchMapping()
     public BaseResponse<PatchAlarmResponse> patchAlarm(
             @RequestBody PatchAlarmRequest request,
             @AuthenticationPrincipal final CustomUserDetails userDetails) {

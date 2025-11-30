@@ -18,7 +18,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
+import ku_rum.backend.domain.alarm.domain.AlarmCategory;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
+import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
@@ -55,7 +57,7 @@ public class AlarmControllerTest extends RestDocsTestSupport {
 
         // given
         List<GetAlarmDto> getAlarmDtos = List.of(
-                new GetAlarmDto(1L, AlarmType.NEW_NOTICE, "새로운 알람이 도착했습니다.", false, "1L",
+                new GetAlarmDto(1L, AlarmType.NEW_NOTICE, AlarmCategory.ALARM, "새로운 알람이 도착했습니다.", false, "1L",
                         LocalDateTime.now()));
         GetAlarmResponse response = new GetAlarmResponse(getAlarmDtos, false, "13");
         AlarmPaginationRequest request = new AlarmPaginationRequest("12", 1);
@@ -106,15 +108,22 @@ public class AlarmControllerTest extends RestDocsTestSupport {
     void patchAlarm() throws Exception {
 
         // given
+        PatchAlarmRequest request = new PatchAlarmRequest(1L, AlarmCategory.ALARM);
         PatchAlarmResponse response = new PatchAlarmResponse(1L, AlarmType.NEW_NOTICE, "메세지", "1");
         Long alarmId = 1L;
-        given(alarmService.patchUserAlarm(any(), eq(alarmId)))
+        given(alarmService.patchUserAlarm(any(), eq(request)))
                 .willReturn(response);
 
         // when
-        mockMvc.perform(patch("/api/v1/alarm/{alarmId}", alarmId)
+        mockMvc.perform(patch("/api/v1/alarm")
                         .header("Authorization", "Bearer test-access-token")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "alarmId": 1,
+                                  "alarmCategory": "ALARM"
+                                }
+                                """))
                 // then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -122,8 +131,9 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                         ResourceSnippetParameters.builder()
                                 .tag("알림 조회 API")
                                 .description("알림을 확인 한다.")
-                                .pathParameters(
-                                        parameterWithName("alarmId").description("확인할 알람 ID")
+                                .requestFields(
+                                        fieldWithPath("alarmId").description("알림 ID"),
+                                        fieldWithPath("alarmCategory").description("알림 타입")
                                 )
                                 .responseFields(
                                         fieldWithPath("code").description("응답 코드"),
