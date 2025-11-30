@@ -64,7 +64,10 @@ public class AlarmService {
     public GetAlarmResponse getAlarmResponse(CustomUserDetails userDetails, AlarmPaginationRequest request) {
         User user = userService.getUser();
         Pageable pageable = PageRequest.of(0, request.limit() + 1);
-        Long lastId = Long.valueOf(request.lastKnown());
+        Long lastId = null;
+        if (request.lastKnown() != null) {
+            lastId = Long.valueOf(request.lastKnown());
+        }
         List<Alarm> alarms = alarmRepository.findAlarms(user, lastId, pageable);
 
         boolean hasNext = alarms.size() > request.limit();

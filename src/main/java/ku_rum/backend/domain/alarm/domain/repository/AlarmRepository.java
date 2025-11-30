@@ -16,7 +16,7 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     @Query("""
             SELECT a FROM Alarm a
             WHERE a.user = :user
-              AND (:lastId IS NULL OR a.id < :lastId)
+              AND (:lastId IS NULL OR a.id > :lastId)
             ORDER BY a.createdAt desc 
             """)
     List<Alarm> findAlarms(@Param("user") User user, @Param("lastId") Long lastId, Pageable pageable);
