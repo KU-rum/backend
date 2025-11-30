@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import java.time.LocalDateTime;
 import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
@@ -53,7 +54,9 @@ public class AlarmControllerTest extends RestDocsTestSupport {
     void getAlarms() throws Exception {
 
         // given
-        List<GetAlarmDto> getAlarmDtos = List.of(new GetAlarmDto(1L, AlarmType.NEW_NOTICE, "새로운 알람이 도착했습니다.", "1L"));
+        List<GetAlarmDto> getAlarmDtos = List.of(
+                new GetAlarmDto(1L, AlarmType.NEW_NOTICE, "새로운 알람이 도착했습니다.", false, "1L",
+                        LocalDateTime.now()));
         GetAlarmResponse response = new GetAlarmResponse(getAlarmDtos, false, "13");
         AlarmPaginationRequest request = new AlarmPaginationRequest("12", 1);
         given(alarmService.getAlarmResponse(any(), eq(request)))
@@ -90,7 +93,9 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("data.alarms[].id").description("알림 ID"),
                                         fieldWithPath("data.alarms[].alarmType").description("알림 타입"),
                                         fieldWithPath("data.alarms[].message").description("알림 메세지"),
-                                        fieldWithPath("data.alarms[].dataId").description("알림 데이터 ID")
+                                        fieldWithPath("data.alarms[].dataId").description("알림 데이터 ID"),
+                                        fieldWithPath("data.alarms[].isChecked").description("알림 확인 여부"),
+                                        fieldWithPath("data.alarms[].createdAt").description("알림 시간")
                                 )
                                 .build()
                 )));

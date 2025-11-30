@@ -21,7 +21,6 @@ public class NewNoticeHandler implements AlarmMessageHandler {
         return Announcement.builder()
                 .alarmType(AlarmType.NEW_NOTICE)
                 .message(message)
-                .isChecked(false)
                 .build();
     }
 }
