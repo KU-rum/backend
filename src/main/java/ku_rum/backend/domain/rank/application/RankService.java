@@ -15,6 +15,7 @@ import ku_rum.backend.domain.place.application.RankingChangeDto;
 import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
+import ku_rum.backend.domain.rank.application.response.GetPlaceTopRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
 import ku_rum.backend.domain.rank.domain.PlaceRank;
@@ -160,7 +161,7 @@ public class RankService {
 
         List<GetPlaceRankResponse> response = placeRankWithRankingProjections
                 .stream()
-                .map(placeRanks -> GetPlaceRankResponse.from(placeRanks))
+                .map(GetPlaceRankResponse::from)
                 .toList();
 
         boolean hasNext = placeRankWithRankings.size() > request.limit();
@@ -174,13 +175,21 @@ public class RankService {
         return GetPlaceRankPaginationResponse.of(response, hasNext, nextCursor);
     }
 
-    public List<GetPlaceRankResponse> getPlaceTopRank(Long placeId) {
+    public List<GetPlaceTopRankResponse> getPlaceTopRank(Long placeId) {
         List<PlaceRankWithRankingProjection> placeRankWithRankingProjections = placeRankRepository.findRankByRange(
                 placeId, TOP_3_START, TOP_3_END);
 
-        return placeRankWithRankingProjections
+        Map<Integer, List<PlaceRankWithRankingProjection>> placeRanksGroupedByCount = placeRankWithRankingProjections.stream()
+                .collect(Collectors.groupingBy(
+                        PlaceRankWithRankingProjection::getRanking,
+                        TreeMap::new,
+                        Collectors.toList())
+                );
+
+        return placeRanksGroupedByCount
+                .values()
                 .stream()
-                .map(placeRanks -> GetPlaceRankResponse.from(placeRanks))
+                .map(PlaceRankWithRankingProjection -> GetPlaceTopRankResponse.from(PlaceRankWithRankingProjection))
                 .toList();
     }
 
