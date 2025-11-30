@@ -10,7 +10,7 @@ public record TemporaryUserResponse(String accessToken, String refreshToken, lon
                 .accessToken(token.accessToken())
                 .refreshToken(token.refreshToken())
                 .accessExpireIn(token.accessExpireIn())
-                .refreshToken(token.refreshToken())
+                .refreshExpireIn(token.refreshExpireIn())
                 .isFirstLogin(token.isFirstLogin())
                 .build();
     }
