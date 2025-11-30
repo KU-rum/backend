@@ -28,6 +28,4 @@ public class Announcement extends BaseEntity {
     private AlarmType alarmType;
 
     private String message;
-
-    private boolean isChecked;
 }

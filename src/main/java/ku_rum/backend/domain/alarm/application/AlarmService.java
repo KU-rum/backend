@@ -138,8 +138,15 @@ public class AlarmService {
 
         if (lastKnown != null) {
             String[] parts = lastKnown.split("_");
-            lastAlarmId = Long.valueOf(parts[0]);
-            lastAnnouncementId = Long.valueOf(parts[1]);
+            if (parts.length != 2) {
+                throw new GlobalException(BaseExceptionResponseStatus.INVALID_CURSOR_FORMAT);
+            }
+            try {
+                lastAlarmId = Long.valueOf(parts[0]);
+                lastAnnouncementId = Long.valueOf(parts[1]);
+            } catch (NumberFormatException e) {
+                throw new GlobalException(BaseExceptionResponseStatus.INVALID_CURSOR_FORMAT);
+            }
         }
         return new AlarmCursorDto(lastAlarmId, lastAnnouncementId);
     }
