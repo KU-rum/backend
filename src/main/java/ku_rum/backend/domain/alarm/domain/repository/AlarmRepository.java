@@ -7,6 +7,7 @@ import ku_rum.backend.domain.user.domain.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -18,7 +19,7 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
               AND (:lastId IS NULL OR a.id < :lastId)
             ORDER BY a.createdAt desc 
             """)
-    List<Alarm> findAlarms(User user, Long lastId, Pageable pageable);
+    List<Alarm> findAlarms(@Param("user") User user, @Param("lastId") Long lastId, Pageable pageable);
 
     Optional<Alarm> findById(Long AlarmId);
 }
