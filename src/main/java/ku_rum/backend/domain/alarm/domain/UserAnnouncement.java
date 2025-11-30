@@ -34,4 +34,8 @@ public class UserAnnouncement extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Announcement announcement;
+
+    public void checkAlarm() {
+        isChecked = true;
+    }
 }

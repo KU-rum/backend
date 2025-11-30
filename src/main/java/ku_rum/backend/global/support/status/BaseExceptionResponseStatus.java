@@ -140,7 +140,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      */
     ALARM_NOT_FOUND(1400, HttpStatus.NOT_FOUND, "해당하는 알림이 없습니다."),
     UNAUTHORIZED_ALARM(1401, HttpStatus.UNAUTHORIZED, "권한이 없는 알람입니다."),
-    INVALID_CURSOR_FORMAT(1402, HttpStatus.BAD_REQUEST, "알림 커서가 올바르지 않습니다.");
+    UNAUTHORIZED_ANNOUNCEMENT(1402, HttpStatus.UNAUTHORIZED, "권한이 없는 공지 알람입니다."),
+    INVALID_CURSOR_FORMAT(1403, HttpStatus.BAD_REQUEST, "알림 커서가 올바르지 않습니다.");
 
     private final int code;
     private final HttpStatus status;

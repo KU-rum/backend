@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import ku_rum.backend.domain.alarm.domain.Alarm;
+import ku_rum.backend.domain.alarm.domain.AlarmCategory;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.domain.Announcement;
 import ku_rum.backend.domain.alarm.domain.UserAnnouncement;
@@ -13,6 +14,7 @@ import ku_rum.backend.domain.alarm.domain.repository.AlarmRepository;
 import ku_rum.backend.domain.alarm.domain.repository.AnnouncementRepository;
 import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
 import ku_rum.backend.domain.alarm.dto.AlarmCursorDto;
+import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
@@ -104,9 +106,16 @@ public class AlarmService {
     }
 
     @Transactional
-    public PatchAlarmResponse patchUserAlarm(CustomUserDetails userDetails, Long alarmId) {
+    public PatchAlarmResponse patchUserAlarm(CustomUserDetails userDetails, PatchAlarmRequest request) {
         Long userId = userService.getUser().getId();
-        Alarm alarm = findById(alarmId);
+        if (request.alarmCategory().equals(AlarmCategory.ALARM)) {
+            return patchAlarm(userId, request.alarmId());
+        }
+        return patchAnnouncement(userId, request.alarmId());
+    }
+
+    private PatchAlarmResponse patchAlarm(Long userId, Long alarmId) {
+        Alarm alarm = findAlarmById(alarmId);
 
         if (!userId.equals(alarm.getUser().getId())) {
             throw new GlobalException(BaseExceptionResponseStatus.UNAUTHORIZED_ALARM);
@@ -114,6 +123,17 @@ public class AlarmService {
         alarm.checkAlarm();
 
         return PatchAlarmResponse.from(alarm);
+    }
+
+    private PatchAlarmResponse patchAnnouncement(Long userId, Long announcementId) {
+        UserAnnouncement userAnnouncement = findAnnouncementById(announcementId);
+
+        if (!userId.equals(userAnnouncement.getUser().getId())) {
+            throw new GlobalException(BaseExceptionResponseStatus.UNAUTHORIZED_ALARM);
+        }
+        userAnnouncement.checkAlarm();
+
+        return PatchAlarmResponse.from(userAnnouncement);
     }
 
     private void saveUserAnnouncement(Announcement announcement) {
@@ -127,8 +147,13 @@ public class AlarmService {
         userAnnouncementRepository.saveAll(userAnnouncements);
     }
 
-    private Alarm findById(Long alarmId) {
+    private Alarm findAlarmById(Long alarmId) {
         return alarmRepository.findById(alarmId).orElseThrow(
+                () -> new GlobalException(BaseExceptionResponseStatus.ALARM_NOT_FOUND));
+    }
+
+    private UserAnnouncement findAnnouncementById(Long announcementId) {
+        return userAnnouncementRepository.findById(announcementId).orElseThrow(
                 () -> new GlobalException(BaseExceptionResponseStatus.ALARM_NOT_FOUND));
     }
 

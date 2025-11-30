@@ -2,6 +2,7 @@ package ku_rum.backend.domain.alarm.presentation;
 
 import jakarta.validation.Valid;
 import ku_rum.backend.domain.alarm.application.AlarmService;
+import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
@@ -12,7 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,9 +34,9 @@ public class AlarmController {
 
     @PatchMapping("{alarmId}")
     public BaseResponse<PatchAlarmResponse> patchAlarm(
-            @PathVariable("alarmId") Long alarmId,
+            @RequestBody PatchAlarmRequest request,
             @AuthenticationPrincipal final CustomUserDetails userDetails) {
-        PatchAlarmResponse response = alarmService.patchUserAlarm(userDetails, alarmId);
+        PatchAlarmResponse response = alarmService.patchUserAlarm(userDetails, request);
         return BaseResponse.ok(response);
     }
 }
