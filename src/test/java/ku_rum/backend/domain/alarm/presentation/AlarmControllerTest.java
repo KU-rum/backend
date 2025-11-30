@@ -97,7 +97,8 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("data.alarms[].message").description("알림 메세지"),
                                         fieldWithPath("data.alarms[].dataId").description("알림 데이터 ID"),
                                         fieldWithPath("data.alarms[].isChecked").description("알림 확인 여부"),
-                                        fieldWithPath("data.alarms[].createdAt").description("알림 시간")
+                                        fieldWithPath("data.alarms[].createdAt").description("알림 시간"),
+                                        fieldWithPath("data.alarms[].alarmCategory").description("알림 카테고리")
                                 )
                                 .build()
                 )));

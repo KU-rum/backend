@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AlarmService {
 
+    private static final int LAST_KNOWN_LENGTH = 2;
     private final Map<AlarmType, AlarmMessageHandler> alarmMessageHandlers;
     private final AlarmRepository alarmRepository;
     private final AnnouncementRepository announcementRepository;
@@ -83,24 +84,13 @@ public class AlarmService {
                 .limit(request.limit())
                 .toList();
 
-        boolean hasNext = alarms.size() > request.limit() || userAnnouncements.size() > request.limit();
+        int totalFetched = alarms.size() + userAnnouncements.size();
+        boolean hasNext = totalFetched > request.limit();
         String nextCursor = null;
         if (hasNext && !merged.isEmpty()) {
             GetAlarmDto lastItem = merged.get(merged.size() - 1);
 
-            Long nextAlarmId = alarms.stream()
-                    .filter(a -> a.getCreatedAt().isBefore(lastItem.createdAt()))
-                    .map(Alarm::getId)
-                    .max(Long::compareTo)
-                    .orElse(alarmCursorDto.lastAlarmId());
-
-            Long nextAnnouncementId = userAnnouncements.stream()
-                    .filter(ua -> ua.getAnnouncement().getCreatedAt().isBefore(lastItem.createdAt()))
-                    .map(UserAnnouncement::getId)
-                    .max(Long::compareTo)
-                    .orElse(alarmCursorDto.lastAnnouncementId());
-
-            nextCursor = nextAlarmId + "_" + nextAnnouncementId;
+            nextCursor = getNextCursor(alarmCursorDto, alarms, userAnnouncements, lastItem);
         }
         return new GetAlarmResponse(merged, hasNext, nextCursor);
     }
@@ -157,13 +147,30 @@ public class AlarmService {
                 () -> new GlobalException(BaseExceptionResponseStatus.ALARM_NOT_FOUND));
     }
 
+    private String getNextCursor(AlarmCursorDto alarmCursorDto, List<Alarm> alarms,
+                                 List<UserAnnouncement> userAnnouncements, GetAlarmDto lastItem) {
+        Long nextAlarmId = alarms.stream()
+                .filter(a -> a.getCreatedAt().isBefore(lastItem.createdAt()))
+                .map(Alarm::getId)
+                .max(Long::compareTo)
+                .orElse(alarmCursorDto.lastAlarmId());
+
+        Long nextAnnouncementId = userAnnouncements.stream()
+                .filter(ua -> ua.getAnnouncement().getCreatedAt().isBefore(lastItem.createdAt()))
+                .map(UserAnnouncement::getId)
+                .max(Long::compareTo)
+                .orElse(alarmCursorDto.lastAnnouncementId());
+
+        return nextAlarmId + "_" + nextAnnouncementId;
+    }
+
     private AlarmCursorDto getAlarmCursorDto(String lastKnown) {
         Long lastAlarmId = null;
         Long lastAnnouncementId = null;
 
         if (lastKnown != null) {
             String[] parts = lastKnown.split("_");
-            if (parts.length != 2) {
+            if (LAST_KNOWN_LENGTH != 2) {
                 throw new GlobalException(BaseExceptionResponseStatus.INVALID_CURSOR_FORMAT);
             }
             try {
