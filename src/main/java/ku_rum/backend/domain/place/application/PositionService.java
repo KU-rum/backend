@@ -118,6 +118,7 @@ public class PositionService {
      *
      * @param userDetails 사용자 인증정보
      */
+    @Transactional
     public Optional<RankingChangeDto> disableSharingPosition(CustomUserDetails userDetails) {
         User user = userService.getUser();
         Position position = positionRepository.findPositionByUser(user)
@@ -127,17 +128,20 @@ public class PositionService {
         Duration minusTime = between(position.getCreatedAt(), LocalDateTime.now());
         boolean isUpperBound = minusTime.getSeconds() >= CRITERION_TIME;
 
-        try {
-            PlaceRank userPlaceRank = rankService.getUserPlaceRank(user, position.getPlace());
-            Integer beforeRank = placeRankRepository.findRankingByRankId(userPlaceRank.getRankId());
-            if (isUpperBound) {
-                userPlaceRank.increaseCount();
-                Integer afterRank = placeRankRepository.findRankingByRankId(userPlaceRank.getRankId());
-                return Optional.of(new RankingChangeDto(beforeRank, afterRank, userPlaceRank));
-            }
-        } catch (Exception ignored) {
+        if (isUpperBound) {
+            Optional<PlaceRank> placeRankOptional = placeRankRepository.findByUserAndPlace(user, position.getPlace());
+            Integer beforeRank = -1;
 
+            if (placeRankOptional.isPresent()) {
+                PlaceRank userPlaceRank = placeRankOptional.get();
+                beforeRank = placeRankRepository.findRankingByRankId(userPlaceRank.getRankId());
+            }
+
+            PlaceRank placeRank = rankService.updateRank(user, position.getPlace());
+            Integer afterRank = placeRankRepository.findRankingByRankId(placeRank.getRankId());
+            return Optional.of(new RankingChangeDto(beforeRank, afterRank, placeRank));
         }
+
         return Optional.empty();
     }
 

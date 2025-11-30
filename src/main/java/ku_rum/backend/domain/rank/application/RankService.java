@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class RankService {
 
     private final PlaceRankRepository placeRankRepository;
@@ -76,11 +75,12 @@ public class RankService {
      * @param place
      */
     @Transactional
-    public void updateRank(User user, Place place) {
+    public PlaceRank updateRank(User user, Place place) {
         Optional<PlaceRank> optionalRank = placeRankRepository.findByUserAndPlace(user, place);
         if (optionalRank.isPresent()) {
-            optionalRank.get().increaseCount();
-            return;
+            PlaceRank placeRank = optionalRank.get();
+            placeRank.increaseCount();
+            return placeRank;
         }
 
         PlaceRank rank = PlaceRank.builder()
@@ -89,6 +89,7 @@ public class RankService {
                 .place(place)
                 .build();
         placeRankRepository.save(rank);
+        return rank;
     }
 
     public PlaceRank getUserPlaceRank(User user, Place place) {
