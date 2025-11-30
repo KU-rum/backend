@@ -1,11 +1,15 @@
 package ku_rum.backend.domain.alarm.dto.response;
 
+import java.time.LocalDateTime;
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
+import ku_rum.backend.domain.alarm.domain.Announcement;
+import ku_rum.backend.domain.alarm.domain.UserAnnouncement;
 import lombok.Builder;
 
 @Builder
-public record GetAlarmDto(Long id, AlarmType alarmType, String message, boolean isChecked, String dataId) {
+public record GetAlarmDto(Long id, AlarmType alarmType, String message, boolean isChecked, String dataId,
+                          LocalDateTime createdAt) {
 
     public static GetAlarmDto from(Alarm alarm) {
         return GetAlarmDto.builder()
@@ -14,6 +18,19 @@ public record GetAlarmDto(Long id, AlarmType alarmType, String message, boolean 
                 .message(alarm.getMessage())
                 .isChecked(alarm.isChecked())
                 .dataId(alarm.getDataId())
+                .createdAt(alarm.getCreatedAt())
+                .build();
+    }
+
+    public static GetAlarmDto from(UserAnnouncement userAnnouncement) {
+        Announcement announcement = userAnnouncement.getAnnouncement();
+        return GetAlarmDto.builder()
+                .id(announcement.getId())
+                .alarmType(announcement.getAlarmType())
+                .message(announcement.getMessage())
+                .isChecked(announcement.isChecked())
+                .dataId(userAnnouncement.getDataId())
+                .createdAt(userAnnouncement.getCreatedAt())
                 .build();
     }
 }

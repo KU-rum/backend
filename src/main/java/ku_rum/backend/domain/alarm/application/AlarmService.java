@@ -1,8 +1,10 @@
 package ku_rum.backend.domain.alarm.application;
 
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.domain.Announcement;
@@ -10,6 +12,7 @@ import ku_rum.backend.domain.alarm.domain.UserAnnouncement;
 import ku_rum.backend.domain.alarm.domain.repository.AlarmRepository;
 import ku_rum.backend.domain.alarm.domain.repository.AnnouncementRepository;
 import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
+import ku_rum.backend.domain.alarm.dto.AlarmCursorDto;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
@@ -62,27 +65,42 @@ public class AlarmService {
     }
 
     public GetAlarmResponse getAlarmResponse(CustomUserDetails userDetails, AlarmPaginationRequest request) {
+        AlarmCursorDto alarmCursorDto = getAlarmCursorDto(request.lastKnown());
+
         User user = userService.getUser();
         Pageable pageable = PageRequest.of(0, request.limit() + 1);
-        Long lastId = null;
-        if (request.lastKnown() != null) {
-            lastId = Long.valueOf(request.lastKnown());
-        }
-        List<Alarm> alarms = alarmRepository.findAlarms(user, lastId, pageable);
+        List<Alarm> alarms = alarmRepository.findAlarms(user, alarmCursorDto.lastAlarmId(), pageable);
+        List<UserAnnouncement> userAnnouncements = userAnnouncementRepository.findUserAnnouncement(user,
+                alarmCursorDto.lastAnnouncementId(), pageable);
 
-        boolean hasNext = alarms.size() > request.limit();
-
-        String nextCursor = null;
-        if (hasNext) {
-            Alarm lastItem = alarms.get(
-                    alarms.size() - 1);
-            nextCursor = String.valueOf(lastItem.getId());
-        }
-        List<GetAlarmDto> getAlarmDtos = alarms.stream()
-                .map(GetAlarmDto::from)
+        List<GetAlarmDto> merged = Stream.concat(
+                        alarms.stream().map(GetAlarmDto::from),
+                        userAnnouncements.stream().map(GetAlarmDto::from)
+                )
+                .sorted(Comparator.comparing(GetAlarmDto::createdAt).reversed())
+                .limit(request.limit())
                 .toList();
 
-        return new GetAlarmResponse(getAlarmDtos, hasNext, nextCursor);
+        boolean hasNext = alarms.size() > request.limit() || userAnnouncements.size() > request.limit();
+        String nextCursor = null;
+        if (hasNext && !merged.isEmpty()) {
+            GetAlarmDto lastItem = merged.get(merged.size() - 1);
+
+            Long nextAlarmId = alarms.stream()
+                    .filter(a -> a.getCreatedAt().isBefore(lastItem.createdAt()))
+                    .map(Alarm::getId)
+                    .max(Long::compareTo)
+                    .orElse(alarmCursorDto.lastAlarmId());
+
+            Long nextAnnouncementId = userAnnouncements.stream()
+                    .filter(ua -> ua.getAnnouncement().getCreatedAt().isBefore(lastItem.createdAt()))
+                    .map(UserAnnouncement::getId)
+                    .max(Long::compareTo)
+                    .orElse(alarmCursorDto.lastAnnouncementId());
+
+            nextCursor = nextAlarmId + "_" + nextAnnouncementId;
+        }
+        return new GetAlarmResponse(merged, hasNext, nextCursor);
     }
 
     @Transactional
@@ -112,5 +130,17 @@ public class AlarmService {
     private Alarm findById(Long alarmId) {
         return alarmRepository.findById(alarmId).orElseThrow(
                 () -> new GlobalException(BaseExceptionResponseStatus.ALARM_NOT_FOUND));
+    }
+
+    private AlarmCursorDto getAlarmCursorDto(String lastKnown) {
+        Long lastAlarmId = null;
+        Long lastAnnouncementId = null;
+
+        if (lastKnown != null) {
+            String[] parts = lastKnown.split("_");
+            lastAlarmId = Long.valueOf(parts[0]);
+            lastAnnouncementId = Long.valueOf(parts[1]);
+        }
+        return new AlarmCursorDto(lastAlarmId, lastAnnouncementId);
     }
 }
