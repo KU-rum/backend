@@ -1,5 +1,12 @@
 package ku_rum.backend.domain.user.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_DEPARTMENT;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_NICKNAME;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PREV_NEW_EQUAL_EXCEPTION;
+
+import java.util.List;
 import ku_rum.backend.domain.auth.dto.response.AuthResponse;
 import ku_rum.backend.domain.common.mail.application.MailService;
 import ku_rum.backend.domain.department.application.DepartmentQueryService;
@@ -17,8 +24,11 @@ import ku_rum.backend.domain.user.dto.request.NicknameChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ResetPasswordRequest;
 import ku_rum.backend.domain.user.dto.request.SocialSignupRequest;
+import ku_rum.backend.domain.user.dto.request.TemporaryUserRequest;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
+import ku_rum.backend.domain.user.dto.response.TemporaryUserResponse;
+import ku_rum.backend.domain.user.dto.response.TokenResponse;
 import ku_rum.backend.domain.user.dto.response.UserResponse;
 import ku_rum.backend.domain.user.dto.response.UserSaveResponse;
 import ku_rum.backend.global.exception.department.DuplicateDepartmentException;
@@ -37,14 +47,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_DEPARTMENT;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_NICKNAME;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PREV_NEW_EQUAL_EXCEPTION;
 
 @Service
 @Transactional(readOnly = true)
@@ -94,7 +96,6 @@ public class UserService {
 
         Department department = departmentQueryService.getDepartment(req.department());
 
-
         User user = User.builder()
                 .providerType(payload.getProviderType())
                 .oauthId(payload.getOauthId())
@@ -123,8 +124,6 @@ public class UserService {
         User user = userQueryService.getUserByLoginId(initiatePasswordResetRequest.loginId());
         mailService.verifyCode(initiatePasswordResetRequest.emailRequest());
 
-
-        
         if (passwordEncoder.matches(initiatePasswordResetRequest.newPassword(), user.getPassword())) {
             throw new GlobalException(PREV_NEW_EQUAL_EXCEPTION);
         }
@@ -230,5 +229,15 @@ public class UserService {
                 user.getStudentId(),
                 user.getImageUrl(),
                 list);
+    }
+
+    public TemporaryUserResponse getUserToken(TemporaryUserRequest request) {
+        User user = userRepository.findUserById(request.userId())
+                .orElseThrow(() -> new GlobalException(NO_SUCH_USER));
+        CustomUserDetails userDetails = CustomUserDetails.from(user);
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        TokenResponse token = jwtTokenProvider.createToken(authentication);
+        return TemporaryUserResponse.from(token);
     }
 }
