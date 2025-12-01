@@ -46,13 +46,13 @@ public class AlarmController {
     }
 
     @PostMapping("/direct")
-    public BaseResponse<Void> sendToUsers(@RequestBody DirectNotificationRequest request) {
+    public BaseResponse<Void> sendFcmMessage(@RequestBody DirectNotificationRequest request) {
         fcmService.sendToUsers(request);
         return BaseResponse.ok();
     }
 
     @PostMapping("/topic")
-    public BaseResponse<Void> sendToTopic(@RequestBody TopicNotificationRequest request) {
+    public BaseResponse<Void> sendFcmMessage(@RequestBody TopicNotificationRequest request) {
         fcmService.sendToTopic(request);
         return BaseResponse.ok();
     }

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
+import ku_rum.backend.domain.alarm.application.FcmService;
 import ku_rum.backend.domain.alarm.domain.AlarmCategory;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
@@ -41,6 +42,9 @@ public class AlarmControllerTest extends RestDocsTestSupport {
 
     @MockBean
     AlarmService alarmService;
+
+    @MockBean
+    FcmService fcmService;
 
     @MockBean
     private ApiLogRepository apiLogRepository;
