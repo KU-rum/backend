@@ -4,6 +4,7 @@ package ku_rum.backend.domain.alarm.application;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmCategory;
@@ -89,9 +90,9 @@ public class AlarmService {
         boolean hasNext = totalFetched > request.limit();
         String nextCursor = null;
         if (hasNext && !merged.isEmpty()) {
-            GetAlarmDto lastItem = merged.get(merged.size() - 1);
+            GetAlarmDto nextItem = merged.get(merged.size() - 1);
 
-            nextCursor = getNextCursor(alarmCursorDto, alarms, userAnnouncements, lastItem);
+            nextCursor = getNextCursor(alarmCursorDto, alarms, userAnnouncements, nextItem);
         }
         return new GetAlarmResponse(merged, hasNext, nextCursor);
     }
@@ -157,17 +158,11 @@ public class AlarmService {
 
     private String getNextCursor(AlarmCursorDto alarmCursorDto, List<Alarm> alarms,
                                  List<UserAnnouncement> userAnnouncements, GetAlarmDto lastItem) {
-        Long nextAlarmId = alarms.stream()
-                .filter(a -> a.getCreatedAt().isBefore(lastItem.createdAt()))
-                .map(Alarm::getId)
-                .max(Long::compareTo)
-                .orElse(alarmCursorDto.lastAlarmId());
+        Long fallbackAlarmId = getFallbackAlarmId(alarmCursorDto);
+        Long fallbackAnnouncementId = getFallbackAnnouncementId(alarmCursorDto);
 
-        Long nextAnnouncementId = userAnnouncements.stream()
-                .filter(ua -> ua.getAnnouncement().getCreatedAt().isBefore(lastItem.createdAt()))
-                .map(UserAnnouncement::getId)
-                .max(Long::compareTo)
-                .orElse(alarmCursorDto.lastAnnouncementId());
+        Long nextAlarmId = getNextAlarmId(alarms, lastItem, fallbackAlarmId);
+        Long nextAnnouncementId = getNextAnnouncementId(userAnnouncements, lastItem, fallbackAnnouncementId);
 
         return nextAlarmId + "_" + nextAnnouncementId;
     }
@@ -196,5 +191,49 @@ public class AlarmService {
             return null;
         }
         return Long.valueOf(cursorPoint);
+    }
+
+    private Long getFallbackAlarmId(AlarmCursorDto cursor) {
+        if (cursor == null) {
+            return -1L;
+        }
+        if (cursor.lastAlarmId() == null) {
+            return -1L;
+        }
+        return cursor.lastAlarmId();
+    }
+
+    private Long getFallbackAnnouncementId(AlarmCursorDto cursor) {
+        if (cursor == null) {
+            return -1L;
+        }
+        if (cursor.lastAnnouncementId() == null) {
+            return -1L;
+        }
+        return cursor.lastAnnouncementId();
+    }
+
+    private Long getNextAlarmId(List<Alarm> alarms, GetAlarmDto lastItem, Long fallback) {
+        Optional<Alarm> optional = alarms.stream()
+                .filter(a -> a.getCreatedAt().isBefore(lastItem.createdAt()))
+                .max(Comparator.comparing(Alarm::getCreatedAt));
+
+        if (!optional.isPresent()) {
+            return fallback;
+        }
+
+        return optional.get().getId();
+    }
+
+    private Long getNextAnnouncementId(List<UserAnnouncement> list, GetAlarmDto lastItem, Long fallback) {
+        Optional<UserAnnouncement> optional = list.stream()
+                .filter(ua -> ua.getAnnouncement().getCreatedAt().isBefore(lastItem.createdAt()))
+                .max(Comparator.comparing(ua -> ua.getAnnouncement().getCreatedAt()));
+
+        if (!optional.isPresent()) {
+            return fallback;
+        }
+
+        return optional.get().getId();
     }
 }
