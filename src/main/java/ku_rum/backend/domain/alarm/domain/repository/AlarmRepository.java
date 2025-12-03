@@ -22,4 +22,6 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     List<Alarm> findAlarms(@Param("user") User user, @Param("lastId") Long lastId, Pageable pageable);
 
     Optional<Alarm> findById(Long AlarmId);
+
+    long countByUserAndIsCheckedFalse(User user);
 }

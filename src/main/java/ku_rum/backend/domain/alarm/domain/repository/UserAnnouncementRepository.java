@@ -22,4 +22,6 @@ public interface UserAnnouncementRepository extends JpaRepository<UserAnnounceme
             """)
     List<UserAnnouncement> findUserAnnouncement(@Param("user") User user, @Param("lastId") Long lastId,
                                                 Pageable pageable);
+
+    long countByUserAndIsCheckedFalse(User user);
 }

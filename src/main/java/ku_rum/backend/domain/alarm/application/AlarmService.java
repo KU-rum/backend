@@ -18,6 +18,7 @@ import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
@@ -102,6 +103,13 @@ public class AlarmService {
             return patchAlarm(userId, request.alarmId());
         }
         return patchAnnouncement(userId, request.alarmId());
+    }
+
+    public GetAlarmUnreadResponse getAlarmUnreadResponse(CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        long unCheckedAlarm = alarmRepository.countByUserAndIsCheckedFalse(user);
+        long unCheckAnnouncementCount = userAnnouncementRepository.countByUserAndIsCheckedFalse(user);
+        return GetAlarmUnreadResponse.of(unCheckedAlarm, unCheckAnnouncementCount);
     }
 
     private PatchAlarmResponse patchAlarm(Long userId, Long alarmId) {
