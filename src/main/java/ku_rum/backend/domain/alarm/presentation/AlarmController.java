@@ -7,6 +7,7 @@ import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
+import ku_rum.backend.domain.notice.application.NoticeAlarmService;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AlarmController {
 
     private final AlarmService alarmService;
+    private final NoticeAlarmService noticeAlarmService;
 
     @GetMapping
     public BaseResponse<GetAlarmResponse> getAlarm(
@@ -46,5 +48,11 @@ public class AlarmController {
             @AuthenticationPrincipal final CustomUserDetails userDetails) {
         GetAlarmUnreadResponse response = alarmService.getAlarmUnreadResponse(userDetails);
         return BaseResponse.ok(response);
+    }
+
+    @GetMapping("/test")
+    public BaseResponse<Void> test() {
+        noticeAlarmService.checkNewAlarm();
+        return BaseResponse.ok();
     }
 }

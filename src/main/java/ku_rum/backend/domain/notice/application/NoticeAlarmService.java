@@ -10,9 +10,11 @@ import ku_rum.backend.domain.notice.domain.PublishStatus;
 import ku_rum.backend.domain.notice.domain.SearchKeyword;
 import ku_rum.backend.domain.notice.domain.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NoticeAlarmService {
@@ -28,6 +30,7 @@ public class NoticeAlarmService {
         LocalDateTime sinceTime = LocalDateTime.now().minusHours(PAST_HOUR);
         List<Notice> notice = noticeRepository.findByPublishStatusAndPubDateAfter(
                 PublishStatus.SUCCESS_CRAWLING, sinceTime);
+        log.info("생성된 알림 조회 {}", notice.size());
         if (notice.isEmpty()) {
             return;
         }
