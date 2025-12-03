@@ -182,12 +182,19 @@ public class AlarmService {
                 throw new GlobalException(BaseExceptionResponseStatus.INVALID_CURSOR_FORMAT);
             }
             try {
-                lastAlarmId = Long.valueOf(parts[0]);
-                lastAnnouncementId = Long.valueOf(parts[1]);
+                lastAlarmId = getCursorPoint(parts[0]);
+                lastAnnouncementId = getCursorPoint(parts[1]);
             } catch (NumberFormatException e) {
                 throw new GlobalException(BaseExceptionResponseStatus.INVALID_CURSOR_FORMAT);
             }
         }
         return new AlarmCursorDto(lastAlarmId, lastAnnouncementId);
+    }
+
+    private Long getCursorPoint(String cursorPoint) {
+        if (cursorPoint.equals("null")) {
+            return null;
+        }
+        return Long.valueOf(cursorPoint);
     }
 }
