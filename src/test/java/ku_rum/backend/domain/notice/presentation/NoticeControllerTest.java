@@ -1,6 +1,21 @@
 package ku_rum.backend.domain.notice.presentation;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import java.time.LocalDateTime;
+import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.notice.application.NoticeService;
 import ku_rum.backend.domain.notice.dto.response.NoticeDetailResponse;
@@ -18,21 +33,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
-
-import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(NoticeController.class)
 @ActiveProfiles("test")
@@ -57,9 +57,10 @@ public class NoticeControllerTest extends RestDocsTestSupport {
         Long categoryId = Long.valueOf(234);
         Pageable pageable = PageRequest.of(0, 2);
 
+        LocalDateTime localDateTime = LocalDateTime.now();
         List<NoticeResponse> noticeList = List.of(
-                new NoticeResponse(1L, categoryId, "학사", "공지 제목 1", "https://link1.com", "2024-01-01", "관리자", "설명1"),
-                new NoticeResponse(2L, categoryId, "학사", "공지 제목 2", "https://link2.com", "2024-01-02", "관리자", "설명2")
+                new NoticeResponse(1L, categoryId, "학사", "공지 제목 1", "https://link1.com", localDateTime, "관리자", "설명1"),
+                new NoticeResponse(2L, categoryId, "학사", "공지 제목 2", "https://link2.com", localDateTime, "관리자", "설명2")
         );
 
         Page<NoticeResponse> page = new PageImpl<>(noticeList, pageable, noticeList.size());
@@ -146,10 +147,12 @@ public class NoticeControllerTest extends RestDocsTestSupport {
     @Test
     void getPopularNotices() throws Exception {
         // given
+        LocalDateTime localDateTime = LocalDateTime.now();
+
         List<NoticeResponse> fakeResponse = List.of(
-                new NoticeResponse(1L, 1L, "학사", "공지 제목 1", "https://link1.com", "2024-01-01", "관리자", "설명1"),
-                new NoticeResponse(2L, 2L, "학사", "공지 제목 2", "https://link2.com", "2024-01-02", "관리자", "설명2"),
-                new NoticeResponse(3L, 3L, "장학", "공지 제목 3", "https://link3.com", "2024-01-03", "관리자", "설명3")
+                new NoticeResponse(1L, 1L, "학사", "공지 제목 1", "https://link1.com", localDateTime, "관리자", "설명1"),
+                new NoticeResponse(2L, 2L, "학사", "공지 제목 2", "https://link2.com", localDateTime, "관리자", "설명2"),
+                new NoticeResponse(3L, 3L, "장학", "공지 제목 3", "https://link3.com", localDateTime, "관리자", "설명3")
         );
 
         given(noticeService.findPopularNotice())
@@ -192,10 +195,11 @@ public class NoticeControllerTest extends RestDocsTestSupport {
     @Test
     void getPrimaryNotices() throws Exception {
         // given
+        LocalDateTime localDateTime = LocalDateTime.now();
         List<NoticeResponse> fakeResponse = List.of(
-                new NoticeResponse(1L, 1L, "학사", "중요 공지 제목 1", "https://link1.com", "2024-01-01", "관리자", "설명1"),
-                new NoticeResponse(2L, 2L, "학사", "중요 공지 제목 2", "https://link2.com", "2024-01-02", "관리자", "설명2"),
-                new NoticeResponse(3L, 3L, "장학", "중요 공지 제목 3", "https://link3.com", "2024-01-03", "관리자", "설명3")
+                new NoticeResponse(1L, 1L, "학사", "중요 공지 제목 1", "https://link1.com", localDateTime, "관리자", "설명1"),
+                new NoticeResponse(2L, 2L, "학사", "중요 공지 제목 2", "https://link2.com", localDateTime, "관리자", "설명2"),
+                new NoticeResponse(3L, 3L, "장학", "중요 공지 제목 3", "https://link3.com", localDateTime, "관리자", "설명3")
         );
 
         // 현재 컨트롤러가 noticeService.findPopularNotice()를 호출하고 있으므로 그대로 사용
@@ -239,12 +243,14 @@ public class NoticeControllerTest extends RestDocsTestSupport {
     @Test
     void searchNoticesByKeyword() throws Exception {
         // given
+        LocalDateTime localDateTime = LocalDateTime.now();
         String keyword = "입학식";
         Pageable pageable = PageRequest.of(0, 2);
 
         List<NoticeResponse> noticeList = List.of(
-                new NoticeResponse(1L, 234L, "학사", "입학식 안내 공지", "https://link1.com", "2024-03-01", "관리자", "입학식 관련 설명"),
-                new NoticeResponse(2L, 234L, "학사", "입학식 장소 변경 안내", "https://link2.com", "2024-03-02", "관리자", "장소 변경 설명")
+                new NoticeResponse(1L, 234L, "학사", "입학식 안내 공지", "https://link1.com", localDateTime, "관리자", "입학식 관련 설명"),
+                new NoticeResponse(2L, 234L, "학사", "입학식 장소 변경 안내", "https://link2.com", localDateTime, "관리자",
+                        "장소 변경 설명")
         );
 
         Page<NoticeResponse> page = new PageImpl<>(noticeList, pageable, noticeList.size());
