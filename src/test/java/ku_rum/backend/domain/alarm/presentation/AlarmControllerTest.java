@@ -24,6 +24,7 @@ import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
@@ -145,6 +146,43 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("data.alarmType").description("알림 타입"),
                                         fieldWithPath("data.message").description("알림 메세지"),
                                         fieldWithPath("data.dataId").description("알림 데이터 ID")
+                                )
+                                .build()
+                )));
+    }
+
+    @DisplayName("안읽은 알림 갯수를 조회한다")
+    @Test
+    void getUnreadAlarmsCount() throws Exception {
+
+        // given
+        GetAlarmUnreadResponse response = GetAlarmUnreadResponse.of(1, 2);
+
+        AlarmPaginationRequest request = new AlarmPaginationRequest("12", 1);
+        given(alarmService.getAlarmUnreadResponse(any()))
+                .willReturn(response);
+
+        // when
+        mockMvc.perform(get("/api/v1/alarm/unread")
+                        .header("Authorization", "Bearer test-access-token"))
+                // then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.hasUnread").value(true))
+                .andExpect(jsonPath("$.data.count").value(3))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("알림 조회 API")
+                                .description("안읽은 알림 갯수를 조회한다")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 액세스 토큰입니다.")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지"),
+                                        fieldWithPath("data.hasUnread").description("안읽은 알람 유무"),
+                                        fieldWithPath("data.count").description("안읽은 알람 갯수")
                                 )
                                 .build()
                 )));
