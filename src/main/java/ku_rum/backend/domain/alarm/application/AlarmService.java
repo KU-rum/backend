@@ -139,6 +139,7 @@ public class AlarmService {
         List<UserAnnouncement> userAnnouncements = userRepository.findAll().stream()
                 .map(user -> UserAnnouncement.builder()
                         .isChecked(false)
+                        .dataId(announcement.getId().toString())
                         .user(user)
                         .announcement(announcement)
                         .build())
