@@ -12,7 +12,7 @@ public class FriendPlaceSharingHandler implements AlarmMessageHandler {
     @Override
     public Alarm create(AlarmType alarmType, Object object, User user) {
         UserPlaceAlarmDto userPlaceAlarmDto = (UserPlaceAlarmDto) object;
-        String message = String.format("%s 님이 위치를 공유했어요. 친구 위치를 확인해보세요.", userPlaceAlarmDto.user());
+        String message = String.format("%s 님이 위치를 공유했어요. 친구 위치를 확인해보세요.", userPlaceAlarmDto.user().getNickname());
         return Alarm.builder()
                 .alarmType(alarmType)
                 .message(message)

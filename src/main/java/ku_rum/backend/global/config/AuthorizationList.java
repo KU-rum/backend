@@ -35,7 +35,8 @@ public final class AuthorizationList {
             "/api/v1/places/**",
             "/api/v1/notices/**",
             "/api/v1/alarm/**",
-            "/api/v1/user/**"
+            "/api/v1/user/**",
+            "/api/v1/users/social"
     );
 
     private AuthorizationList() {

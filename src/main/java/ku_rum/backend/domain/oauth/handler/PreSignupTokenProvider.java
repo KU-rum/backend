@@ -7,6 +7,7 @@ import ku_rum.backend.domain.oauth.domain.ProviderType;
 import ku_rum.backend.global.utill.RedisUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -67,6 +68,7 @@ public class PreSignupTokenProvider {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class PreSignupPayload {
         private ProviderType providerType;
         private String oauthId;

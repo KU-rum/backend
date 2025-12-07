@@ -8,6 +8,7 @@ import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.request.TopicNotificationRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
@@ -37,7 +38,7 @@ public class AlarmController {
         return BaseResponse.ok(response);
     }
 
-    @PatchMapping()
+    @PatchMapping
     public BaseResponse<PatchAlarmResponse> patchAlarm(
             @RequestBody PatchAlarmRequest request,
             @AuthenticationPrincipal final CustomUserDetails userDetails) {
@@ -55,5 +56,12 @@ public class AlarmController {
     public BaseResponse<Void> sendFcmMessage(@RequestBody TopicNotificationRequest request) {
         fcmService.sendToTopic(request);
         return BaseResponse.ok();
+    }
+
+    @GetMapping("/unread")
+    public BaseResponse<GetAlarmUnreadResponse> getUnreadAlarm(
+            @AuthenticationPrincipal final CustomUserDetails userDetails) {
+        GetAlarmUnreadResponse response = alarmService.getAlarmUnreadResponse(userDetails);
+        return BaseResponse.ok(response);
     }
 }

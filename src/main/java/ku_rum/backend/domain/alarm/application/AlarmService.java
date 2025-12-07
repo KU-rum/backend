@@ -4,6 +4,7 @@ package ku_rum.backend.domain.alarm.application;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmCategory;
@@ -18,6 +19,7 @@ import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
@@ -88,9 +90,9 @@ public class AlarmService {
         boolean hasNext = totalFetched > request.limit();
         String nextCursor = null;
         if (hasNext && !merged.isEmpty()) {
-            GetAlarmDto lastItem = merged.get(merged.size() - 1);
+            GetAlarmDto nextItem = merged.get(merged.size() - 1);
 
-            nextCursor = getNextCursor(alarmCursorDto, alarms, userAnnouncements, lastItem);
+            nextCursor = getNextCursor(alarmCursorDto, alarms, userAnnouncements, nextItem);
         }
         return new GetAlarmResponse(merged, hasNext, nextCursor);
     }
@@ -102,6 +104,13 @@ public class AlarmService {
             return patchAlarm(userId, request.alarmId());
         }
         return patchAnnouncement(userId, request.alarmId());
+    }
+
+    public GetAlarmUnreadResponse getAlarmUnreadResponse(CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        long unCheckedAlarm = alarmRepository.countByUserAndIsCheckedFalse(user);
+        long unCheckAnnouncementCount = userAnnouncementRepository.countByUserAndIsCheckedFalse(user);
+        return GetAlarmUnreadResponse.of(unCheckedAlarm, unCheckAnnouncementCount);
     }
 
     private PatchAlarmResponse patchAlarm(Long userId, Long alarmId) {
@@ -149,17 +158,11 @@ public class AlarmService {
 
     private String getNextCursor(AlarmCursorDto alarmCursorDto, List<Alarm> alarms,
                                  List<UserAnnouncement> userAnnouncements, GetAlarmDto lastItem) {
-        Long nextAlarmId = alarms.stream()
-                .filter(a -> a.getCreatedAt().isBefore(lastItem.createdAt()))
-                .map(Alarm::getId)
-                .max(Long::compareTo)
-                .orElse(alarmCursorDto.lastAlarmId());
+        Long fallbackAlarmId = getFallbackAlarmId(alarmCursorDto);
+        Long fallbackAnnouncementId = getFallbackAnnouncementId(alarmCursorDto);
 
-        Long nextAnnouncementId = userAnnouncements.stream()
-                .filter(ua -> ua.getAnnouncement().getCreatedAt().isBefore(lastItem.createdAt()))
-                .map(UserAnnouncement::getId)
-                .max(Long::compareTo)
-                .orElse(alarmCursorDto.lastAnnouncementId());
+        Long nextAlarmId = getNextAlarmId(alarms, lastItem, fallbackAlarmId);
+        Long nextAnnouncementId = getNextAnnouncementId(userAnnouncements, lastItem, fallbackAnnouncementId);
 
         return nextAlarmId + "_" + nextAnnouncementId;
     }
@@ -174,12 +177,63 @@ public class AlarmService {
                 throw new GlobalException(BaseExceptionResponseStatus.INVALID_CURSOR_FORMAT);
             }
             try {
-                lastAlarmId = Long.valueOf(parts[0]);
-                lastAnnouncementId = Long.valueOf(parts[1]);
+                lastAlarmId = getCursorPoint(parts[0]);
+                lastAnnouncementId = getCursorPoint(parts[1]);
             } catch (NumberFormatException e) {
                 throw new GlobalException(BaseExceptionResponseStatus.INVALID_CURSOR_FORMAT);
             }
         }
         return new AlarmCursorDto(lastAlarmId, lastAnnouncementId);
+    }
+
+    private Long getCursorPoint(String cursorPoint) {
+        if (cursorPoint.equals("null")) {
+            return null;
+        }
+        return Long.valueOf(cursorPoint);
+    }
+
+    private Long getFallbackAlarmId(AlarmCursorDto cursor) {
+        if (cursor == null) {
+            return -1L;
+        }
+        if (cursor.lastAlarmId() == null) {
+            return -1L;
+        }
+        return cursor.lastAlarmId();
+    }
+
+    private Long getFallbackAnnouncementId(AlarmCursorDto cursor) {
+        if (cursor == null) {
+            return -1L;
+        }
+        if (cursor.lastAnnouncementId() == null) {
+            return -1L;
+        }
+        return cursor.lastAnnouncementId();
+    }
+
+    private Long getNextAlarmId(List<Alarm> alarms, GetAlarmDto lastItem, Long fallback) {
+        Optional<Alarm> optional = alarms.stream()
+                .filter(a -> a.getCreatedAt().isBefore(lastItem.createdAt()))
+                .max(Comparator.comparing(Alarm::getCreatedAt));
+
+        if (!optional.isPresent()) {
+            return fallback;
+        }
+
+        return optional.get().getId();
+    }
+
+    private Long getNextAnnouncementId(List<UserAnnouncement> list, GetAlarmDto lastItem, Long fallback) {
+        Optional<UserAnnouncement> optional = list.stream()
+                .filter(ua -> ua.getAnnouncement().getCreatedAt().isBefore(lastItem.createdAt()))
+                .max(Comparator.comparing(ua -> ua.getAnnouncement().getCreatedAt()));
+
+        if (!optional.isPresent()) {
+            return fallback;
+        }
+
+        return optional.get().getId();
     }
 }

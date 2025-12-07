@@ -17,9 +17,11 @@ public interface UserAnnouncementRepository extends JpaRepository<UserAnnounceme
             FROM UserAnnouncement ua
             JOIN ua.announcement a
             WHERE ua.user = :user
-              AND (:lastId IS NULL OR ua.id < :lastId)
+              AND (:lastId IS NULL OR ua.id <= :lastId)
             ORDER BY ua.createdAt DESC
             """)
     List<UserAnnouncement> findUserAnnouncement(@Param("user") User user, @Param("lastId") Long lastId,
                                                 Pageable pageable);
+
+    long countByUserAndIsCheckedFalse(User user);
 }

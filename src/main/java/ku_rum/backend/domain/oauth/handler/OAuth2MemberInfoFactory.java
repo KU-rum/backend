@@ -14,6 +14,8 @@ public class OAuth2MemberInfoFactory {
                 return new NaverOAuth2MemberInfo(attributes);
             case KAKAO:
                 return new KakaoOAuth2MemberInfo(attributes);
+            case APPLE:
+                return new AppleOAuth2MemberInfo(attributes);
             default:
                 throw new IllegalArgumentException("Invalid Provider Type.");
         }
