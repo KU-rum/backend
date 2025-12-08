@@ -13,8 +13,8 @@ import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.application.FcmService;
-import ku_rum.backend.domain.alarm.dto.request.DirectNotificationRequest;
-import ku_rum.backend.domain.alarm.dto.request.TopicNotificationRequest;
+import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
+import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +49,7 @@ public class FcmAlarmControllerTest extends RestDocsTestSupport {
     void sendToUsers() throws Exception {
 
         // given
-        DirectNotificationRequest request = new DirectNotificationRequest(List.of(1L), "알림 제목", "알림 내용");
+        FcmDirectDto request = new FcmDirectDto("알림 제목", "알림 내용", List.of(1L));
         doNothing().when(fcmService).sendToUsers(eq(request));
 
         // when
@@ -88,7 +88,7 @@ public class FcmAlarmControllerTest extends RestDocsTestSupport {
     void sendToTopic() throws Exception {
 
         // given
-        TopicNotificationRequest request = new TopicNotificationRequest("kuroom", "알림 제목", "알림 내용");
+        FcmTopicDto request = new FcmTopicDto("알림 제목", "알림 내용", "kuroom");
         doNothing().when(fcmService).sendToTopic(eq(request));
 
         // when
