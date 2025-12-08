@@ -9,8 +9,8 @@ import com.google.firebase.messaging.MulticastMessage;
 import java.util.List;
 import java.util.Optional;
 import ku_rum.backend.domain.alarm.domain.repository.UserFcmTokenRepository;
-import ku_rum.backend.domain.alarm.dto.request.DirectNotificationRequest;
-import ku_rum.backend.domain.alarm.dto.request.TopicNotificationRequest;
+import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
+import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.user.application.UserQueryService;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
@@ -19,9 +19,11 @@ import ku_rum.backend.domain.user.dto.request.UserFcmRequest;
 import ku_rum.backend.domain.user.dto.response.UserFcmResponse;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class FcmService {
 
     private final FirebaseMessaging firebaseMessaging;
@@ -29,15 +31,7 @@ public class FcmService {
     private final UserQueryService userQueryService;
     private final UserService userService;
 
-    public FcmService(UserFcmTokenRepository userFcmTokenRepository,
-                      UserQueryService userQueryService, UserService userService) {
-        this.userFcmTokenRepository = userFcmTokenRepository;
-        this.userQueryService = userQueryService;
-        this.userService = userService;
-        this.firebaseMessaging = FirebaseMessaging.getInstance();
-    }
-
-    public void sendToUsers(DirectNotificationRequest request) {
+    public void sendToUsers(FcmDirectDto request) {
         List<User> users = request.userIds().stream()
                 .map(userQueryService::getUserById)
                 .toList();
@@ -61,7 +55,7 @@ public class FcmService {
 
     }
 
-    public void sendToTopic(TopicNotificationRequest request) {
+    public void sendToTopic(FcmTopicDto request) {
 
         Message message = Message.builder()
                 .setTopic(request.topic())

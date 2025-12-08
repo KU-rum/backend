@@ -3,6 +3,8 @@ package ku_rum.backend.domain.alarm.presentation;
 import jakarta.validation.Valid;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.application.FcmService;
+import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
+import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.alarm.dto.request.DirectNotificationRequest;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.request.TopicNotificationRequest;
@@ -48,13 +50,15 @@ public class AlarmController {
 
     @PostMapping("/direct")
     public BaseResponse<Void> sendFcmMessage(@RequestBody DirectNotificationRequest request) {
-        fcmService.sendToUsers(request);
+        FcmDirectDto fcmDirectDto = new FcmDirectDto(request.title(), request.body(), request.userIds());
+        fcmService.sendToUsers(fcmDirectDto);
         return BaseResponse.ok();
     }
 
     @PostMapping("/topic")
     public BaseResponse<Void> sendFcmMessage(@RequestBody TopicNotificationRequest request) {
-        fcmService.sendToTopic(request);
+        FcmTopicDto fcmDirectDto = new FcmTopicDto(request.title(), request.body(), request.topic());
+        fcmService.sendToTopic(fcmDirectDto);
         return BaseResponse.ok();
     }
 

@@ -44,26 +44,36 @@ public class AlarmService {
     private final UserAnnouncementRepository userAnnouncementRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final FcmService fcmService;
 
-    @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object, User user) {
         AlarmMessageHandler alarmMessageHandler = alarmMessageHandlers.get(alarmType);
         if (alarmMessageHandler == null) {
             throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
         }
 
+        createAndSaveAlarm(alarmMessageHandler, alarmType, object, user);
+    }
+
+    @Transactional
+    public void createAndSaveAlarm(AlarmMessageHandler alarmMessageHandler, AlarmType alarmType, Object object,
+                                   User user) {
         Alarm alarm = alarmMessageHandler.create(alarmType, object, user);
 
         alarmRepository.save(alarm);
     }
 
-    @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object) {
         AlarmMessageHandler alarmMessageHandler = alarmMessageHandlers.get(alarmType);
         if (alarmMessageHandler == null) {
             throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
         }
 
+        createAndSaveAnnouncement(alarmMessageHandler, alarmType, object);
+    }
+
+    @Transactional
+    public void createAndSaveAnnouncement(AlarmMessageHandler alarmMessageHandler, AlarmType alarmType, Object object) {
         Announcement announcement = alarmMessageHandler.create(alarmType, object);
         Announcement saveAnnouncement = announcementRepository.save(announcement);
         saveUserAnnouncement(saveAnnouncement);
