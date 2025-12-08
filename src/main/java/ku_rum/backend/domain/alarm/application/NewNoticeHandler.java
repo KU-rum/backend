@@ -1,8 +1,13 @@
 package ku_rum.backend.domain.alarm.application;
 
+import static ku_rum.backend.domain.alarm.util.FcmUtil.MESSAGE_TITLE;
+
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.domain.Announcement;
+import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
+import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
+import ku_rum.backend.domain.alarm.util.FcmUtil;
 import ku_rum.backend.domain.user.domain.User;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +21,27 @@ public class NewNoticeHandler implements AlarmMessageHandler {
 
     @Override
     public Announcement create(AlarmType alarmType, Object object) {
-        String message = String.format("새로운 공지가 올라왔어요. 바로 확인해보세요!");
-
         return Announcement.builder()
                 .alarmType(AlarmType.NEW_NOTICE)
-                .message(message)
+                .message(getMessage())
                 .build();
+    }
+
+    @Override
+    public FcmTopicDto getFcmTopicDto(Object object) {
+        return FcmTopicDto.builder()
+                .title(MESSAGE_TITLE)
+                .body(getMessage())
+                .topic(FcmUtil.TOPIC_NAME)
+                .build();
+    }
+
+    @Override
+    public FcmDirectDto getFcmDirectDto(Object object, User user) {
+        return null;
+    }
+
+    public String getMessage() {
+        return "새로운 공지가 올라왔어요. 바로 확인해보세요!";
     }
 }

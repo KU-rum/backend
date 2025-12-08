@@ -15,6 +15,8 @@ import ku_rum.backend.domain.alarm.domain.repository.AlarmRepository;
 import ku_rum.backend.domain.alarm.domain.repository.AnnouncementRepository;
 import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
 import ku_rum.backend.domain.alarm.dto.AlarmCursorDto;
+import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
+import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
@@ -53,6 +55,9 @@ public class AlarmService {
         }
 
         createAndSaveAlarm(alarmMessageHandler, alarmType, object, user);
+
+        FcmDirectDto fcmDirectDto = alarmMessageHandler.getFcmDirectDto(object, user);
+        fcmService.sendToUsers(fcmDirectDto);
     }
 
     @Transactional
@@ -70,10 +75,14 @@ public class AlarmService {
         }
 
         createAndSaveAnnouncement(alarmMessageHandler, alarmType, object);
+
+        FcmTopicDto fcmTopicDto = alarmMessageHandler.getFcmTopicDto(object);
+        fcmService.sendToTopic(fcmTopicDto);
     }
 
     @Transactional
-    public void createAndSaveAnnouncement(AlarmMessageHandler alarmMessageHandler, AlarmType alarmType, Object object) {
+    public void createAndSaveAnnouncement(AlarmMessageHandler alarmMessageHandler,
+                                          AlarmType alarmType, Object object) {
         Announcement announcement = alarmMessageHandler.create(alarmType, object);
         Announcement saveAnnouncement = announcementRepository.save(announcement);
         saveUserAnnouncement(saveAnnouncement);
@@ -145,7 +154,7 @@ public class AlarmService {
         return PatchAlarmResponse.from(userAnnouncement);
     }
 
-    private void saveUserAnnouncement(Announcement announcement) {
+    private List<UserAnnouncement> saveUserAnnouncement(Announcement announcement) {
         List<UserAnnouncement> userAnnouncements = userRepository.findAll().stream()
                 .map(user -> UserAnnouncement.builder()
                         .isChecked(false)
@@ -153,7 +162,7 @@ public class AlarmService {
                         .announcement(announcement)
                         .build())
                 .toList();
-        userAnnouncementRepository.saveAll(userAnnouncements);
+        return userAnnouncementRepository.saveAll(userAnnouncements);
     }
 
     private Alarm findAlarmById(Long alarmId) {
