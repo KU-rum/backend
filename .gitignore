@@ -4,7 +4,7 @@ logs/
 src/main/resources/application-prod.yml
 src/main/resources/application-local.yml
 src/main/resources/application-test.yml
-src/main/resources/kuroom-90fb5-firebase-adminsdk-fbsvc-f264f66c64.json
+firebase-adminsdk.json
 src/main/resources/firebase-key.json
 logs/*
 
