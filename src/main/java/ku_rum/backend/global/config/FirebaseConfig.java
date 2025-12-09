@@ -17,18 +17,16 @@ public class FirebaseConfig {
     public FirebaseMessaging firebaseMessaging() {
 
         try {
-            Resource resource = new ClassPathResource("config/firebase-service.json");
+            if (FirebaseApp.getApps().isEmpty()) {
+                Resource resource = new ClassPathResource("config/firebase-service.json");
 
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
-                    .build();
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
+                        .build();
 
-            if (!FirebaseApp.getApps().isEmpty()) {
-                throw new IllegalStateException("FCM 이미 설정 완료");
+                FirebaseApp.initializeApp(options);
             }
-
-            FirebaseApp firebaseApp = FirebaseApp.initializeApp(options);
-            return FirebaseMessaging.getInstance(firebaseApp);
+            return FirebaseMessaging.getInstance();
 
         } catch (IOException e) {
             throw new IllegalStateException("FCM 설정 실패", e);
