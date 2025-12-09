@@ -20,9 +20,10 @@ spring:
       maximum-pool-size: 5
       minimum-idle: 2
   jpa:
+    hibernate:
+      ddl-auto: create-drop
     properties:
       hibernate:
-        ddl-auto: create-drop
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
     generate-ddl: true
@@ -101,3 +102,6 @@ cloud:
       bucket: kuroom
     stack:
       auto: false
+
+firebase:
+  config-file: classpath:config/firebase-service.json
