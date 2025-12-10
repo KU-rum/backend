@@ -1,6 +1,7 @@
 package ku_rum.backend.domain.alarm.application;
 
 import static ku_rum.backend.domain.alarm.util.FcmUtil.MESSAGE_TITLE;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.UNSUPPORTED_TOPIC_FCM;
 
 import java.util.List;
 import ku_rum.backend.domain.alarm.domain.Alarm;
@@ -10,6 +11,7 @@ import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
 import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.place.dto.UserPlaceAlarmDto;
 import ku_rum.backend.domain.user.domain.User;
+import ku_rum.backend.global.exception.global.GlobalException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,7 +35,7 @@ public class FriendPlaceSharingHandler implements AlarmMessageHandler {
 
     @Override
     public FcmTopicDto getFcmTopicDto(Object object) {
-        return null;
+        throw new GlobalException(UNSUPPORTED_TOPIC_FCM);
     }
 
     @Override

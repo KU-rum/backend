@@ -1,7 +1,7 @@
 package ku_rum.backend.domain.alarm.presentation;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.application.FcmService;
@@ -49,8 +48,7 @@ public class FcmAlarmControllerTest extends RestDocsTestSupport {
     void sendToUsers() throws Exception {
 
         // given
-        FcmDirectDto request = new FcmDirectDto("알림 제목", "알림 내용", List.of(1L));
-        doNothing().when(fcmService).sendToUsers(eq(request));
+        doNothing().when(fcmService).sendToUsers(any(FcmDirectDto.class));
 
         // when
         mockMvc.perform(post("/api/v1/alarm/direct")
@@ -88,8 +86,7 @@ public class FcmAlarmControllerTest extends RestDocsTestSupport {
     void sendToTopic() throws Exception {
 
         // given
-        FcmTopicDto request = new FcmTopicDto("알림 제목", "알림 내용", "kuroom");
-        doNothing().when(fcmService).sendToTopic(eq(request));
+        doNothing().when(fcmService).sendToTopic(any(FcmTopicDto.class));
 
         // when
         mockMvc.perform(post("/api/v1/alarm/topic")

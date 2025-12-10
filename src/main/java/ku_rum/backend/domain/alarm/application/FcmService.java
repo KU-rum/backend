@@ -21,6 +21,7 @@ import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,9 +33,7 @@ public class FcmService {
     private final UserService userService;
 
     public void sendToUsers(FcmDirectDto request) {
-        List<User> users = request.userIds().stream()
-                .map(userQueryService::getUserById)
-                .toList();
+        List<User> users = userQueryService.getUsersByIds(request.userIds());
 
         List<UserFcmToken> userFcmTokens = userFcmTokenRepository.findByUserIn(users);
         List<String> tokens = userFcmTokens.stream()
@@ -70,6 +69,7 @@ public class FcmService {
         }
     }
 
+    @Transactional
     public UserFcmResponse createFcmToken(CustomUserDetails userDetails, UserFcmRequest request) {
         User user = userService.getUser();
         Optional<UserFcmToken> fcmTokenOptional = userFcmTokenRepository.findByUser(user);

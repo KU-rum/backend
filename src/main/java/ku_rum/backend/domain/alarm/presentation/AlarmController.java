@@ -57,8 +57,8 @@ public class AlarmController {
 
     @PostMapping("/topic")
     public BaseResponse<Void> sendFcmMessage(@RequestBody TopicNotificationRequest request) {
-        FcmTopicDto fcmDirectDto = new FcmTopicDto(request.title(), request.body(), request.topic());
-        fcmService.sendToTopic(fcmDirectDto);
+        FcmTopicDto fcmTopicDto = new FcmTopicDto(request.title(), request.body(), request.topic());
+        fcmService.sendToTopic(fcmTopicDto);
         return BaseResponse.ok();
     }
 

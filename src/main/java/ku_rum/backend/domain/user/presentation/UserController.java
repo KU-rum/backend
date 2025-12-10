@@ -108,7 +108,7 @@ public class UserController {
 
     @PostMapping("/fcm")
     public BaseResponse<UserFcmResponse> createFcmToken(@AuthenticationPrincipal final CustomUserDetails userDetails,
-                                                        @RequestBody UserFcmRequest request) {
+                                                        @RequestBody final UserFcmRequest request) {
         UserFcmResponse response = fcmService.createFcmToken(userDetails, request);
         return BaseResponse.ok(response);
     }

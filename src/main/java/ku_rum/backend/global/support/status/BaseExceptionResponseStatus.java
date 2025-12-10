@@ -143,7 +143,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     UNAUTHORIZED_ALARM(1401, HttpStatus.UNAUTHORIZED, "권한이 없는 알람입니다."),
     UNAUTHORIZED_ANNOUNCEMENT(1402, HttpStatus.UNAUTHORIZED, "권한이 없는 공지 알람입니다."),
     INVALID_CURSOR_FORMAT(1403, HttpStatus.BAD_REQUEST, "알림 커서가 올바르지 않습니다."),
-    FCM_SEND_ERROR(1404, HttpStatus.BAD_REQUEST, "알림 전송중 문제가 발생했습니다.");
+    FCM_SEND_ERROR(1404, HttpStatus.BAD_REQUEST, "알림 전송중 문제가 발생했습니다."),
+    UNSUPPORTED_TOPIC_FCM(1405, HttpStatus.UNPROCESSABLE_ENTITY, "토픽 FCM을 제공하지 않습니다."),
+    UNSUPPORTED_DIRCT_FCM(1406, HttpStatus.UNPROCESSABLE_ENTITY, "Direct FCM을 제공하지 않습니다.");
 
     private final int code;
     private final HttpStatus status;

@@ -56,7 +56,7 @@ public class UserFcmControllerTest extends RestDocsTestSupport {
 
     @DisplayName("사용자 fcm 토큰을 저장한다")
     @Test
-    void sendToUsers() throws Exception {
+    void saveFcmToken() throws Exception {
 
         // given
         String token = "fcm 토큰";
@@ -82,8 +82,8 @@ public class UserFcmControllerTest extends RestDocsTestSupport {
                 .andExpect(status().isOk())
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
-                                .tag("멤버 관련 API")
-                                .description("특정 사용자에게 푸시 알림을 보낸다")
+                                .tag("알림 FCM API")
+                                .description("사용자의 FCM 토큰을 저장한다")
                                 .requestHeaders(
                                         headerWithName("Authorization").description("발급 받은 액세스 토큰입니다.")
                                 )
