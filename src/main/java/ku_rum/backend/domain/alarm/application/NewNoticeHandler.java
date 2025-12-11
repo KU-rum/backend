@@ -1,7 +1,7 @@
 package ku_rum.backend.domain.alarm.application;
 
 import static ku_rum.backend.domain.alarm.util.FcmUtil.MESSAGE_TITLE;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.UNSUPPORTED_DIRCT_FCM;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.UNSUPPORTED_DIRECT_FCM;
 
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
@@ -40,7 +40,7 @@ public class NewNoticeHandler implements AlarmMessageHandler {
 
     @Override
     public FcmDirectDto getFcmDirectDto(Object object, User user) {
-        throw new GlobalException(UNSUPPORTED_DIRCT_FCM);
+        throw new GlobalException(UNSUPPORTED_DIRECT_FCM);
     }
 
     public String getMessage() {

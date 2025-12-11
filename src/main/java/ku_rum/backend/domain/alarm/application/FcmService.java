@@ -1,6 +1,7 @@
 package ku_rum.backend.domain.alarm.application;
 
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.FCM_SEND_ERROR;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.INVALID_USER_TOKEN;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -39,7 +40,7 @@ public class FcmService {
         List<String> tokens = userFcmTokens.stream()
                 .map(UserFcmToken::getToken)
                 .toList();
-
+        validateUserToken(users, tokens);
         MulticastMessage message = MulticastMessage.builder()
                 .addAllTokens(tokens)
                 .putData("title", request.title())
@@ -72,21 +73,40 @@ public class FcmService {
     @Transactional
     public UserFcmResponse createFcmToken(CustomUserDetails userDetails, UserFcmRequest request) {
         User user = userService.getUser();
-        Optional<UserFcmToken> fcmTokenOptional = userFcmTokenRepository.findByUser(user);
+        Optional<UserFcmToken> existingToken = userFcmTokenRepository.findByUser(user);
 
-        UserFcmToken userFcmToken = UserFcmToken.builder()
+        UserFcmToken result = existingToken
+                .map(token -> updateToken(token, request))
+                .orElseGet(() -> createToken(user, request));
+
+        return UserFcmResponse.from(result);
+    }
+
+
+    private void validateUserToken(List<User> users, List<String> tokens) {
+        if (users.size() > tokens.size()) {
+            throw new GlobalException(INVALID_USER_TOKEN);
+        }
+    }
+
+    private UserFcmToken createToken(User user, UserFcmRequest request) {
+        UserFcmToken newToken = UserFcmToken.builder()
                 .token(request.token())
                 .user(user)
                 .deviceType(request.deviceType())
                 .build();
 
-        if (fcmTokenOptional.isPresent()) {
-            UserFcmToken findUserFcmToken = fcmTokenOptional.get();
-            findUserFcmToken.update(userFcmToken);
-            return UserFcmResponse.from(findUserFcmToken);
-        }
+        return userFcmTokenRepository.save(newToken);
+    }
 
-        UserFcmToken saveUserFcmToken = userFcmTokenRepository.save(userFcmToken);
-        return UserFcmResponse.from(saveUserFcmToken);
+    private UserFcmToken updateToken(UserFcmToken existingToken, UserFcmRequest request) {
+        existingToken.update(
+                UserFcmToken.builder()
+                        .token(request.token())
+                        .user(existingToken.getUser())
+                        .deviceType(request.deviceType())
+                        .build()
+        );
+        return existingToken;
     }
 }
