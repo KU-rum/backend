@@ -194,6 +194,9 @@ dependencies {
     // Test Container
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:mysql'
+
+    // FCM
+    implementation 'com.google.firebase:firebase-admin:9.7.0'
 }
 
 

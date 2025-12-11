@@ -15,6 +15,8 @@ import ku_rum.backend.domain.alarm.domain.repository.AlarmRepository;
 import ku_rum.backend.domain.alarm.domain.repository.AnnouncementRepository;
 import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
 import ku_rum.backend.domain.alarm.dto.AlarmCursorDto;
+import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
+import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
@@ -44,26 +46,43 @@ public class AlarmService {
     private final UserAnnouncementRepository userAnnouncementRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final FcmService fcmService;
 
-    @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object, User user) {
         AlarmMessageHandler alarmMessageHandler = alarmMessageHandlers.get(alarmType);
         if (alarmMessageHandler == null) {
             throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
         }
 
+        createAndSaveAlarm(alarmMessageHandler, alarmType, object, user);
+
+        FcmDirectDto fcmDirectDto = alarmMessageHandler.getFcmDirectDto(object, user);
+        fcmService.sendToUsers(fcmDirectDto);
+    }
+
+    @Transactional
+    public void createAndSaveAlarm(AlarmMessageHandler alarmMessageHandler, AlarmType alarmType, Object object,
+                                   User user) {
         Alarm alarm = alarmMessageHandler.create(alarmType, object, user);
 
         alarmRepository.save(alarm);
     }
 
-    @Transactional
     public void notifyAlarm(AlarmType alarmType, Object object) {
         AlarmMessageHandler alarmMessageHandler = alarmMessageHandlers.get(alarmType);
         if (alarmMessageHandler == null) {
             throw new IllegalArgumentException("지원하지 않는 알림 타입입니다: " + alarmType);
         }
 
+        createAndSaveAnnouncement(alarmMessageHandler, alarmType, object);
+
+        FcmTopicDto fcmTopicDto = alarmMessageHandler.getFcmTopicDto(object);
+        fcmService.sendToTopic(fcmTopicDto);
+    }
+
+    @Transactional
+    public void createAndSaveAnnouncement(AlarmMessageHandler alarmMessageHandler,
+                                          AlarmType alarmType, Object object) {
         Announcement announcement = alarmMessageHandler.create(alarmType, object);
         Announcement saveAnnouncement = announcementRepository.save(announcement);
         saveUserAnnouncement(saveAnnouncement);
@@ -135,7 +154,7 @@ public class AlarmService {
         return PatchAlarmResponse.from(userAnnouncement);
     }
 
-    private void saveUserAnnouncement(Announcement announcement) {
+    private List<UserAnnouncement> saveUserAnnouncement(Announcement announcement) {
         List<UserAnnouncement> userAnnouncements = userRepository.findAll().stream()
                 .map(user -> UserAnnouncement.builder()
                         .isChecked(false)
@@ -144,7 +163,7 @@ public class AlarmService {
                         .announcement(announcement)
                         .build())
                 .toList();
-        userAnnouncementRepository.saveAll(userAnnouncements);
+        return userAnnouncementRepository.saveAll(userAnnouncements);
     }
 
     private Alarm findAlarmById(Long alarmId) {
