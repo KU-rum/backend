@@ -21,11 +21,13 @@ import ku_rum.backend.domain.user.dto.response.UserFcmResponse;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FcmService {
 
     private final FirebaseMessaging firebaseMessaging;
@@ -50,6 +52,9 @@ public class FcmService {
         try {
             firebaseMessaging.sendMulticast(message);
         } catch (FirebaseMessagingException e) {
+            log.error("FCM error code: {}", e.getErrorCode());
+            log.error("FCM message: {}", e.getMessage(), e);
+            e.printStackTrace();
             throw new GlobalException(FCM_SEND_ERROR);
         }
 
@@ -66,6 +71,9 @@ public class FcmService {
         try {
             firebaseMessaging.send(message);
         } catch (FirebaseMessagingException e) {
+            log.error("FCM error code: {}", e.getErrorCode());
+            log.error("FCM message: {}", e.getMessage(), e);
+            e.printStackTrace();
             throw new GlobalException(FCM_SEND_ERROR);
         }
     }
