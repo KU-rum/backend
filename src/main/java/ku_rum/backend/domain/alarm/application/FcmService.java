@@ -50,7 +50,7 @@ public class FcmService {
                 .build();
 
         try {
-            firebaseMessaging.sendMulticast(message);
+            firebaseMessaging.sendEachForMulticast(message);
         } catch (FirebaseMessagingException e) {
             log.error("FCM error code: {}", e.getErrorCode());
             log.error("FCM message: {}", e.getMessage(), e);
