@@ -117,7 +117,8 @@ public class NoticeControllerTest extends RestDocsTestSupport {
         Long noticeId = 1L;
         String htmlContent = "<div>공지 상세 내용</div>";
         String link = "url";
-        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link);
+        String title = "공지사항 제목";
+        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link, title, LocalDateTime.now());
         given(noticeService.findByNoticeId(eq(noticeId)))
                 .willReturn(noticeDetailResponse);
 
@@ -130,6 +131,9 @@ public class NoticeControllerTest extends RestDocsTestSupport {
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.content").value("<div>공지 상세 내용</div>"))
                 .andExpect(jsonPath("$.data.link").value("url"))
+                .andExpect(jsonPath("$.data.title").value("공지사항 제목"))
+                .andExpect(jsonPath("$.data.pubdate").exists())
+
                 .andDo(restDocs.document(
                         resource(
                                 ResourceSnippetParameters.builder()

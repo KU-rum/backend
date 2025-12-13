@@ -16,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.bookmark.application.BookmarkService;
@@ -103,8 +105,9 @@ class BookmarkControllerTest extends RestDocsTestSupport {
         Long bookmarkId = 10L;
         Long noticeId = 1L;
         String noticeName = "공지사항 테스트";
+        LocalDateTime now = LocalDateTime.now();
 
-        GetBookmarkResponse response = new GetBookmarkResponse(bookmarkId, noticeId, noticeName);
+        GetBookmarkResponse response = new GetBookmarkResponse(bookmarkId, noticeId, noticeName, now, now);
 
         given(bookmarkService.getBookmark(any()))
                 .willReturn(List.of(response));
@@ -133,7 +136,9 @@ class BookmarkControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("message").description("응답 메시지"),
                                         fieldWithPath("data[].bookmarkId").description("북마크 ID"),
                                         fieldWithPath("data[].noticeId").description("북마크된 공지사항 ID"),
-                                        fieldWithPath("data[].noticeName").description("북마크된 공지사항 제목")
+                                        fieldWithPath("data[].noticeName").description("북마크된 공지사항 제목"),
+                                        fieldWithPath("data[].noticePubDate").description("공지사항 생성 날짜"),
+                                        fieldWithPath("data[].bookmarkDate").description("북마크 날짜")
                                 )
                                 .build()
                 )));
