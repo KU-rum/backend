@@ -7,6 +7,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.Notification;
 import java.util.List;
 import java.util.Optional;
 import ku_rum.backend.domain.alarm.domain.repository.UserFcmTokenRepository;
@@ -43,8 +44,15 @@ public class FcmService {
                 .map(UserFcmToken::getToken)
                 .toList();
         validateUserToken(users, tokens);
+
         MulticastMessage message = MulticastMessage.builder()
                 .addAllTokens(tokens)
+                .setNotification(
+                        Notification.builder()
+                                .setTitle(request.title())
+                                .setBody(request.body())
+                                .build()
+                )
                 .putData("title", request.title())
                 .putData("body", request.body())
                 .build();
@@ -64,6 +72,12 @@ public class FcmService {
 
         Message message = Message.builder()
                 .setTopic(request.topic())
+                .setNotification(
+                        Notification.builder()
+                                .setTitle(request.title())
+                                .setBody(request.body())
+                                .build()
+                )
                 .putData("title", request.title())
                 .putData("body", request.body())
                 .build();
