@@ -8,6 +8,7 @@ public record NoticeDetailResponse(
         String link,
         String title,
         LocalDateTime pubdate,
+        Long bookmarkId,
         boolean isBookmark
 ) {
 }

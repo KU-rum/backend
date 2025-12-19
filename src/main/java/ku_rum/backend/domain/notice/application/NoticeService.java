@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.notice.application;
 
+import ku_rum.backend.domain.bookmark.domain.NoticeBookmark;
 import ku_rum.backend.domain.bookmark.domain.repository.BookmarkRepository;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.NoticeDetail;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE_DETAIL;
@@ -46,11 +48,11 @@ public class NoticeService {
         NoticeDetail noticeDetail = noticeDetailRepository.findByNotice(notice)
                 .orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE_DETAIL));
         String encodedHtml = noticeDetail.getHtmlContent();
-        boolean isBookmark = bookmarkRepository.existsByUserAndNotice(user, notice);
-        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(), noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(), isBookmark);
-        //byte[] decodedBytes = Base64.getDecoder().decode(encodedHtml);
-        //String htmlContent = new String(decodedBytes, StandardCharsets.UTF_8);
-        //return new NoticeDetailResponse(noticeDetail.getNotice().getId(), htmlContent);
+        Optional<NoticeBookmark> noticeBookmark =  bookmarkRepository.findByUserAndNotice(user, notice);
+        if(noticeBookmark.isPresent()) {
+            return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(), noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(), noticeBookmark.get().getId(), true);
+        }
+        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(), noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(), -1L, false);
     }
 
     public Notice findNoticeByNoticeId(Long noticeId) {

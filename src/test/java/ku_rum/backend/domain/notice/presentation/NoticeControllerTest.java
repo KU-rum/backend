@@ -119,7 +119,7 @@ public class NoticeControllerTest extends RestDocsTestSupport {
         String link = "url";
         String title = "공지사항 제목";
         boolean isBookmark = true;
-        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link, title, LocalDateTime.now(), isBookmark);
+        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link, title, LocalDateTime.now(), 1L, isBookmark);
         given(noticeService.findByNoticeId(eq(noticeId)))
                 .willReturn(noticeDetailResponse);
 
