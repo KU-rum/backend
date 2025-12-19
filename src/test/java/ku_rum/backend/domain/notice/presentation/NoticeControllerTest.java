@@ -118,7 +118,8 @@ public class NoticeControllerTest extends RestDocsTestSupport {
         String htmlContent = "<div>공지 상세 내용</div>";
         String link = "url";
         String title = "공지사항 제목";
-        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link, title, LocalDateTime.now());
+        boolean isBookmark = true;
+        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link, title, LocalDateTime.now(), isBookmark);
         given(noticeService.findByNoticeId(eq(noticeId)))
                 .willReturn(noticeDetailResponse);
 

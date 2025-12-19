@@ -7,6 +7,7 @@ public record NoticeDetailResponse(
         String content,
         String link,
         String title,
-        LocalDateTime pubdate
+        LocalDateTime pubdate,
+        boolean isBookmark
 ) {
 }

@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.notice.application;
 
+import ku_rum.backend.domain.bookmark.domain.repository.BookmarkRepository;
 import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.notice.domain.NoticeDetail;
 import ku_rum.backend.domain.notice.domain.PublishStatus;
@@ -7,6 +8,8 @@ import ku_rum.backend.domain.notice.domain.repository.NoticeDetailRepository;
 import ku_rum.backend.domain.notice.domain.repository.NoticeRepository;
 import ku_rum.backend.domain.notice.dto.response.NoticeDetailResponse;
 import ku_rum.backend.domain.notice.dto.response.NoticeResponse;
+import ku_rum.backend.domain.user.application.UserService;
+import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +32,8 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
     private final NoticeDetailRepository noticeDetailRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final UserService userService;
 
     public Page<NoticeResponse> findByCategory(Long categoryId, Pageable pageable) {
         return noticeRepository.findByCategoryIdAndPublishStatus(categoryId, PublishStatus.SUCCESS_CRAWLING, pageable)
@@ -36,11 +41,13 @@ public class NoticeService {
     }
 
     public NoticeDetailResponse findByNoticeId(Long noticeId) {
+        User user = userService.getUser();
         Notice notice = findNoticeByNoticeId(noticeId);
         NoticeDetail noticeDetail = noticeDetailRepository.findByNotice(notice)
                 .orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE_DETAIL));
         String encodedHtml = noticeDetail.getHtmlContent();
-        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(), noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate());
+        boolean isBookmark = bookmarkRepository.existsByUserAndNotice(user, notice);
+        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(), noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(), isBookmark);
         //byte[] decodedBytes = Base64.getDecoder().decode(encodedHtml);
         //String htmlContent = new String(decodedBytes, StandardCharsets.UTF_8);
         //return new NoticeDetailResponse(noticeDetail.getNotice().getId(), htmlContent);
