@@ -73,8 +73,8 @@ public class BookmarkService {
     }
 
     private void validateBookmarkAuthorization(User user, NoticeBookmark noticeBookmark) {
-        Long noticeId = noticeBookmark.getUser().getId();
-        if (noticeId.equals(user.getId())) {
+        Long noticeUserId = noticeBookmark.getUser().getId();
+        if (!noticeUserId.equals(user.getId())) {
             throw new GlobalException(UNAUTHORIZED_BOOKMARK);
         }
     }
