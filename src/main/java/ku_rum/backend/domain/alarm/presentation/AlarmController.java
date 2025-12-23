@@ -10,6 +10,7 @@ import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.request.PatchDisableAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.request.TopicNotificationRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmDisableResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
@@ -76,6 +77,13 @@ public class AlarmController {
             @AuthenticationPrincipal final CustomUserDetails userDetails,
             @RequestBody PatchDisableAlarmRequest request) {
         PatchDisableAlarmResponse response = alarmService.disableAlarm(userDetails, request);
+        return BaseResponse.ok(response);
+    }
+
+    @GetMapping("/disable")
+    public BaseResponse<GetAlarmDisableResponse> disableAlarm(
+            @AuthenticationPrincipal final CustomUserDetails userDetails) {
+        GetAlarmDisableResponse response = alarmService.findDisableAlarm(userDetails);
         return BaseResponse.ok(response);
     }
 }

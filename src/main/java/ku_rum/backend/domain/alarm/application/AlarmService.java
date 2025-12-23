@@ -22,6 +22,7 @@ import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.request.PatchDisableAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmDisableResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
@@ -156,6 +157,12 @@ public class AlarmService {
         UserDisabledAlarm userDisabledAlarm = optional.get();
         userDisabledAlarmRepository.delete(userDisabledAlarm);
         return PatchDisableAlarmResponse.of(userDisabledAlarm, false);
+    }
+
+    public GetAlarmDisableResponse findDisableAlarm(CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        List<UserDisabledAlarm> userDisabledAlarms = userDisabledAlarmRepository.findByUser(user);
+        return GetAlarmDisableResponse.from(userDisabledAlarms);
     }
 
     private PatchAlarmResponse patchAlarm(Long userId, Long alarmId) {

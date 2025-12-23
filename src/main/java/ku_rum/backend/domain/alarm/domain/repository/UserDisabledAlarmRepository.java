@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.alarm.domain.repository;
 
+import java.util.List;
 import java.util.Optional;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.domain.UserDisabledAlarm;
@@ -11,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface UserDisabledAlarmRepository extends JpaRepository<UserDisabledAlarm, Long> {
 
     Optional<UserDisabledAlarm> findByUserAndAlarmType(User user, AlarmType alarmType);
+
+    List<UserDisabledAlarm> findByUser(User user);
 }
