@@ -9,6 +9,7 @@ import ku_rum.backend.domain.notice.domain.repository.NoticeDetailRepository;
 import ku_rum.backend.domain.notice.domain.repository.NoticeRepository;
 import ku_rum.backend.domain.notice.dto.response.NoticeDetailResponse;
 import ku_rum.backend.domain.notice.dto.response.NoticeResponse;
+import ku_rum.backend.domain.search.application.RecentSearchService;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
@@ -36,6 +37,7 @@ public class NoticeService {
     private final NoticeDetailRepository noticeDetailRepository;
     private final BookmarkRepository bookmarkRepository;
     private final UserService userService;
+    private final RecentSearchService recentSearchService;
 
     public Page<NoticeResponse> findByCategory(Long categoryId, Pageable pageable) {
         return noticeRepository.findByCategoryIdAndPublishStatus(categoryId, PublishStatus.SUCCESS_CRAWLING, pageable)
@@ -84,6 +86,8 @@ public class NoticeService {
 
     // 키워드 검색 로직
     public Page<NoticeResponse> searchByKeyword(String keyword, Pageable pageable) {
+        recentSearchService.save(keyword);
+
         return noticeRepository.searchByKeyword(keyword, PublishStatus.SUCCESS_CRAWLING, pageable)
                 .map(NoticeResponse::from);
     }
