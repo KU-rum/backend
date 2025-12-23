@@ -5,6 +5,7 @@ import ku_rum.backend.domain.search.domain.repository.RecentSearchRepository;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,21 +24,31 @@ public class RecentSearchService {
 
     @Transactional
     public void save(String keyword) {
-        String normalized = keyword == null ? "" : keyword.trim();
-        if (normalized.isEmpty()) return;
+        String normalized = normalizeKeyword(keyword);
+        if (normalized == null) {
+            return;
+        }
 
         User user = userService.getUser();
         LocalDateTime now = LocalDateTime.now();
 
-        repository.findByUserIdAndKeyword(user.getId(), normalized)
-                .ifPresentOrElse(
-                        rs -> rs.touch(now),
-                        () -> repository.save(
-                                new RecentSearch(user.getId(), normalized, now)
-                        )
-                );
+        try {
+            repository.findByUserIdAndKeyword(user.getId(), normalized)
+                    .ifPresentOrElse(
+                            rs -> rs.touch(now),
+                            () -> repository.save(
+                                    new RecentSearch(user.getId(), normalized, now)
+                            )
+                    );
+        } catch (DataIntegrityViolationException e) {
+            repository.findByUserIdAndKeyword(user.getId(), normalized)
+                    .ifPresent(rs -> rs.touch(now));
+        }
 
-        // 최대 개수 초과 시 오래된 것 삭제
+        deleteRecentKeywordsOversize(user);
+    }
+
+    private void deleteRecentKeywordsOversize(User user) {
         List<RecentSearch> list =
                 repository.findByUserIdOrderByUpdatedAtDesc(
                         user.getId(),
@@ -49,8 +60,18 @@ public class RecentSearchService {
         }
     }
 
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+
+        String trimmed = keyword.trim();
+        if (trimmed.isEmpty()) return null;
+        return trimmed;
+    }
+
     @Transactional(readOnly = true)
-    public List<RecentSearch> list(int limit) {
+    public List<RecentSearch> list(final int limit) {
         User user = userService.getUser();
         return repository.findByUserIdOrderByUpdatedAtDesc(
                 user.getId(),
