@@ -11,18 +11,22 @@ import ku_rum.backend.domain.alarm.domain.AlarmCategory;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.domain.Announcement;
 import ku_rum.backend.domain.alarm.domain.UserAnnouncement;
+import ku_rum.backend.domain.alarm.domain.UserDisabledAlarm;
 import ku_rum.backend.domain.alarm.domain.repository.AlarmRepository;
 import ku_rum.backend.domain.alarm.domain.repository.AnnouncementRepository;
 import ku_rum.backend.domain.alarm.domain.repository.UserAnnouncementRepository;
+import ku_rum.backend.domain.alarm.domain.repository.UserDisabledAlarmRepository;
 import ku_rum.backend.domain.alarm.dto.AlarmCursorDto;
 import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
 import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
+import ku_rum.backend.domain.alarm.dto.request.PostDisableAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.PostDisableAlarmResponse;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
@@ -47,6 +51,7 @@ public class AlarmService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final FcmService fcmService;
+    private final UserDisabledAlarmRepository userDisabledAlarmRepository;
 
     public void notifyAlarm(AlarmType alarmType, Object object, User user) {
         AlarmMessageHandler alarmMessageHandler = alarmMessageHandlers.get(alarmType);
@@ -130,6 +135,27 @@ public class AlarmService {
         long unCheckedAlarm = alarmRepository.countByUserAndIsCheckedFalse(user);
         long unCheckAnnouncementCount = userAnnouncementRepository.countByUserAndIsCheckedFalse(user);
         return GetAlarmUnreadResponse.of(unCheckedAlarm, unCheckAnnouncementCount);
+    }
+
+    @Transactional
+    public PostDisableAlarmResponse disableAlarm(CustomUserDetails userDetails, PostDisableAlarmRequest request) {
+        User user = userService.getUser();
+        AlarmType alarmType = request.alarmType();
+        Optional<UserDisabledAlarm> optional = userDisabledAlarmRepository.findByUserAndAlarmType(user,
+                alarmType);
+
+        if (optional.isEmpty()) {
+            UserDisabledAlarm userDisabledAlarm = UserDisabledAlarm.builder()
+                    .user(user)
+                    .alarmType(alarmType)
+                    .build();
+            UserDisabledAlarm saveUserDisabledAlarm = userDisabledAlarmRepository.save(userDisabledAlarm);
+            return PostDisableAlarmResponse.of(saveUserDisabledAlarm, true);
+        }
+
+        UserDisabledAlarm userDisabledAlarm = optional.get();
+        userDisabledAlarmRepository.delete(userDisabledAlarm);
+        return PostDisableAlarmResponse.of(userDisabledAlarm, false);
     }
 
     private PatchAlarmResponse patchAlarm(Long userId, Long alarmId) {
