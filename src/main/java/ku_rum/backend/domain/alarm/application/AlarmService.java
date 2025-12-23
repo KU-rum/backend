@@ -61,7 +61,9 @@ public class AlarmService {
         }
 
         createAndSaveAlarm(alarmMessageHandler, alarmType, object, user);
-
+        if (isDisableAlarm(alarmType, user)) {
+            return;
+        }
         FcmDirectDto fcmDirectDto = alarmMessageHandler.getFcmDirectDto(object, user);
         fcmService.sendToUsers(fcmDirectDto);
     }
@@ -288,5 +290,13 @@ public class AlarmService {
         }
 
         return optional.get().getId();
+    }
+
+    private boolean isDisableAlarm(AlarmType alarmType, User user) {
+        Optional<UserDisabledAlarm> optional = userDisabledAlarmRepository.findByUserAndAlarmType(user, alarmType);
+        if (optional.isPresent()) {
+            return true;
+        }
+        return false;
     }
 }
