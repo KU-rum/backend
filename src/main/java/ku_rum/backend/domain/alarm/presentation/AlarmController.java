@@ -7,11 +7,14 @@ import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
 import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.alarm.dto.request.DirectNotificationRequest;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
+import ku_rum.backend.domain.alarm.dto.request.PatchDisableAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.request.TopicNotificationRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmDisableResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.PatchDisableAlarmResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +69,21 @@ public class AlarmController {
     public BaseResponse<GetAlarmUnreadResponse> getUnreadAlarm(
             @AuthenticationPrincipal final CustomUserDetails userDetails) {
         GetAlarmUnreadResponse response = alarmService.getAlarmUnreadResponse(userDetails);
+        return BaseResponse.ok(response);
+    }
+
+    @PatchMapping("/disable")
+    public BaseResponse<PatchDisableAlarmResponse> disableAlarm(
+            @AuthenticationPrincipal final CustomUserDetails userDetails,
+            @RequestBody PatchDisableAlarmRequest request) {
+        PatchDisableAlarmResponse response = alarmService.disableAlarm(userDetails, request);
+        return BaseResponse.ok(response);
+    }
+
+    @GetMapping("/disable")
+    public BaseResponse<GetAlarmDisableResponse> disableAlarm(
+            @AuthenticationPrincipal final CustomUserDetails userDetails) {
+        GetAlarmDisableResponse response = alarmService.findDisableAlarm(userDetails);
         return BaseResponse.ok(response);
     }
 }

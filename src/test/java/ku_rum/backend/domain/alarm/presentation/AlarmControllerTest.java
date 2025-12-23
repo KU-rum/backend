@@ -22,11 +22,14 @@ import ku_rum.backend.domain.alarm.application.FcmService;
 import ku_rum.backend.domain.alarm.domain.AlarmCategory;
 import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
+import ku_rum.backend.domain.alarm.dto.request.PatchDisableAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
+import ku_rum.backend.domain.alarm.dto.response.GetAlarmDisableResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
+import ku_rum.backend.domain.alarm.dto.response.PatchDisableAlarmResponse;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
@@ -187,6 +190,89 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("message").description("응답 메시지"),
                                         fieldWithPath("data.hasUnread").description("안읽은 알람 유무"),
                                         fieldWithPath("data.count").description("안읽은 알람 갯수")
+                                )
+                                .build()
+                )));
+    }
+
+    @DisplayName("알림을 활성화/비활성화한다")
+    @Test
+    void patchDisableAlarm() throws Exception {
+
+        // given
+        PatchDisableAlarmResponse response = new PatchDisableAlarmResponse(1L, AlarmType.NEW_NOTICE,
+                Boolean.valueOf(true));
+
+        PatchDisableAlarmRequest request = new PatchDisableAlarmRequest(AlarmType.NEW_NOTICE);
+        given(alarmService.disableAlarm(any(), eq(request)))
+                .willReturn(response);
+
+        // when
+        mockMvc.perform(patch("/api/v1/alarm/disable")
+                        .header("Authorization", "Bearer test-access-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "alarmType": "NEW_NOTICE"
+                                }
+                                """))
+                // then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.userId").value(1))
+                .andExpect(jsonPath("$.data.alarmType").value("NEW_NOTICE"))
+                .andExpect(jsonPath("$.data.isDisabled").value(true))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("알림 조회 API")
+                                .description("특정 알림 활성화 또는 비활성화한다")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 액세스 토큰입니다.")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지"),
+                                        fieldWithPath("data.userId").description("유저 ID"),
+                                        fieldWithPath("data.alarmType").description("알람 타입"),
+                                        fieldWithPath("data.isDisabled").description("활성화 비활성화 여부")
+                                )
+                                .build()
+                )));
+    }
+
+    @DisplayName("알림 활성화/비활성화 여부를 확인한다")
+    @Test
+    void getDisableAlarm() throws Exception {
+
+        // given
+        GetAlarmDisableResponse response = new GetAlarmDisableResponse(
+                List.of(AlarmType.NEW_NOTICE, AlarmType.NEW_KEYWORD_NOTICE));
+
+        PatchDisableAlarmRequest request = new PatchDisableAlarmRequest(AlarmType.NEW_NOTICE);
+        given(alarmService.findDisableAlarm(any()))
+                .willReturn(response);
+
+        // when
+        mockMvc.perform(get("/api/v1/alarm/disable")
+                        .header("Authorization", "Bearer test-access-token"))
+                // then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.disabledAlarmType[0]").value("NEW_NOTICE"))
+                .andExpect(jsonPath("$.data.disabledAlarmType[1]").value("NEW_KEYWORD_NOTICE"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("알림 조회 API")
+                                .description("알림 활성화/비활성화 여부를 확인한다")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 액세스 토큰입니다.")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지"),
+                                        fieldWithPath("data.disabledAlarmType[]").description("비활성화 알림 목록")
                                 )
                                 .build()
                 )));
