@@ -60,7 +60,7 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
         given(recentSearchService.list(20)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/v1/recent-searches")
+        mockMvc.perform(get("/api/v1/notices/searches/recent")
                         .param("limit", "20")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -96,7 +96,7 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
     void deleteRecentSearch() throws Exception {
         doNothing().when(recentSearchService).delete(1L);
 
-        mockMvc.perform(delete("/api/v1/recent-searches/{id}", 1L)
+        mockMvc.perform(delete("/api/v1/notices/searches/recent/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -122,7 +122,7 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
     void deleteAllRecentSearches() throws Exception {
         doNothing().when(recentSearchService).deleteAll();
 
-        mockMvc.perform(delete("/api/v1/recent-searches/all")
+        mockMvc.perform(delete("/api/v1/notices/searches/recent/all")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
