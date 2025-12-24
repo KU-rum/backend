@@ -4,6 +4,7 @@ import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
@@ -273,6 +274,35 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("status").description("응답 상태"),
                                         fieldWithPath("message").description("응답 메시지"),
                                         fieldWithPath("data.disabledAlarmType[]").description("비활성화 알림 목록")
+                                )
+                                .build()
+                )));
+    }
+
+    @DisplayName("알림을 전부 읽는다")
+    @Test
+    void patchAllAlarm() throws Exception {
+        // given
+
+        doNothing().when(alarmService).patchAllUserAlarm(any());
+
+        // when
+        mockMvc.perform(patch("/api/v1/alarm/read-all")
+                        .header("Authorization", "Bearer test-access-token"))
+                // then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("알림 조회 API")
+                                .description("알림을 전부 확인한다")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 액세스 토큰입니다.")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").description("응답 코드"),
+                                        fieldWithPath("status").description("응답 상태"),
+                                        fieldWithPath("message").description("응답 메시지")
                                 )
                                 .build()
                 )));
