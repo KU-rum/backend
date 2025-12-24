@@ -167,6 +167,13 @@ public class AlarmService {
         return GetAlarmDisableResponse.from(userDisabledAlarms);
     }
 
+    @Transactional
+    public void patchAllUserAlarm(CustomUserDetails userDetails) {
+        User user = userService.getUser();
+        userAnnouncementRepository.markCheckedByUser(user);
+        alarmRepository.markCheckedByUser(user);
+    }
+
     private PatchAlarmResponse patchAlarm(Long userId, Long alarmId) {
         Alarm alarm = findAlarmById(alarmId);
 

@@ -6,6 +6,7 @@ import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.user.domain.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,4 +25,8 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     Optional<Alarm> findById(Long AlarmId);
 
     long countByUserAndIsCheckedFalse(User user);
+
+    @Modifying
+    @Query("UPDATE Alarm ua SET ua.isChecked = true WHERE ua.user = :user AND ua.isChecked = false")
+    int markCheckedByUser(@Param("user") User user);
 }

@@ -51,6 +51,12 @@ public class AlarmController {
         return BaseResponse.ok(response);
     }
 
+    @PatchMapping("/read-all")
+    public BaseResponse<Void> patchAllAlarm(@AuthenticationPrincipal final CustomUserDetails userDetails) {
+        alarmService.patchAllUserAlarm(userDetails);
+        return BaseResponse.ok();
+    }
+
     @PostMapping("/direct")
     public BaseResponse<Void> sendFcmMessage(@RequestBody DirectNotificationRequest request) {
         FcmDirectDto fcmDirectDto = new FcmDirectDto(request.title(), request.body(), request.userIds());
