@@ -1,6 +1,8 @@
 package ku_rum.backend.domain.oauth.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.JwtException;
 import ku_rum.backend.domain.oauth.domain.PreSignupPrincipal;
 import ku_rum.backend.domain.oauth.domain.ProviderType;
@@ -20,7 +22,9 @@ public class PreSignupTokenProvider {
 
     private final RedisUtil redisUtil;
     private static final long PRE_SIGNUP_EXPIRY_MILLIS = 30 * 60 * 1000; // 30분
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     public String create(PreSignupPrincipal pre) {
         String token = UUID.randomUUID().toString();
