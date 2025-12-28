@@ -40,12 +40,8 @@ public class AppleOAuth2ClientConfig {
                     .withRegistrationId(registrationId)
                     .clientId(reg.getClientId())
                     .clientSecret(reg.getClientSecret())
-                    .clientAuthenticationMethod(
-                            new ClientAuthenticationMethod(reg.getClientAuthenticationMethod())
-                    )
-                    .authorizationGrantType(
-                            new AuthorizationGrantType(reg.getAuthorizationGrantType())
-                    )
+                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                     .redirectUri(reg.getRedirectUri())
                     .scope(reg.getScope())
                     .clientName(
