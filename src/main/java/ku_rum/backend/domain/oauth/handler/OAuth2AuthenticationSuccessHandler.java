@@ -4,11 +4,18 @@ import com.github.dockerjava.api.exception.BadRequestException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ku_rum.backend.domain.oauth.domain.OAuth2MemberInfo;
 import ku_rum.backend.domain.oauth.domain.PreSignupPrincipal;
+import ku_rum.backend.domain.oauth.domain.ProviderType;
 import ku_rum.backend.domain.oauth.util.AppProperties;
 import ku_rum.backend.domain.oauth.util.CookieUtils;
+import ku_rum.backend.domain.user.domain.User;
+import ku_rum.backend.domain.user.domain.repository.UserRepository;
+import ku_rum.backend.global.exception.oauth.OAuthProviderMissMatchException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,9 +31,12 @@ import static ku_rum.backend.domain.oauth.handler.HttpCookieOAuth2AuthorizationR
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final AppProperties appProperties;
-    private final TempTokenProvider tempTokenProvider;             // 기존 가입자용 임시토큰
-    private final PreSignupTokenProvider preSignupTokenProvider;   // 신규: 프리사인업 토큰
+    private final TempTokenProvider tempTokenProvider;
+    private final PreSignupTokenProvider preSignupTokenProvider;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+
+    // 추가: Apple도 여기서 가입/미가입 판단을 해야 하므로 필요
+    private final UserRepository userRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -52,10 +62,54 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
+        // Apple은 OIDC principal 형태가 달라서 여기서 별도 처리 (PreSignup 플로우 유지)
+        if (authentication instanceof OAuth2AuthenticationToken oauth2Token) {
+            String registrationId = oauth2Token.getAuthorizedClientRegistrationId();
+
+            if ("apple".equals(registrationId)) {
+                OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+
+                // Apple은 sub가 고유 식별자
+                OAuth2MemberInfo memberInfo = OAuth2MemberInfoFactory.getOauth2MemberInfo(
+                        ProviderType.APPLE,
+                        oauth2User.getAttributes()
+                );
+
+                Optional<User> userOptional = userRepository.findByOauthId(memberInfo.getId());
+
+                if (userOptional.isPresent()) {
+                    User member = userOptional.get();
+
+                    if (ProviderType.APPLE != member.getProviderType()) {
+                        throw new OAuthProviderMissMatchException(
+                                "이미 " + member.getProviderType() + "로 가입된 계정입니다. 해당 계정으로 로그인해주세요."
+                        );
+                    }
+
+                    // 기존 가입자: userId 기반으로 temp token 발급
+                    String tempToken = tempTokenProvider.createTempTokenByUserId(member.getId());
+
+                    return UriComponentsBuilder.fromUriString(targetUrl)
+                            .queryParam("needSignup", false)
+                            .queryParam("token", tempToken)
+                            .build().toUriString();
+                }
+
+                // 미가입자: 기존과 동일하게 PreSignupPrincipal 기반 토큰 발급
+                PreSignupPrincipal pre = PreSignupPrincipal.of(ProviderType.APPLE, memberInfo, oauth2User.getAttributes());
+                String preToken = preSignupTokenProvider.create(pre);
+
+                return UriComponentsBuilder.fromUriString(targetUrl)
+                        .queryParam("needSignup", true)
+                        .queryParam("token", preToken)
+                        .build().toUriString();
+            }
+        }
+
+        // ---- 기존 로직 (Google/Naver/Kakao 등) 그대로 유지 ----
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof PreSignupPrincipal pre) {
-            // 미가입자 —> 프리사인업 토큰 발급
             String preToken = preSignupTokenProvider.create(pre);
             return UriComponentsBuilder.fromUriString(targetUrl)
                     .queryParam("needSignup", true)
@@ -63,7 +117,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     .build().toUriString();
         }
 
-        // 기존 가입자 —> 임시토큰(=userId 바인딩) 발급 (기존 교환 플로우 유지)
         String tempToken = tempTokenProvider.createTempToken(authentication);
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("needSignup", false)

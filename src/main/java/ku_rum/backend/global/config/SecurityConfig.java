@@ -26,6 +26,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -46,6 +48,8 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+
+    private final OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> appleAwareTokenResponseClient;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -78,6 +82,9 @@ public class SecurityConfig {
                         .authorizationEndpoint(endpoint -> endpoint
                                 .baseUri("/oauth2/authorization")
                                 .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
+                        )
+                        .tokenEndpoint(token -> token
+                                .accessTokenResponseClient(appleAwareTokenResponseClient)
                         )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
