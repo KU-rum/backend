@@ -9,6 +9,7 @@ import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import ku_rum.backend.global.security.JwtTokenProvider;
 import ku_rum.backend.global.utill.RedisUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -49,7 +50,8 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-    private final OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> appleAwareTokenResponseClient;
+    private final ObjectProvider<OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest>>
+            appleAwareTokenResponseClientProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -78,23 +80,25 @@ public class SecurityConfig {
                 )
 
                 // OAuth2 로그인 설정 (인증 성공/실패 핸들러)
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .baseUri("/oauth2/authorization")
-                                .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
-                        )
-                        .tokenEndpoint(token -> token
-                                .accessTokenResponseClient(appleAwareTokenResponseClient)
-                        )
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                        // OAuth 로그인 도중 에러 발생 시에도 401 반환
-                        .failureHandler((request, response, exception) ->
-                                response.sendError(HttpStatus.UNAUTHORIZED.value())
-                        )
-                )
+                .oauth2Login(oauth2 -> {
+                    oauth2.authorizationEndpoint(endpoint -> endpoint
+                            .baseUri("/oauth2/authorization")
+                            .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
+                    );
+
+                    OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenClient =
+                            appleAwareTokenResponseClientProvider.getIfAvailable();
+
+                    if (tokenClient != null) {
+                        oauth2.tokenEndpoint(token -> token.accessTokenResponseClient(tokenClient));
+                    }
+
+                    oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService));
+                    oauth2.successHandler(oAuth2AuthenticationSuccessHandler);
+                    oauth2.failureHandler((request, response, exception) ->
+                            response.sendError(HttpStatus.UNAUTHORIZED.value())
+                    );
+                })
                 .oauth2Client(Customizer.withDefaults())
 
                 // JWT 필터 등록

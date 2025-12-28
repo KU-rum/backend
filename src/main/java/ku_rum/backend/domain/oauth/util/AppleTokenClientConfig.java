@@ -2,8 +2,11 @@ package ku_rum.backend.domain.oauth.config;
 
 import ku_rum.backend.domain.oauth.util.AppleClientSecretGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.RequestEntity;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
@@ -14,6 +17,9 @@ import org.springframework.util.MultiValueMap;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile("!test")
+@ConditionalOnProperty(prefix = "apple", name = "enabled", havingValue = "true")
+@ConditionalOnBean(AppleClientSecretGenerator.class)
 public class AppleTokenClientConfig {
 
     private final AppleClientSecretGenerator appleClientSecretGenerator;
