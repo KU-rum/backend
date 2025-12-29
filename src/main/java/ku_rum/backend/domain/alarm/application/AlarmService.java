@@ -178,7 +178,7 @@ public class AlarmService {
             userDisabledAlarmRepository.deleteAll(toDelete);
         }
 
-        return PatchDisableAlarmResponse.of(toCreate, toDelete);
+        return PatchDisableAlarmResponse.of(user.getId(), toCreate, toDelete);
     }
 
     public GetAlarmDisableResponse findDisableAlarm(CustomUserDetails userDetails) {
