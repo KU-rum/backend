@@ -238,7 +238,6 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("data.userId").description("유저 ID"),
                                         fieldWithPath("data.alarms[].alarmType").description("알람 타입"),
                                         fieldWithPath("data.alarms[].isDisabled").description("활성 여부")
-                                        //fieldWithPath("data.isDisabled").description("활성화 비활성화 여부")
                                 )
                                 .build()
                 )));
