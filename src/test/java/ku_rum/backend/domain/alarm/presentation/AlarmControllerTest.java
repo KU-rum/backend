@@ -25,6 +25,7 @@ import ku_rum.backend.domain.alarm.domain.AlarmType;
 import ku_rum.backend.domain.alarm.dto.request.PatchAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.request.PatchDisableAlarmRequest;
 import ku_rum.backend.domain.alarm.dto.response.AlarmPaginationRequest;
+import ku_rum.backend.domain.alarm.dto.response.DisableAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDisableResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmDto;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
@@ -201,10 +202,10 @@ public class AlarmControllerTest extends RestDocsTestSupport {
     void patchDisableAlarm() throws Exception {
 
         // given
-        PatchDisableAlarmResponse response = new PatchDisableAlarmResponse(1L, AlarmType.NEW_NOTICE,
-                Boolean.valueOf(true));
+        DisableAlarmDto disableAlarmDto = new DisableAlarmDto(AlarmType.NEW_NOTICE, true);
+        PatchDisableAlarmResponse response = new PatchDisableAlarmResponse(1L, List.of(disableAlarmDto));
 
-        PatchDisableAlarmRequest request = new PatchDisableAlarmRequest(AlarmType.NEW_NOTICE);
+        PatchDisableAlarmRequest request = new PatchDisableAlarmRequest(List.of(AlarmType.NEW_NOTICE));
         given(alarmService.disableAlarm(any(), eq(request)))
                 .willReturn(response);
 
@@ -214,15 +215,15 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "alarmType": "NEW_NOTICE"
+                                  "alarmTypes": ["NEW_NOTICE"]
                                 }
                                 """))
                 // then
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.userId").value(1))
-                .andExpect(jsonPath("$.data.alarmType").value("NEW_NOTICE"))
-                .andExpect(jsonPath("$.data.isDisabled").value(true))
+                .andExpect(jsonPath("$.data.alarms[0].alarmType").value("NEW_NOTICE"))
+                .andExpect(jsonPath("$.data.alarms[0].isDisabled").value(true))
                 .andDo(restDocs.document(resource(
                         ResourceSnippetParameters.builder()
                                 .tag("알림 조회 API")
@@ -235,8 +236,8 @@ public class AlarmControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("status").description("응답 상태"),
                                         fieldWithPath("message").description("응답 메시지"),
                                         fieldWithPath("data.userId").description("유저 ID"),
-                                        fieldWithPath("data.alarmType").description("알람 타입"),
-                                        fieldWithPath("data.isDisabled").description("활성화 비활성화 여부")
+                                        fieldWithPath("data.alarms[].alarmType").description("알람 타입"),
+                                        fieldWithPath("data.alarms[].isDisabled").description("활성 여부")
                                 )
                                 .build()
                 )));
@@ -250,7 +251,6 @@ public class AlarmControllerTest extends RestDocsTestSupport {
         GetAlarmDisableResponse response = new GetAlarmDisableResponse(
                 List.of(AlarmType.NEW_NOTICE, AlarmType.NEW_KEYWORD_NOTICE));
 
-        PatchDisableAlarmRequest request = new PatchDisableAlarmRequest(AlarmType.NEW_NOTICE);
         given(alarmService.findDisableAlarm(any()))
                 .willReturn(response);
 

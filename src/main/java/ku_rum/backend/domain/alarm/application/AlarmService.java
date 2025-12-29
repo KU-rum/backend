@@ -1,10 +1,13 @@
 package ku_rum.backend.domain.alarm.application;
 
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import ku_rum.backend.domain.alarm.domain.Alarm;
 import ku_rum.backend.domain.alarm.domain.AlarmCategory;
@@ -143,22 +146,39 @@ public class AlarmService {
     @Transactional
     public PatchDisableAlarmResponse disableAlarm(CustomUserDetails userDetails, PatchDisableAlarmRequest request) {
         User user = userService.getUser();
-        AlarmType alarmType = request.alarmType();
-        Optional<UserDisabledAlarm> optional = userDisabledAlarmRepository.findByUserAndAlarmType(user,
-                alarmType);
+        List<AlarmType> alarmTypes = request.alarmTypes();
+        List<UserDisabledAlarm> existingDisabledAlarms = userDisabledAlarmRepository.findByUserAndAlarmTypeIn(user,
+                alarmTypes);
+        Set<AlarmType> existingAlarmTypes = existingDisabledAlarms.stream()
+                .map(UserDisabledAlarm::getAlarmType)
+                .collect(Collectors.toSet());
 
-        if (optional.isEmpty()) {
+        List<UserDisabledAlarm> toCreate = new ArrayList<>();
+        List<UserDisabledAlarm> toDelete = new ArrayList<>();
+
+        for (AlarmType alarmType : alarmTypes) {
+            if (existingAlarmTypes.contains(alarmType)) {
+                existingDisabledAlarms.stream()
+                        .filter(alarm -> alarm.getAlarmType().equals(alarmType))
+                        .findFirst()
+                        .ifPresent(toDelete::add);
+                continue;
+            }
             UserDisabledAlarm userDisabledAlarm = UserDisabledAlarm.builder()
                     .user(user)
                     .alarmType(alarmType)
                     .build();
-            UserDisabledAlarm saveUserDisabledAlarm = userDisabledAlarmRepository.save(userDisabledAlarm);
-            return PatchDisableAlarmResponse.of(saveUserDisabledAlarm, true);
+            toCreate.add(userDisabledAlarm);
         }
 
-        UserDisabledAlarm userDisabledAlarm = optional.get();
-        userDisabledAlarmRepository.delete(userDisabledAlarm);
-        return PatchDisableAlarmResponse.of(userDisabledAlarm, false);
+        if (!toCreate.isEmpty()) {
+            userDisabledAlarmRepository.saveAll(toCreate);
+        }
+        if (!toDelete.isEmpty()) {
+            userDisabledAlarmRepository.deleteAll(toDelete);
+        }
+
+        return PatchDisableAlarmResponse.of(user.getId(), toCreate, toDelete);
     }
 
     public GetAlarmDisableResponse findDisableAlarm(CustomUserDetails userDetails) {
