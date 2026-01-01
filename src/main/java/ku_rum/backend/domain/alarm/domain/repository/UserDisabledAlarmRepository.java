@@ -13,5 +13,7 @@ public interface UserDisabledAlarmRepository extends JpaRepository<UserDisabledA
 
     Optional<UserDisabledAlarm> findByUserAndAlarmType(User user, AlarmType alarmType);
 
+    List<UserDisabledAlarm> findByUserAndAlarmTypeIn(User user, List<AlarmType> alarmTypes);
+
     List<UserDisabledAlarm> findByUser(User user);
 }
