@@ -68,7 +68,7 @@ public class AlarmService {
             return;
         }
         FcmDirectDto fcmDirectDto = alarmMessageHandler.getFcmDirectDto(object, user);
-        fcmService.sendToUsers(fcmDirectDto);
+        fcmService.sendToUsersIfTokenExists(fcmDirectDto);
     }
 
     @Transactional
