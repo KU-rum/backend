@@ -37,15 +37,38 @@ public class FcmService {
     private final UserService userService;
 
     public void sendToUsersIfTokenExists(FcmDirectDto fcmDirectDto) {
-        User user = userService.getUser();
-        Optional<UserFcmToken> token = userFcmTokenRepository.findByUser(user);
+        List<User> users = userQueryService.getUsersByIds(fcmDirectDto.userIds());
+        List<UserFcmToken> userFcmTokens = userFcmTokenRepository.findByUserIn(users);
 
-        if (token.isEmpty()) {
-            log.info("FCM 토큰이 존재하지 않는 유저입니다. userId={}", user.getId());
+        List<Long> userIdsWithToken = userFcmTokens.stream()
+                .map(token -> token.getUser().getId())
+                .toList();
+
+        List<Long> userIdsWithoutToken = fcmDirectDto.userIds().stream()
+                .filter(userId -> !userIdsWithToken.contains(userId))
+                .toList();
+
+        if (!userIdsWithoutToken.isEmpty()) {
+            log.info(
+                    "FCM 토큰이 없어 전송하지 못한 userIds={}",
+                    userIdsWithoutToken
+            );
+        }
+
+        if (userIdsWithToken.isEmpty()) {
+            log.info(
+                    "FCM 전송 가능한 유저가 없습니다. 요청 userIds={}",
+                    fcmDirectDto.userIds()
+            );
             return;
         }
 
-        sendToUsers(fcmDirectDto);
+        FcmDirectDto filteredDto = FcmDirectDto.builder()
+                .title(fcmDirectDto.title())
+                .body(fcmDirectDto.body())
+                .userIds(userIdsWithToken)
+                .build();
+        sendToUsers(filteredDto);
     }
 
     public void sendToUsers(FcmDirectDto request) {
