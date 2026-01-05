@@ -41,7 +41,11 @@ public class FriendManageService {
         }
         friendRepository.save(Friend.of(fromUser, toUser, PENDING));
 
-        alarmService.notifyAlarm(AlarmType.NEW_FRIEND_REQUEST, fromUser, toUser);
+        alarmService.notifyAlarm(
+                AlarmType.NEW_FRIEND_REQUEST,
+                toUser,
+                toUser
+        );
     }
 
     // 친구 수락 및 거절
