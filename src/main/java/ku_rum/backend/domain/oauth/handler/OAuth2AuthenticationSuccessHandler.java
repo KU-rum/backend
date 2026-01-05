@@ -16,6 +16,7 @@ import ku_rum.backend.global.exception.oauth.OAuthProviderMissMatchException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -74,12 +75,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String registrationId = oauth2Token.getAuthorizedClientRegistrationId();
 
             if ("apple".equals(registrationId)) {
-                OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+                OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
 
                 // Apple은 sub가 고유 식별자
                 OAuth2MemberInfo memberInfo = OAuth2MemberInfoFactory.getOauth2MemberInfo(
                         ProviderType.APPLE,
-                        oauth2User.getAttributes()
+                        oidcUser.getClaims()
                 );
 
                 Optional<User> userOptional = userRepository.findByOauthId(memberInfo.getId());
@@ -103,7 +104,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 }
 
                 // 미가입자: 기존과 동일하게 PreSignupPrincipal 기반 토큰 발급
-                PreSignupPrincipal pre = PreSignupPrincipal.of(ProviderType.APPLE, memberInfo, oauth2User.getAttributes());
+                PreSignupPrincipal pre = PreSignupPrincipal.of(
+                        ProviderType.APPLE, memberInfo, oidcUser.getClaims()
+                );
                 String preToken = preSignupTokenProvider.create(pre);
 
                 return UriComponentsBuilder.fromUriString(targetUrl)

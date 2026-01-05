@@ -46,7 +46,7 @@ public class CustomOidcUserService extends OidcUserService {
                 }
                 // CustomUserDetails가 OAuth2User를 기대한다면, 여기서도 동일하게 래핑
                 // (필요 시 create 시그니처에 맞게 조정)
-                return (OidcUser) CustomUserDetails.create(member, oidcUser.getClaims());
+                return oidcUser;
             }
 
             // 미가입자: PreSignupPrincipal로 처리하려면 OidcUser가 아니라 OAuth2User 흐름이 필요하므로,
