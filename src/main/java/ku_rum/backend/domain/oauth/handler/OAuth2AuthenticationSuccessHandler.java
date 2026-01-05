@@ -1,6 +1,7 @@
 package ku_rum.backend.domain.oauth.handler;
 
 import com.github.dockerjava.api.exception.BadRequestException;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +38,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // 추가: Apple도 여기서 가입/미가입 판단을 해야 하므로 필요
     private final UserRepository userRepository;
+
+    @PostConstruct
+    public void init() {
+        setDefaultTargetUrl("https://ku-room.vercel.app/oauth/callback");
+        setAlwaysUseDefaultTargetUrl(false);
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,

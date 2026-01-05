@@ -1,4 +1,4 @@
-package ku_rum.backend.domain.oauth.config;
+package ku_rum.backend.domain.oauth.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
