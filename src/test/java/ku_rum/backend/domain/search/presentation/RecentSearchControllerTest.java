@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -132,6 +133,39 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
                                 ResourceSnippetParameters.builder()
                                         .tag("최근 검색어 API")
                                         .description("최근 검색어 전체 삭제")
+                                        .responseFields(
+                                                fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드"),
+                                                fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("최근 검색어를 저장한다")
+    @WithMockUser
+    void saveRecentSearch() throws Exception {
+        // given
+        doNothing().when(recentSearchService).save("장학금");
+
+        // when & then
+        mockMvc.perform(post("/api/v1/notices/searches/recent")
+                        .queryParam("keyword", "장학금")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("최근 검색어 API")
+                                        .description("최근 검색어 저장")
+                                        .queryParameters(
+                                                parameterWithName("keyword")
+                                                        .description("저장할 검색 키워드")
+                                        )
                                         .responseFields(
                                                 fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드"),
                                                 fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태"),

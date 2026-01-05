@@ -2,6 +2,7 @@ package ku_rum.backend.domain.search.presentation;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import ku_rum.backend.domain.search.application.RecentSearchService;
 import ku_rum.backend.domain.search.domain.RecentSearch;
 import ku_rum.backend.global.support.response.BaseResponse;
@@ -34,6 +35,16 @@ public class RecentSearchController {
     @DeleteMapping("/all")
     public BaseResponse<Void> deleteAll() {
         recentSearchService.deleteAll();
+        return BaseResponse.ok(null);
+    }
+
+    @PostMapping
+    public BaseResponse<Void> save(
+            @RequestParam
+            @NotBlank(message = "검색어는 필수입니다.")
+            String keyword) {
+
+        recentSearchService.save(keyword);
         return BaseResponse.ok(null);
     }
 }
