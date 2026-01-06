@@ -1,5 +1,12 @@
 package ku_rum.backend.domain.user.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_EMAIL;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_LOGIN;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_NICKNAME;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_STUDENT_ID;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PREV_PASSWORD_EXCEPTION;
+
 import ku_rum.backend.domain.department.application.DepartmentValidator;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
@@ -15,8 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.*;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -29,7 +34,6 @@ public class UserValidator {
         log.info("사용자 유효성 검사 시작: {}", userSaveRequest);
         validateDuplicateEmail(userSaveRequest.email());
         validateDuplicateLoginId(userSaveRequest.loginId());
-        validateDuplicateStudentId(userSaveRequest.studentId());
         validateNickname(userSaveRequest.nickname());
         departmentValidator.validateDepartmentName(userSaveRequest.department());
     }

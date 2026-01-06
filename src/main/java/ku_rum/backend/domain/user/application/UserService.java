@@ -88,6 +88,7 @@ public class UserService {
     public AuthResponse completeSocialSignup(final SocialSignupRequest req) {
         log.info("소셜 가입 요청: {}", req);
 
+        userValidator.validateNickname(req.nickname());
         PreSignupTokenProvider.PreSignupPayload payload = preSignupTokenProvider.resolve(req.token());
 
         userRepository.findByOauthId(payload.getOauthId()).ifPresent(u -> {
