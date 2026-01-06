@@ -1,5 +1,10 @@
 package ku_rum.backend.domain.notice.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE_DETAIL;
+
+import java.util.List;
+import java.util.Optional;
 import ku_rum.backend.domain.bookmark.domain.NoticeBookmark;
 import ku_rum.backend.domain.bookmark.domain.repository.BookmarkRepository;
 import ku_rum.backend.domain.notice.domain.Notice;
@@ -19,12 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_NOTICE_DETAIL;
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +49,14 @@ public class NoticeService {
         NoticeDetail noticeDetail = noticeDetailRepository.findByNotice(notice)
                 .orElseThrow(() -> new GlobalException(NO_SUCH_NOTICE_DETAIL));
         String encodedHtml = noticeDetail.getHtmlContent();
-        Optional<NoticeBookmark> noticeBookmark =  bookmarkRepository.findByUserAndNotice(user, notice);
-        if(noticeBookmark.isPresent()) {
-            return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(), noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(), noticeBookmark.get().getId(), true);
+        Optional<NoticeBookmark> noticeBookmark = bookmarkRepository.findByUserAndNotice(user, notice);
+        if (noticeBookmark.isPresent()) {
+            return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(),
+                    noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(),
+                    noticeBookmark.get().getId(), true);
         }
-        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(), noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(), -1L, false);
+        return new NoticeDetailResponse(noticeDetail.getNotice().getId(), encodedHtml, notice.getLink(),
+                noticeDetail.getNotice().getTitle(), noticeDetail.getNotice().getPubDate(), -1L, false);
     }
 
     public Notice findNoticeByNoticeId(Long noticeId) {

@@ -134,15 +134,15 @@ class FriendManageControllerTest extends RestDocsTestSupport {
     @DisplayName("보낸 친구 요청 삭제 API")
     @WithMockUser
     void deleteFriendRequest() throws Exception {
-        Long requestId = 1L;
-        FriendRequest request = new FriendRequest(requestId); // FriendRequest DTO에 맞게 생성자/빌더 필요
+        Long receiverId = 1L;
+        FriendRequest request = new FriendRequest(receiverId); // FriendRequest DTO에 맞게 생성자/빌더 필요
 
         doNothing().when(friendManageService).deleteSentRequest(request);
 
         mockMvc.perform(delete("/api/v1/friends/request")
                         .header("Authorization", "Bearer your.jwt.token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"requestId\":1}"))
+                        .content("{\"receiverId\":1}"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpectAll(RestDocsTestUtils.expectCommonSuccess())
@@ -154,7 +154,7 @@ class FriendManageControllerTest extends RestDocsTestSupport {
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
                                 )
                                 .requestFields(
-                                        fieldWithPath("requestId").description("삭제할 친구 요청 ID")
+                                        fieldWithPath("receiverId").description("삭제할 친구 요청 ID")
                                 )
                                 .responseFields(RestDocsFieldSnippets.COMMON_RESPONSE_FIELDS)
                                 .build())
