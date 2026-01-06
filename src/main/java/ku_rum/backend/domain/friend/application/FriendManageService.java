@@ -67,7 +67,7 @@ public class FriendManageService {
         User currentUser = userUtil.getUser();
         User toUser = userQueryService.getUserById(friendSendRequest.receiverId());
 
-        Friend friend = friendRepository.findByFromUserAndToUserAndStatus(toUser, currentUser, PENDING)
+        Friend friend = friendRepository.findByFromUserAndToUserAndStatus(currentUser, toUser, PENDING)
                 .orElseThrow(() -> new GlobalException(NO_PENDING_LIST));
 
         if (!friend.getFromUser().equals(currentUser)) {
