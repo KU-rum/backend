@@ -34,7 +34,6 @@ public class UserProfileController {
 
     private final UserService userService;
 
-
     /**
      * 프로필 조회 API
      *

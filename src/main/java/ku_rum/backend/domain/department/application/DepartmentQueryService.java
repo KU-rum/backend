@@ -1,18 +1,18 @@
 package ku_rum.backend.domain.department.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
+
+import java.util.List;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.department.domain.repository.DepartmentRepository;
 import ku_rum.backend.domain.department.dto.CollegeDepartmentResponse;
+import ku_rum.backend.domain.department.dto.SearchDepartmentResponse;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.global.exception.department.NoSuchDepartmentException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -38,5 +38,13 @@ public class DepartmentQueryService {
         List<Department> departments = departmentRepository.findAllByCollege_Name(college);
         List<String> list = departments.stream().map(Department::getName).toList();
         return new CollegeDepartmentResponse(list);
+    }
+
+    public List<SearchDepartmentResponse> search(String query) {
+        List<Department> departments = departmentRepository.searchDepartmentByName(query);
+        return departments.stream()
+                .map(department -> new SearchDepartmentResponse(department.getName(),
+                        department.getCollege().getName()))
+                .toList();
     }
 }
