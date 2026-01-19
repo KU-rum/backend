@@ -582,7 +582,8 @@ class UserControllerTest extends RestDocsTestSupport {
         //given
         List<UserProfileDepartmentResponse> profileDepartmentResponses = List.of(
                 new UserProfileDepartmentResponse("융합생명공학", "KU융합과학기술원"));
-        UserProfileResponse response = new UserProfileResponse("kuroom@konkuk.ac.kr", "쿠룸", "201911254",
+        UserProfileResponse response = new UserProfileResponse("examplce.png", "kuroom@konkuk.ac.kr", "kuroom", "쿠룸",
+                "201911254",
                 profileDepartmentResponses);
         when(userService.getUserProfile()).thenReturn(response);
 
@@ -611,9 +612,15 @@ class UserControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("message")
                                                         .type(JsonType.STRING)
                                                         .description("성공 시 메시지 값 (OK)"),
+                                                fieldWithPath("data.profileImage")
+                                                        .type(JsonType.STRING)
+                                                        .description("회원 프로필 이미지 URL"),
                                                 fieldWithPath("data.email")
                                                         .type(JsonType.STRING)
                                                         .description("회원 이메일"),
+                                                fieldWithPath("data.loginId")
+                                                        .type(JsonType.STRING)
+                                                        .description("회원 로그인 아이디"),
                                                 fieldWithPath("data.nickname")
                                                         .type(JsonType.STRING)
                                                         .description("회원 닉네임"),
