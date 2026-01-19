@@ -29,6 +29,8 @@ import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
 import ku_rum.backend.domain.user.dto.response.TemporaryUserResponse;
 import ku_rum.backend.domain.user.dto.response.TokenResponse;
+import ku_rum.backend.domain.user.dto.response.UserProfileDepartmentResponse;
+import ku_rum.backend.domain.user.dto.response.UserProfileResponse;
 import ku_rum.backend.domain.user.dto.response.UserResponse;
 import ku_rum.backend.domain.user.dto.response.UserSaveResponse;
 import ku_rum.backend.global.exception.department.DuplicateDepartmentException;
@@ -240,5 +242,18 @@ public class UserService {
                 new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
         TokenResponse token = jwtTokenProvider.createToken(authentication);
         return TemporaryUserResponse.from(token);
+    }
+
+    public UserProfileResponse getUserProfile() {
+        User user = getUser();
+        List<UserProfileDepartmentResponse> userDepartments = userDepartmentRepository.findByUserId(user.getId())
+                .stream()
+                .map(userDepartment -> {
+                    String departmentName = userDepartment.getDepartment().getName();
+                    String collegeName = userDepartment.getDepartment().getCollege().getName();
+                    return new UserProfileDepartmentResponse(departmentName, collegeName);
+                })
+                .toList();
+        new UserProfileResponse(user.getEmail(), user.getNickname(), user.getStudentId(), userDepartments);
     }
 }
