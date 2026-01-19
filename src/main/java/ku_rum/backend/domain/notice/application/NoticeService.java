@@ -42,7 +42,7 @@ public class NoticeService {
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "pub_date")
+                Sort.by(Sort.Direction.DESC, "pubDate")
         );
         return noticeRepository.findByCategoryIdAndPublishStatus(categoryId, PublishStatus.SUCCESS_CRAWLING,
                 sortedPageable).map(NoticeResponse::from);
