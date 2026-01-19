@@ -34,6 +34,29 @@ public class UserProfileController {
 
     private final UserService userService;
 
+
+    /**
+     * 프로필 조회 API
+     *
+     * @return
+     */
+    @GetMapping("/profile")
+    public BaseResponse<UserProfileResponse> getUserProfile() {
+        UserProfileResponse response = userService.getUserProfile();
+        return BaseResponse.ok(response);
+    }
+
+    /**
+     * 프로필 조회 API
+     *
+     * @return
+     */
+    @GetMapping("/profile")
+    public BaseResponse<UserProfileResponse> getUserProfile() {
+        UserProfileResponse response = userService.getUserProfile();
+        return BaseResponse.ok(response);
+    }
+
     /**
      * 프로필 조회 API
      *
