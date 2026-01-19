@@ -254,6 +254,6 @@ public class UserService {
                     return new UserProfileDepartmentResponse(departmentName, collegeName);
                 })
                 .toList();
-        new UserProfileResponse(user.getEmail(), user.getNickname(), user.getStudentId(), userDepartments);
+        return new UserProfileResponse(user.getEmail(), user.getNickname(), user.getStudentId(), userDepartments);
     }
 }

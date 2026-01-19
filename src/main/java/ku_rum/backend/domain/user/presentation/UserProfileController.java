@@ -34,6 +34,18 @@ public class UserProfileController {
 
     private final UserService userService;
 
+
+    /**
+     * 프로필 조회 API
+     *
+     * @return
+     */
+    @GetMapping("/profile")
+    public BaseResponse<UserProfileResponse> getUserProfile() {
+        UserProfileResponse response = userService.getUserProfile();
+        return BaseResponse.ok(response);
+    }
+
     /**
      * 프로필 변경 API
      *
@@ -124,17 +136,6 @@ public class UserProfileController {
     public BaseResponse<String> deleteDepartment(@RequestBody @Valid final DepartmentRequest departmentRequest) {
         userService.deleteDepartment(departmentRequest.department());
         return BaseResponse.ok("학과 삭제에 성공하였습니다.");
-    }
-
-    /**
-     * 프로필 조회 API
-     *
-     * @return
-     */
-    @GetMapping
-    public BaseResponse<UserProfileResponse> getUserProfile() {
-        UserProfileResponse response = userService.getUserProfile();
-        return BaseResponse.ok(response);
     }
 }
 
