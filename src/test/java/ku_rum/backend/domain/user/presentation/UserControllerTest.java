@@ -1,39 +1,5 @@
 package ku_rum.backend.domain.user.presentation;
 
-import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
-import ku_rum.backend.domain.auth.dto.response.AuthResponse;
-import ku_rum.backend.domain.common.mail.dto.request.EmailValidationRequest;
-import ku_rum.backend.domain.friend.application.FriendReportService;
-import ku_rum.backend.domain.friend.domain.repository.FriendBlockRepository;
-import ku_rum.backend.domain.user.application.UserService;
-import ku_rum.backend.domain.user.application.UserValidator;
-import ku_rum.backend.domain.user.domain.AgreementStatus;
-import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
-import ku_rum.backend.domain.user.dto.request.SocialSignupRequest;
-import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
-import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
-import ku_rum.backend.domain.user.dto.response.TokenResponse;
-import ku_rum.backend.domain.user.dto.response.UserResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.CustomUserDetails;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.openqa.selenium.json.JsonType;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static ku_rum.backend.domain.user.domain.UserMessage.VALID_LOGINID_MESSAGE;
 import static ku_rum.backend.domain.user.domain.UserMessage.VALID_NICKNAME_MESSAGE;
@@ -52,6 +18,41 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import java.util.List;
+import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.domain.auth.dto.response.AuthResponse;
+import ku_rum.backend.domain.common.mail.dto.request.EmailValidationRequest;
+import ku_rum.backend.domain.friend.application.FriendReportService;
+import ku_rum.backend.domain.friend.domain.repository.FriendBlockRepository;
+import ku_rum.backend.domain.user.application.UserService;
+import ku_rum.backend.domain.user.application.UserValidator;
+import ku_rum.backend.domain.user.domain.AgreementStatus;
+import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
+import ku_rum.backend.domain.user.dto.request.SocialSignupRequest;
+import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
+import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
+import ku_rum.backend.domain.user.dto.response.TokenResponse;
+import ku_rum.backend.domain.user.dto.response.UserProfileDepartmentResponse;
+import ku_rum.backend.domain.user.dto.response.UserProfileResponse;
+import ku_rum.backend.domain.user.dto.response.UserResponse;
+import ku_rum.backend.global.domain.repository.ApiLogRepository;
+import ku_rum.backend.global.security.CustomUserDetails;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.json.JsonType;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
@@ -167,7 +168,8 @@ class UserControllerTest extends RestDocsTestSupport {
         // when then
         mockMvc.perform(post("/api/v1/users/social")
                         .content(objectMapper.writeValueAsString(request))
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -270,11 +272,13 @@ class UserControllerTest extends RestDocsTestSupport {
     void changeProfile() throws Exception {
         // given
         ProfileChangeRequest profileChangeRequest = new ProfileChangeRequest("test.com");
-        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
+        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser",
+                AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
 
         // when then
         mockMvc.perform(patch("/api/v1/users/profile")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
                         .with(SecurityMockMvcRequestPostProcessors.user(userDetails))
                         .content(objectMapper.writeValueAsString(profileChangeRequest))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -353,7 +357,8 @@ class UserControllerTest extends RestDocsTestSupport {
                                         .tag("소셜 로그인 API")
                                         .description("소셜 로그인 회원가입 완료 API — 프리사인업 토큰을 이용해 회원 정보를 등록하고 JWT를 발급받습니다.")
                                         .requestHeaders(
-                                                headerWithName("Authorization").description("발급받은 임시 접근 토큰 또는 Bearer 헤더 (테스트용)")
+                                                headerWithName("Authorization").description(
+                                                        "발급받은 임시 접근 토큰 또는 Bearer 헤더 (테스트용)")
                                         )
                                         .requestFields(
                                                 fieldWithPath("token")
@@ -424,9 +429,12 @@ class UserControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("data.userResponse.departmentResponse")
                                                         .type(JsonFieldType.ARRAY)
                                                         .description("학과 리스트").optional(),
-                                                fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
-                                                fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
-                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                                fieldWithPath("code").type(JsonFieldType.NUMBER)
+                                                        .description("응답 코드 (200)"),
+                                                fieldWithPath("status").type(JsonFieldType.STRING)
+                                                        .description("응답 상태 (OK)"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                        .description("응답 메시지")
                                         )
                                         .build()
                         )
@@ -506,7 +514,6 @@ class UserControllerTest extends RestDocsTestSupport {
         String testStudentId = "2021123456";
         doNothing().when(userValidator).validateDuplicateStudentId(testStudentId);
 
-
         // when & then
         mockMvc.perform(get("/api/v1/users/check-studentId")
                         .param("value", testStudentId)
@@ -563,7 +570,62 @@ class UserControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
                                         fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
                                         fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                        fieldWithPath("data.loginId").type(JsonFieldType.STRING).description("조회된 로그인 아이디")
+                                        fieldWithPath("data.loginId").type(JsonFieldType.STRING)
+                                                .description("조회된 로그인 아이디")
                                 ).build())));
+    }
+
+    @Test
+    @DisplayName("회원 프로필 조회")
+    void getUserProfile() throws Exception {
+
+        //given
+        List<UserProfileDepartmentResponse> profileDepartmentResponses = List.of(
+                new UserProfileDepartmentResponse("융합생명공학", "KU융합과학기술원"));
+        UserProfileResponse response = new UserProfileResponse("kuroom@konkuk.ac.kr", "쿠룸", "201911254",
+                profileDepartmentResponses);
+        when(userService.getUserProfile()).thenReturn(response);
+
+        // when & Then
+        mockMvc.perform(get("/api/v1/users/profile")
+                        .header("Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("프로필 관련 API")
+                                        .description("프로필 조회")
+                                        .requestHeaders(
+                                                headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("code")
+                                                        .type(JsonType.NUMBER)
+                                                        .description("성공시 반환 코드 (200)"),
+                                                fieldWithPath("status")
+                                                        .type(JsonType.STRING)
+                                                        .description("성공시 상태 값 (OK)"),
+                                                fieldWithPath("message")
+                                                        .type(JsonType.STRING)
+                                                        .description("성공 시 메시지 값 (OK)"),
+                                                fieldWithPath("data.email")
+                                                        .type(JsonType.STRING)
+                                                        .description("회원 이메일"),
+                                                fieldWithPath("data.nickname")
+                                                        .type(JsonType.STRING)
+                                                        .description("회원 닉네임"),
+                                                fieldWithPath("data.studentId")
+                                                        .type(JsonType.STRING)
+                                                        .description("회원 학번"),
+                                                fieldWithPath("data.departments[].department")
+                                                        .type(JsonType.STRING)
+                                                        .description("회원 학과"),
+                                                fieldWithPath("data.departments[].college")
+                                                        .type(JsonType.STRING)
+                                                        .description("회원 단과대")
+                                        ).build())));
     }
 }
