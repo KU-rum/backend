@@ -41,7 +41,7 @@ public class DepartmentQueryService {
     }
 
     public List<SearchDepartmentResponse> search(String query) {
-        List<Department> departments = departmentRepository.searchDepartmentByName(query);
+        List<Department> departments = departmentRepository.findByNameContaining(query);
         return departments.stream()
                 .map(department -> new SearchDepartmentResponse(department.getName(),
                         department.getCollege().getName()))

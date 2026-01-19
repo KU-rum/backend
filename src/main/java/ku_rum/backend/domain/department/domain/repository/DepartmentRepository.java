@@ -14,5 +14,5 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
     List<Department> findAllByCollege_Name(String college);
 
-    List<Department> searchDepartmentByName(String name);
+    List<Department> findByNameContaining(String name);
 }
