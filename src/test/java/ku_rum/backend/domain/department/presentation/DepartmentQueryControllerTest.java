@@ -139,7 +139,7 @@ class DepartmentQueryControllerTest extends RestDocsTestSupport {
     }
 
     @Test
-    @DisplayName("학과 검색")
+    @DisplayName("학과 URL을 확인할 수 있다")
     void getDepartmentResponse() throws Exception {
         // given
         List<DepartmentUrlResponse> response = List.of(new DepartmentUrlResponse("응용통계학과", "url"));
