@@ -359,6 +359,45 @@ public class PlaceControllerTest extends RestDocsTestSupport {
 
     }
 
+    @DisplayName("장소 검색어를 저장한다")
+    @Test
+    void savePlaceSearchKeyword() throws Exception {
+        //given
+        doNothing().when(placeHistoryService).updatePlaceHistory(any(), any());
+
+        //when
+        mockMvc.perform(post("/api/v1/places/search/keyword")
+                        .queryParam("query", "검색어")
+                        .header("Authorization",
+                                "access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("지도 검색어 저장")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .queryParameters(
+                                        RequestDocumentation.parameterWithName("query").description("검색어")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("응답 코드 (200)"),
+                                        fieldWithPath("status")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 상태 (OK)"),
+                                        fieldWithPath("message")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 메시지")
+                                )
+                                .build())));
+
+    }
+
     @DisplayName("장소 검색 기록를 확인한다")
     @Test
     void searchPlaceHistory() throws Exception {
