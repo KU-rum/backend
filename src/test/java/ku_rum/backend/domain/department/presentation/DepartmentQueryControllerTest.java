@@ -13,7 +13,9 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
 import ku_rum.backend.config.RestDocsTestSupport;
 import ku_rum.backend.domain.department.application.DepartmentQueryService;
+import ku_rum.backend.domain.department.application.UserDepartmentService;
 import ku_rum.backend.domain.department.dto.CollegeDepartmentResponse;
+import ku_rum.backend.domain.department.dto.DepartmentUrlResponse;
 import ku_rum.backend.domain.department.dto.SearchDepartmentResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,9 @@ class DepartmentQueryControllerTest extends RestDocsTestSupport {
 
     @MockBean
     private SecurityFilterChain securityFilterChain;
+
+    @MockBean
+    private UserDepartmentService userDepartmentService;
 
     @Test
     @DisplayName("단일 컬리지명으로 학과 목록 조회 성공")
@@ -128,6 +133,48 @@ class DepartmentQueryControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("data[].college")
                                                         .type(JsonFieldType.STRING)
                                                         .description("단과대 이름")
+                                        ).build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("학과 검색")
+    void getDepartmentResponse() throws Exception {
+        // given
+        List<DepartmentUrlResponse> response = List.of(new DepartmentUrlResponse("응용통계학과", "url"));
+        given(userDepartmentService.getDepartmentUrl()).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/departments/url"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data[0].name").value("응용통계학과"))
+                .andExpect(jsonPath("$.data[0].url").value("url"))
+                .andDo(restDocs.document(
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("학과 관련 API")
+                                        .description("학과 검색")
+                                        .responseFields(
+                                                fieldWithPath("code")
+                                                        .type(JsonFieldType.NUMBER)
+                                                        .description("응답 코드 (200)"),
+                                                fieldWithPath("status")
+                                                        .type(JsonFieldType.STRING)
+                                                        .description("응답 상태 (OK)"),
+                                                fieldWithPath("message")
+                                                        .type(JsonFieldType.STRING)
+                                                        .description("응답 메시지"),
+                                                fieldWithPath("data[].name")
+                                                        .type(JsonFieldType.STRING)
+                                                        .description("학과 이름"),
+                                                fieldWithPath("data[].url")
+                                                        .type(JsonFieldType.STRING)
+                                                        .description("학과 URL")
                                         ).build()
                         )
                 ));
