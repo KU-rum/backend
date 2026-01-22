@@ -125,19 +125,6 @@ public class PlaceService {
     }
 
     /**
-     * 장소 검색(회원 로직)
-     *
-     * @param userDetails
-     * @param query
-     * @return
-     */
-    @Transactional
-    public List<SearchPlaceResponse> searchPlaceWithUser(CustomUserDetails userDetails, String query) {
-        placeHistoryService.updatePlaceHistory(query, userDetails);
-        return searchPlace(query);
-    }
-
-    /**
      * place 조회
      *
      * @param placeId
