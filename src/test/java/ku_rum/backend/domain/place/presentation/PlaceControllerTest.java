@@ -10,6 +10,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,6 +29,7 @@ import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SearchPlaceHistoryResponse;
+import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
 import ku_rum.backend.domain.place.domain.Place;
@@ -44,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -282,6 +285,113 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 )
                                 .pathParameters(
                                         RequestDocumentation.parameterWithName("placeId").description("건물id")
+                                )
+                                .build())));
+
+    }
+
+    @DisplayName("장소를 검색한다")
+    @Test
+    void searchPlace() throws Exception {
+        //given
+        String query = "도서관";
+        String name = "상허기념도서관";
+        Long placeId = 1L;
+        Place place = Place.builder()
+                .placeId(placeId)
+                .categoryChip(CategoryChip.K_CUBE)
+                .name(name)
+                .subName("상허기념도서관 K-CUBE")
+                .content("상허기념도서관 K-CUBE입니다")
+                .latitude(BigDecimal.valueOf(37.541941000))
+                .longitude(BigDecimal.valueOf(127.073784000))
+                .build();
+
+        List<SearchPlaceResponse> responses = List.of(
+                new SearchPlaceResponse(name, placeId, BigDecimal.valueOf(123.1), BigDecimal.valueOf(123.1)));
+
+        given(placeService.searchPlace(eq(query)))
+                .willReturn(responses);
+
+        //when
+        mockMvc.perform(get("/api/v1/places/search")
+                        .param("query", query)
+                        .header("Authorization", "Bearer test-access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value(name))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("지도 검색")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .queryParameters(
+                                        RequestDocumentation.parameterWithName("query").description("검색어")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("응답 코드 (200)"),
+                                        fieldWithPath("status")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 상태 (OK)"),
+                                        fieldWithPath("message")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 메시지"),
+                                        fieldWithPath("data[].name")
+                                                .type(JsonFieldType.STRING)
+                                                .description("장소 이름"),
+                                        fieldWithPath("data[].placeId")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("장소 ID"),
+                                        fieldWithPath("data[].latitude")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("장소 위도"),
+                                        fieldWithPath("data[].longitude")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("장소 경도")
+                                )
+                                .build())));
+
+    }
+
+    @DisplayName("장소 검색어를 저장한다")
+    @Test
+    void savePlaceSearchKeyword() throws Exception {
+        //given
+        doNothing().when(placeHistoryService).updatePlaceHistory(any(), any());
+
+        //when
+        mockMvc.perform(post("/api/v1/places/search/keyword")
+                        .queryParam("query", "검색어")
+                        .header("Authorization",
+                                "Bearer test-access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("지도 검색어 저장")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .queryParameters(
+                                        RequestDocumentation.parameterWithName("query").description("검색어")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("응답 코드 (200)"),
+                                        fieldWithPath("status")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 상태 (OK)"),
+                                        fieldWithPath("message")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 메시지")
                                 )
                                 .build())));
 

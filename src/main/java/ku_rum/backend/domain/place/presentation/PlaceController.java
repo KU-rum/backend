@@ -105,11 +105,17 @@ public class PlaceController {
     @GetMapping("/search")
     public BaseResponse<List<SearchPlaceResponse>> searchPlace(@RequestParam("query") String query,
                                                                @AuthenticationPrincipal final CustomUserDetails userDetails) {
-        if (isAuthenticated(userDetails)) {
-            return BaseResponse.ok(placeService.searchPlaceWithUser(userDetails, query));
-        }
         return BaseResponse.ok(placeService.searchPlace(query));
     }
+
+    @PostMapping("/search/keyword")
+    public BaseResponse<Void> getPlaceSearchKeyword(@RequestParam("query") String query,
+                                                    @AuthenticationPrincipal final CustomUserDetails userDetails) {
+
+        placeHistoryService.updatePlaceHistory(query, userDetails);
+        return BaseResponse.ok();
+    }
+
 
     @GetMapping("/search/history")
     public BaseResponse<List<SearchPlaceHistoryResponse>> searchPlaceHistory(
