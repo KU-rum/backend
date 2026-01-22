@@ -158,7 +158,7 @@ class DepartmentQueryControllerTest extends RestDocsTestSupport {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("학과 관련 API")
-                                        .description("학과 검색")
+                                        .description("학과 URL 확인")
                                         .responseFields(
                                                 fieldWithPath("code")
                                                         .type(JsonFieldType.NUMBER)
