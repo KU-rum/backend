@@ -316,8 +316,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places/search")
                         .param("query", query)
-                        .header("Authorization",
-                                "access-token"))
+                        .header("Authorization", "Bearer test-access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -369,7 +368,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         mockMvc.perform(post("/api/v1/places/search/keyword")
                         .queryParam("query", "검색어")
                         .header("Authorization",
-                                "access-token"))
+                                "Bearer test-access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
