@@ -1,13 +1,10 @@
 package ku_rum.backend.domain.department.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ku_rum.backend.domain.college.domain.College;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-
-import static org.assertj.core.api.Assertions.*;
 
 class DepartmentTest {
 
@@ -19,7 +16,7 @@ class DepartmentTest {
         String Deptname = "컴퓨터공학부";
 
         //when
-        Department department = Department.of(Deptname, college);
+        Department department = Department.of(Deptname, college, "url");
 
         //then
         assertThat(department.getName()).isEqualTo(Deptname);
