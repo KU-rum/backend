@@ -93,8 +93,6 @@ public class NoticeService {
 
     // 키워드 검색 로직
     public Page<NoticeResponse> searchByKeyword(String keyword, Pageable pageable) {
-        recentSearchService.save(keyword);
-
         return noticeRepository.searchByKeyword(keyword, PublishStatus.SUCCESS_CRAWLING, pageable)
                 .map(NoticeResponse::from);
     }

@@ -1,5 +1,7 @@
 package ku_rum.backend.domain.user.domain.repository;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import ku_rum.backend.domain.college.domain.College;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.department.domain.repository.DepartmentRepository;
@@ -17,8 +19,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @Transactional
@@ -48,7 +48,7 @@ class UserRepositoryTest {
     @BeforeEach
     void setup() {
         College college = College.of("공과대학");
-        Department department = Department.of("컴퓨터공학부" , college);
+        Department department = Department.of("컴퓨터공학부", college, "url");
         departmentRepository.save(department);
 
         user = User.builder()
