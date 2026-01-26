@@ -47,6 +47,11 @@ public class FriendPlaceSharingHandler implements AlarmMessageHandler {
                 .build();
     }
 
+    @Override
+    public String getDataId(Object object) {
+        return "";
+    }
+
     public String getMessage(Object object) {
         UserPlaceAlarmDto userPlaceAlarmDto = (UserPlaceAlarmDto) object;
         return String.format("%s 님이 위치를 공유했어요. 친구 위치를 확인해보세요.", userPlaceAlarmDto.user().getNickname());

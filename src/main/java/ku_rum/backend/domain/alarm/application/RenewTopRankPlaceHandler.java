@@ -46,6 +46,11 @@ public class RenewTopRankPlaceHandler implements AlarmMessageHandler {
                 .build();
     }
 
+    @Override
+    public String getDataId(Object object) {
+        return "";
+    }
+
     public String getMessage(Object payload) {
         RankingChangeDto rankingChangeDto = (RankingChangeDto) payload;
         String name = rankingChangeDto.placeRank().getPlace().getName();

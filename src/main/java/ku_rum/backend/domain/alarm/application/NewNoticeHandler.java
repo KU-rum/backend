@@ -9,6 +9,7 @@ import ku_rum.backend.domain.alarm.domain.Announcement;
 import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
 import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
 import ku_rum.backend.domain.alarm.util.FcmUtil;
+import ku_rum.backend.domain.notice.domain.Notice;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,12 @@ public class NewNoticeHandler implements AlarmMessageHandler {
     @Override
     public FcmDirectDto getFcmDirectDto(Object object, User user) {
         throw new GlobalException(UNSUPPORTED_DIRECT_FCM);
+    }
+
+    @Override
+    public String getDataId(Object object) {
+        Notice notice = (Notice) object;
+        return String.valueOf(notice.getId());
     }
 
     public String getMessage() {

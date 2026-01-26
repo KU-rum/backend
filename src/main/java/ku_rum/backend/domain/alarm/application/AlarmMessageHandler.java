@@ -15,4 +15,6 @@ public interface AlarmMessageHandler {
     FcmTopicDto getFcmTopicDto(Object object);
 
     FcmDirectDto getFcmDirectDto(Object object, User user);
+
+    String getDataId(Object object);
 }
