@@ -96,7 +96,8 @@ public class AlarmService {
                                           AlarmType alarmType, Object object) {
         Announcement announcement = alarmMessageHandler.create(alarmType, object);
         Announcement saveAnnouncement = announcementRepository.save(announcement);
-        saveUserAnnouncement(saveAnnouncement);
+        String dataId = alarmMessageHandler.getDataId(object);
+        saveUserAnnouncement(saveAnnouncement, dataId);
     }
 
     public GetAlarmResponse getAlarmResponse(CustomUserDetails userDetails, AlarmPaginationRequest request) {
@@ -216,11 +217,11 @@ public class AlarmService {
         return PatchAlarmResponse.from(userAnnouncement);
     }
 
-    private List<UserAnnouncement> saveUserAnnouncement(Announcement announcement) {
+    private List<UserAnnouncement> saveUserAnnouncement(Announcement announcement, String dataId) {
         List<UserAnnouncement> userAnnouncements = userRepository.findAll().stream()
                 .map(user -> UserAnnouncement.builder()
                         .isChecked(false)
-                        .dataId(announcement.getId().toString())
+                        .dataId(dataId)
                         .user(user)
                         .announcement(announcement)
                         .build())
