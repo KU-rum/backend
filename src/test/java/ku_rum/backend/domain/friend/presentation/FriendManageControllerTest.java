@@ -76,7 +76,7 @@ class FriendManageControllerTest extends RestDocsTestSupport {
     void acceptFriendRequest() throws Exception {
         Long requestId = 1L;
         FriendRequest friendRequest = new FriendRequest(1L);
-        doNothing().when(friendManageService).respondToFriend(friendRequest, true);
+        doNothing().when(friendManageService).respondToFriend(friendRequest);
 
         mockMvc.perform(put("/api/v1/friends/accept")
                         .header("Authorization",
@@ -105,7 +105,7 @@ class FriendManageControllerTest extends RestDocsTestSupport {
         Long requestId = 1L;
         FriendRequest request = new FriendRequest(requestId); // FriendRequest DTO에 맞게 생성자/빌더 필요
 
-        doNothing().when(friendManageService).respondToFriend(request, false);
+        doNothing().when(friendManageService).rejectToFriend(request);
 
         mockMvc.perform(put("/api/v1/friends/reject")
                         .header("Authorization", "Bearer your.jwt.token")

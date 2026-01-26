@@ -49,7 +49,7 @@ public class FriendManageService {
     }
 
     // 친구 수락 및 거절
-    public void respondToFriend(final FriendRequest friendSendRequest, boolean accept) {
+    public void respondToFriend(final FriendRequest friendSendRequest) {
         User currentUser = userUtil.getUser();
         User toUser = userQueryService.getUserById(friendSendRequest.receiverId());
 
@@ -59,7 +59,21 @@ public class FriendManageService {
         if (!friend.getToUser().equals(currentUser)) {
             throw new GlobalException(NOT_EQUAL_TO_USER);
         }
-        friend.setStatus(accept ? FriendStatus.ACCEPT : FriendStatus.REJECT);
+        friend.setStatus(FriendStatus.ACCEPT);
+    }
+
+    public void rejectToFriend(final FriendRequest friendSendRequest) {
+        User currentUser = userUtil.getUser();
+        User toUser = userQueryService.getUserById(friendSendRequest.receiverId());
+
+        Friend friend = friendRepository.findByFromUserAndToUserAndStatus(toUser, currentUser, PENDING)
+                .orElseThrow(() -> new GlobalException(NO_PENDING_LIST));
+
+        if (!friend.getToUser().equals(currentUser)) {
+            throw new GlobalException(NOT_EQUAL_TO_USER);
+        }
+
+        friendRepository.delete(friend);
     }
 
     // 보낸 친구 요청 삭제
