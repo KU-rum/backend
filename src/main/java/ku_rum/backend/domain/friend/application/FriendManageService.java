@@ -65,7 +65,7 @@ public class FriendManageService {
     public void rejectToFriend(final FriendRequest friendSendRequest) {
         User currentUser = userUtil.getUser();
         User toUser = userQueryService.getUserById(friendSendRequest.receiverId());
-
+        
         Friend friend = friendRepository.findByFromUserAndToUserAndStatus(toUser, currentUser, PENDING)
                 .orElseThrow(() -> new GlobalException(NO_PENDING_LIST));
 
