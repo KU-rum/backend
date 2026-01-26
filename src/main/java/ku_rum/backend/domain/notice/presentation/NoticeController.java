@@ -53,5 +53,4 @@ public class NoticeController {
     ) {
         return noticeService.searchByKeyword(keyword, pageable);
     }
-
 }
