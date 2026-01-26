@@ -47,6 +47,11 @@ public class FriendRequestHandler implements AlarmMessageHandler {
                 .build();
     }
 
+    @Override
+    public String getDataId(Object object) {
+        return "";
+    }
+
     public String getMessage(Object object) {
         User friend = (User) object;
         return String.format("%s 님이 친구 신청을 했어요. 친구 신청을 수락하시겠어요?", friend.getNickname());

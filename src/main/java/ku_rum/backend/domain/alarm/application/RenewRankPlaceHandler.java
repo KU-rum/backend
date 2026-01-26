@@ -44,6 +44,11 @@ public class RenewRankPlaceHandler implements AlarmMessageHandler {
                 .build();
     }
 
+    @Override
+    public String getDataId(Object object) {
+        return "";
+    }
+
     public String getMessage() {
         return "내 장소 랭킹의 순위가 바뀌었어요!";
     }

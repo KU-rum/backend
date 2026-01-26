@@ -52,6 +52,11 @@ public class NewKeywordNoticeHandler implements AlarmMessageHandler {
                 .build();
     }
 
+    @Override
+    public String getDataId(Object object) {
+        return "";
+    }
+
     public String getMessage(Object object) {
         Entry<SearchKeyword, Notice> entry = (Entry<SearchKeyword, Notice>) object;
         String keyword = entry.getKey().getKeyword();
