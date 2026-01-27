@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -48,7 +49,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -565,6 +568,59 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 )
                                 .requestFields(
                                         fieldWithPath("content").type(JsonFieldType.STRING).description("변경할 내용")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 이미지를 수정한다")
+    @Test
+    void modifyPlaceImages() throws Exception {
+        //given
+        Long placeId = 1L;
+        MockMultipartFile image1 = new MockMultipartFile(
+                "images",
+                "image1.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 1".getBytes()
+        );
+        MockMultipartFile image2 = new MockMultipartFile(
+                "images",
+                "image2.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 2".getBytes()
+        );
+
+        doNothing().when(placeService).modifyPlaceImages(eq(placeId), any());
+
+        //when
+        mockMvc.perform(multipart("/api/v1/places/{placeId}/images", placeId)
+                        .file(image1)
+                        .file(image2)
+                        .with(request -> {
+                            request.setMethod(HttpMethod.PUT.name());
+                            return request;
+                        })
+                        .header("Authorization", "Bearer access-token")
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 이미지 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
                                 )
                                 .responseFields(
                                         fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
