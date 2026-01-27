@@ -94,7 +94,8 @@ openai:
 
 cloud:
   aws:
-    region: ap-northeast-2
+    region:
+      static: ap-northeast-2
     credentials:
       access-key: testtest
       secret-key: testtest
