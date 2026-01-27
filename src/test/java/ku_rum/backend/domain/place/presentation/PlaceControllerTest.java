@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,6 +39,7 @@ import ku_rum.backend.domain.place.domain.PlaceImage;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
@@ -485,6 +487,47 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 .description("지도 검색 히스토리 전부 삭제")
                                 .requestHeaders(
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 부가 이름을 수정한다")
+    @Test
+    void modifyPlaceSubName() throws Exception {
+        //given
+        Long placeId = 1L;
+        PutPlaceSubNameRequest request = new PutPlaceSubNameRequest("변경된 소제목");
+
+        doNothing().when(placeService).modifyPlaceSubName(eq(placeId), any(PutPlaceSubNameRequest.class));
+
+        //when
+        mockMvc.perform(patch("/api/v1/places/{placeId}/subName", placeId)
+                        .header("Authorization",
+                                "Bearer access-token")
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 부가 이름 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .requestFields(
+                                        fieldWithPath("subName").type(JsonFieldType.STRING).description("변경할 부가 이름")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                 )
                                 .build())));
     }
