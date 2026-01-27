@@ -502,7 +502,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         doNothing().when(placeService).modifyPlaceSubName(eq(placeId), any(PutPlaceSubNameRequest.class));
 
         //when
-        mockMvc.perform(patch("/api/v1/places/{placeId}/subName", placeId)
+        mockMvc.perform(patch("/api/v1/places/{placeId}/sub-name", placeId)
                         .header("Authorization",
                                 "Bearer access-token")
                         .content(new ObjectMapper().writeValueAsString(request))

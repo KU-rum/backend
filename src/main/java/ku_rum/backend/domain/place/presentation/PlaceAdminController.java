@@ -18,7 +18,7 @@ public class PlaceAdminController {
 
     private final PlaceService placeService;
 
-    @PatchMapping("/{placeId}/subName")
+    @PatchMapping("/{placeId}/sub-name")
     public BaseResponse<Void> modifyPlaceSubName(@PathVariable("placeId") final Long placeId,
                                                  @RequestBody PutPlaceSubNameRequest request) {
         placeService.modifyPlaceSubName(placeId, request);
