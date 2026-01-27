@@ -1,9 +1,11 @@
 package ku_rum.backend.domain.place.application;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import ku_rum.backend.domain.common.image.application.S3ImageService;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipFriendListResponse;
@@ -27,6 +29,7 @@ import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,6 +43,7 @@ public class PlaceService {
     private final SearchService searchService;
     private final RankService rankService;
     private final UserService userService;
+    private final S3ImageService s3ImageService;
 
     /**
      * 지도 칩 조회(회원 로직)
@@ -136,6 +140,28 @@ public class PlaceService {
     public void modifyPlaceContent(Long placeId, PutPlaceContentRequest request) {
         Place place = findPlace(placeId);
         place.updateContent(request.content());
+    }
+
+    @Transactional
+    public void modifyPlaceImages(Long placeId, List<MultipartFile> images) {
+        Place place = findPlace(placeId);
+
+        List<PlaceImage> existingImages = placeImageRepository.findByPlace(place);
+        for (PlaceImage existingImage : existingImages) {
+            s3ImageService.deleteImage(existingImage.getImageUrl());
+        }
+        placeImageRepository.deleteByPlace(place);
+
+        List<String> imageUrls = s3ImageService.uploadImages(images);
+        List<PlaceImage> newImages = new ArrayList<>();
+        for (String imageUrl : imageUrls) {
+            PlaceImage placeImage = PlaceImage.builder()
+                    .place(place)
+                    .imageUrl(imageUrl)
+                    .build();
+            newImages.add(placeImage);
+        }
+        placeImageRepository.saveAll(newImages);
     }
 
     /**
