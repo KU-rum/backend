@@ -32,6 +32,7 @@ public record GetAlarmDto(Long id, AlarmType alarmType, AlarmCategory alarmCateg
                 .alarmType(announcement.getAlarmType())
                 .alarmCategory(userAnnouncement.getAnnouncement().getAlarmType().getAlarmCategory())
                 .message(announcement.getMessage())
+                .isChecked(userAnnouncement.isChecked())
                 .dataId(userAnnouncement.getDataId())
                 .createdAt(userAnnouncement.getCreatedAt())
                 .build();
