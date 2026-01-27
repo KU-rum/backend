@@ -39,6 +39,7 @@ import ku_rum.backend.domain.place.domain.PlaceImage;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.security.CustomUserDetails;
@@ -523,6 +524,47 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 )
                                 .requestFields(
                                         fieldWithPath("subName").type(JsonFieldType.STRING).description("변경할 부가 이름")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 내용을 수정한다")
+    @Test
+    void modifyPlaceContent() throws Exception {
+        //given
+        Long placeId = 1L;
+        PutPlaceContentRequest request = new PutPlaceContentRequest("변경된 내용");
+
+        doNothing().when(placeService).modifyPlaceContent(eq(placeId), any(PutPlaceContentRequest.class));
+
+        //when
+        mockMvc.perform(patch("/api/v1/places/{placeId}/content", placeId)
+                        .header("Authorization",
+                                "Bearer access-token")
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 내용 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .requestFields(
+                                        fieldWithPath("content").type(JsonFieldType.STRING).description("변경할 내용")
                                 )
                                 .responseFields(
                                         fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
