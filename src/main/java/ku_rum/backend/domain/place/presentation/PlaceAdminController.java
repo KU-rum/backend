@@ -1,6 +1,7 @@
 package ku_rum.backend.domain.place.presentation;
 
 import ku_rum.backend.domain.place.application.PlaceService;
+import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,13 @@ public class PlaceAdminController {
     public BaseResponse<Void> modifyPlaceSubName(@PathVariable("placeId") final Long placeId,
                                                  @RequestBody PutPlaceSubNameRequest request) {
         placeService.modifyPlaceSubName(placeId, request);
+        return BaseResponse.ok();
+    }
+
+    @PatchMapping("/{placeId}/content")
+    public BaseResponse<Void> modifyPlaceContent(@PathVariable("placeId") final Long placeId,
+                                                 @RequestBody PutPlaceContentRequest request) {
+        placeService.modifyPlaceContent(placeId, request);
         return BaseResponse.ok();
     }
 }

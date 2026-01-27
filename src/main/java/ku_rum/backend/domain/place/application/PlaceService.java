@@ -15,6 +15,7 @@ import ku_rum.backend.domain.place.domain.repository.PlaceImageRepository;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
+import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
@@ -129,6 +130,12 @@ public class PlaceService {
     public void modifyPlaceSubName(Long placeId, PutPlaceSubNameRequest request) {
         Place place = findPlace(placeId);
         place.updateSubName(request.subName());
+    }
+
+    @Transactional
+    public void modifyPlaceContent(Long placeId, PutPlaceContentRequest request) {
+        Place place = findPlace(placeId);
+        place.updateContent(request.content());
     }
 
     /**

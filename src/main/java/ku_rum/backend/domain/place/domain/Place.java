@@ -54,4 +54,8 @@ public class Place extends BaseEntity {
     public void updateSubName(String subName) {
         this.subName = subName;
     }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }
