@@ -1,8 +1,5 @@
 package ku_rum.backend.domain.common.image.application;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +11,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class S3ImageService {
 
-    private final AmazonS3 amazonS3;
+    private final S3Client s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+
+    @Value("${cloud.aws.region.static}")
+    private String region;
 
     private static final String PREFIX = "place-images";
 
@@ -42,24 +46,21 @@ public class S3ImageService {
         String originalFilename = image.getOriginalFilename();
         String filePath = FilePath.createPath(PREFIX, originalFilename);
 
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(image.getContentType());
-        metadata.setContentLength(image.getSize());
-
         try {
-            PutObjectRequest putObjectRequest = new PutObjectRequest(
-                    bucket,
-                    filePath,
-                    image.getInputStream(),
-                    metadata
-            );
-            amazonS3.putObject(putObjectRequest);
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(filePath)
+                    .contentType(image.getContentType())
+                    .contentLength(image.getSize())
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(image.getInputStream(), image.getSize()));
         } catch (IOException e) {
             log.error("이미지 업로드 실패: {}", e.getMessage());
             throw new GlobalException(BaseExceptionResponseStatus.IMAGE_UPLOAD_FAILED);
         }
 
-        return amazonS3.getUrl(bucket, filePath).toString();
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, filePath);
     }
 
     public void deleteImage(String imageUrl) {
@@ -74,6 +75,12 @@ public class S3ImageService {
         }
 
         String key = imageUrl.substring(prefixIndex);
-        amazonS3.deleteObject(bucket, key);
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        s3Client.deleteObject(deleteObjectRequest);
     }
 }
