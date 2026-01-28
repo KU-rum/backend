@@ -28,16 +28,18 @@ public class LoggingInterceptor implements HandlerInterceptor {
             final Object handler,
             final Exception ex
     ) throws Exception {
-        final ContentCachingRequestWrapper cachingRequest = (ContentCachingRequestWrapper) request;
+        String requestBody = getRequestBody(request);
 
         String requestIp = request.getHeader("X-Forwarded-For");
-        if (requestIp == null) requestIp = request.getRemoteAddr();
+        if (requestIp == null) {
+            requestIp = request.getRemoteAddr();
+        }
 
         ApiLog apiLog = ApiLog.builder()
                 .httpMethod(request.getMethod())
                 .requestURI(request.getRequestURI())
                 .accessTokenExist(StringUtils.hasText(request.getHeader(HttpHeaders.AUTHORIZATION)))
-                .requestBody(String.valueOf(objectMapper.readTree(cachingRequest.getContentAsByteArray())))
+                .requestBody(requestBody)
                 .requestIP(requestIp)
                 .build();
         apiLogRepository.save(apiLog);
@@ -56,5 +58,20 @@ public class LoggingInterceptor implements HandlerInterceptor {
                 apiLog.getRequestTime(),
                 apiLog.getRequestIP()
         );
+    }
+
+    private String getRequestBody(HttpServletRequest request) {
+        if (request instanceof ContentCachingRequestWrapper cachingRequest) {
+            byte[] content = cachingRequest.getContentAsByteArray();
+            if (content.length > 0) {
+                try {
+                    return String.valueOf(objectMapper.readTree(content));
+                } catch (Exception e) {
+                    return new String(content);
+                }
+            }
+            return "";
+        }
+        return "/multipartform-data";
     }
 }
