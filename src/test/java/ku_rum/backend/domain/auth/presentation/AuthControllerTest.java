@@ -45,6 +45,9 @@ class AuthControllerTest extends RestDocsTestSupport {
     @MockBean
     private SecurityFilterChain securityFilterChain;
 
+    @MockBean
+    private ku_rum.backend.domain.common.s3.application.S3Service s3Service;
+
     @DisplayName("로그인을 진행한다.")
     @Test
     @WithMockUser
