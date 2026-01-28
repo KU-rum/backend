@@ -12,7 +12,9 @@ import ku_rum.backend.domain.user.dto.request.InitiatePasswordResetRequest;
 import ku_rum.backend.domain.user.dto.request.NicknameChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ResetPasswordRequest;
+import ku_rum.backend.domain.user.dto.request.S3PresignedUrlRequest;
 import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
+import ku_rum.backend.domain.user.dto.response.S3PresignedUrlResponse;
 import ku_rum.backend.domain.user.dto.response.UserProfileResponse;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -136,6 +138,19 @@ public class UserProfileController {
     public BaseResponse<String> deleteDepartment(@RequestBody @Valid final DepartmentRequest departmentRequest) {
         userService.deleteDepartment(departmentRequest.department());
         return BaseResponse.ok("학과 삭제에 성공하였습니다.");
+    }
+
+    /**
+     * 프로필 이미지 업로드용 S3 Presigned URL 생성 API
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/profile/presigned-url")
+    public BaseResponse<S3PresignedUrlResponse> generatePresignedUrl(
+            @RequestBody @Valid final S3PresignedUrlRequest request) {
+        S3PresignedUrlResponse response = userService.generateProfileImagePresignedUrl(request);
+        return BaseResponse.ok(response);
     }
 }
 

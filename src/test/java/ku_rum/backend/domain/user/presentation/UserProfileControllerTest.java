@@ -10,6 +10,8 @@ import ku_rum.backend.domain.user.dto.request.DepartmentRequest;
 import ku_rum.backend.domain.user.dto.request.InitiatePasswordResetRequest;
 import ku_rum.backend.domain.user.dto.request.NicknameChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ResetPasswordRequest;
+import ku_rum.backend.domain.user.dto.request.S3PresignedUrlRequest;
+import ku_rum.backend.domain.user.dto.response.S3PresignedUrlResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -315,5 +318,87 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
                         )));
 
         verify(userService, times(1)).deleteDepartment("컴퓨터공학과");
+    }
+
+    @Test
+    @DisplayName("프로필 이미지 업로드용 S3 Presigned URL 생성 API")
+    @WithMockUser(roles = "USER")
+    void generatePresignedUrl() throws Exception {
+        // given
+        S3PresignedUrlRequest request = new S3PresignedUrlRequest(
+                "profile.jpg",
+                "image/jpeg"
+        );
+
+        S3PresignedUrlResponse mockResponse = new S3PresignedUrlResponse(
+                "https://bucket.s3.ap-northeast-2.amazonaws.com/profile/uuid_profile.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&...",
+                "profile/uuid_profile.jpg",
+                "https://bucket.s3.ap-northeast-2.amazonaws.com/profile/uuid_profile.jpg"
+        );
+
+        when(userService.generateProfileImagePresignedUrl(any(S3PresignedUrlRequest.class)))
+                .thenReturn(mockResponse);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/profile/presigned-url")
+                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"))
+                .andExpect(jsonPath("$.data.presignedUrl").exists())
+                .andExpect(jsonPath("$.data.fileKey").exists())
+                .andExpect(jsonPath("$.data.fullUrl").exists())
+                .andDo(restDocs.document(
+                        resource(ResourceSnippetParameters.builder()
+                                .tag("프로필 관련 API")
+                                .description("프로필 이미지 업로드용 S3 Presigned URL 생성 API\n\n" +
+                                        "### 사용 방법\n" +
+                                        "1. 이 API를 호출하여 Presigned URL을 받습니다.\n" +
+                                        "2. 클라이언트에서 받은 presignedUrl로 이미지를 직접 S3에 PUT 요청으로 업로드합니다.\n" +
+                                        "3. 업로드 성공 후 fullUrl을 프로필 변경 API에 전달합니다.\n\n" +
+                                        "### 주의사항\n" +
+                                        "- Presigned URL은 15분간 유효합니다.\n" +
+                                        "- 허용되는 파일 타입: image/jpeg, image/jpg, image/png, image/webp\n" +
+                                        "- 최대 파일 크기: 5MB")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 액세스 토큰 (Bearer {token})")
+                                )
+                                .requestFields(
+                                        fieldWithPath("fileName")
+                                                .type(JsonFieldType.STRING)
+                                                .description("업로드할 파일명 (예: profile.jpg)"),
+                                        fieldWithPath("fileType")
+                                                .type(JsonFieldType.STRING)
+                                                .description("파일 MIME 타입 (예: image/jpeg, image/png)")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("응답 코드 (200)"),
+                                        fieldWithPath("status")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 상태 (OK)"),
+                                        fieldWithPath("message")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 메시지"),
+                                        fieldWithPath("data.presignedUrl")
+                                                .type(JsonFieldType.STRING)
+                                                .description("S3에 업로드할 때 사용하는 Presigned URL (15분간 유효)"),
+                                        fieldWithPath("data.fileKey")
+                                                .type(JsonFieldType.STRING)
+                                                .description("S3에 저장될 파일의 키 (예: profile/uuid_filename.jpg)"),
+                                        fieldWithPath("data.fullUrl")
+                                                .type(JsonFieldType.STRING)
+                                                .description("업로드 완료 후 접근 가능한 최종 이미지 URL (프로필 변경 API에 전달)")
+                                )
+                                .build()
+                        )));
+
+        verify(userService, times(1)).generateProfileImagePresignedUrl(any(S3PresignedUrlRequest.class));
     }
 }
