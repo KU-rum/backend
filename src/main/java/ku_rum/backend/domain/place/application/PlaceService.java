@@ -27,6 +27,7 @@ import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class PlaceService {
 
     private final PlaceRepository placeRepository;
@@ -147,21 +149,33 @@ public class PlaceService {
         Place place = findPlace(placeId);
 
         List<PlaceImage> existingImages = placeImageRepository.findByPlace(place);
-        for (PlaceImage existingImage : existingImages) {
-            s3ImageService.deleteImage(existingImage.getImageUrl());
-        }
+
+        List<String> oldImageUrls = existingImages.stream()
+                .map(PlaceImage::getImageUrl)
+                .toList();
+        List<String> newImageUrls = s3ImageService.uploadImages(images);
         placeImageRepository.deleteByPlace(place);
 
-        List<String> imageUrls = s3ImageService.uploadImages(images);
         List<PlaceImage> newImages = new ArrayList<>();
-        for (String imageUrl : imageUrls) {
+
+        for (String imageUrl : newImageUrls) {
             PlaceImage placeImage = PlaceImage.builder()
                     .place(place)
                     .imageUrl(imageUrl)
                     .build();
             newImages.add(placeImage);
         }
+
         placeImageRepository.saveAll(newImages);
+
+        for (String oldUrl : oldImageUrls) {
+            try {
+                s3ImageService.deleteImage(oldUrl);
+            } catch (Exception e) {
+                log.warn("Failed to delete old S3 image: {}", oldUrl, e);
+
+            }
+        }
     }
 
     /**
