@@ -127,6 +127,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     PLACE_BUILDING_NOT_FOUND(1204, HttpStatus.NOT_FOUND, "해당 위치가 속한 건물이 없습니다."),
     RANK_NOT_FOUND(1205, HttpStatus.NOT_FOUND, "랭크가 없습니다"),
     INVALID_RANK_RANGE(1206, HttpStatus.BAD_REQUEST, "잘못된 랭킹입니다"),
+    IMAGE_UPLOAD_FAILED(1207, HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패하였습니다."),
 
     /**
      * 1300: 북마크
