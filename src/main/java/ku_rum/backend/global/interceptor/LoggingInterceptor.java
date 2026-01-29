@@ -72,6 +72,10 @@ public class LoggingInterceptor implements HandlerInterceptor {
             }
             return "";
         }
-        return "/multipartform-data";
+        String contentType = request.getContentType();
+        if (contentType != null && contentType.startsWith("multipart/")) {
+            return "multipart/form-data";
+        }
+        return "";
     }
 }
