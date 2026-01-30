@@ -9,6 +9,7 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.P
 import java.util.List;
 import ku_rum.backend.domain.auth.dto.response.AuthResponse;
 import ku_rum.backend.domain.common.mail.application.MailService;
+import ku_rum.backend.domain.common.s3.application.S3Service;
 import ku_rum.backend.domain.department.application.DepartmentQueryService;
 import ku_rum.backend.domain.department.application.UserDepartmentService;
 import ku_rum.backend.domain.department.domain.Department;
@@ -23,10 +24,12 @@ import ku_rum.backend.domain.user.dto.request.InitiatePasswordResetRequest;
 import ku_rum.backend.domain.user.dto.request.NicknameChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
 import ku_rum.backend.domain.user.dto.request.ResetPasswordRequest;
+import ku_rum.backend.domain.user.dto.request.S3PresignedUrlRequest;
 import ku_rum.backend.domain.user.dto.request.SocialSignupRequest;
 import ku_rum.backend.domain.user.dto.request.TemporaryUserRequest;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
+import ku_rum.backend.domain.user.dto.response.S3PresignedUrlResponse;
 import ku_rum.backend.domain.user.dto.response.TemporaryUserResponse;
 import ku_rum.backend.domain.user.dto.response.TokenResponse;
 import ku_rum.backend.domain.user.dto.response.UserProfileDepartmentResponse;
@@ -64,6 +67,7 @@ public class UserService {
     private final DepartmentRepository departmentRepository;
     private final UserDepartmentService userDepartmentService;
     private final MailService mailService;
+    private final S3Service s3Service;
     private final PreSignupTokenProvider preSignupTokenProvider;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -154,6 +158,25 @@ public class UserService {
         User user = getUser();
         user.changeImage(profileChangeRequest.imageUrl());
         log.info("프로필 변경 완료: userId={}", user.getId());
+    }
+
+    /**
+     * 프로필 이미지 업로드용 S3 Presigned URL 생성
+     */
+    public S3PresignedUrlResponse generateProfileImagePresignedUrl(final S3PresignedUrlRequest request) {
+        log.info("Presigned URL 생성 요청: fileName={}, fileType={}", request.fileName(), request.fileType());
+
+        S3Service.PresignedUrlInfo urlInfo = s3Service.generatePresignedUrl(
+                request.fileName(),
+                request.fileType()
+        );
+
+        log.info("Presigned URL 생성 완료: fileKey={}", urlInfo.fileKey());
+        return S3PresignedUrlResponse.of(
+                urlInfo.presignedUrl(),
+                urlInfo.fileKey(),
+                urlInfo.fullUrl()
+        );
     }
 
     public LoginIdResponse getLoginId(final String email) {

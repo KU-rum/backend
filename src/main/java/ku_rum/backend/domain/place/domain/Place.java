@@ -50,4 +50,12 @@ public class Place extends BaseEntity {
 
     @Column(columnDefinition = "POLYGON")
     private Polygon boundary;
+
+    public void updateSubName(String subName) {
+        this.subName = subName;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

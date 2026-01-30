@@ -34,6 +34,9 @@ class CollegeQueryControllerTest extends RestDocsTestSupport {
     @MockBean
     private SecurityFilterChain securityFilterChain;
 
+    @MockBean
+    private ku_rum.backend.domain.common.s3.application.S3Service s3Service;
+
     @Test
     @DisplayName("전체 컬리지 목록 조회 성공")
     @WithMockUser
