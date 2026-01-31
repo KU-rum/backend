@@ -1,9 +1,11 @@
 package ku_rum.backend.domain.place.application;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import ku_rum.backend.domain.common.image.application.S3ImageService;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipFriendListResponse;
@@ -15,6 +17,8 @@ import ku_rum.backend.domain.place.domain.repository.PlaceImageRepository;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
+import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
 import ku_rum.backend.domain.user.application.UserService;
@@ -23,12 +27,15 @@ import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class PlaceService {
 
     private final PlaceRepository placeRepository;
@@ -38,6 +45,7 @@ public class PlaceService {
     private final SearchService searchService;
     private final RankService rankService;
     private final UserService userService;
+    private final S3ImageService s3ImageService;
 
     /**
      * 지도 칩 조회(회원 로직)
@@ -122,6 +130,52 @@ public class PlaceService {
      */
     public List<SearchPlaceResponse> searchPlace(String query) {
         return searchService.searchPlace(query);
+    }
+
+    @Transactional
+    public void modifyPlaceSubName(Long placeId, PutPlaceSubNameRequest request) {
+        Place place = findPlace(placeId);
+        place.updateSubName(request.subName());
+    }
+
+    @Transactional
+    public void modifyPlaceContent(Long placeId, PutPlaceContentRequest request) {
+        Place place = findPlace(placeId);
+        place.updateContent(request.content());
+    }
+
+    @Transactional
+    public void modifyPlaceImages(Long placeId, List<MultipartFile> images) {
+        Place place = findPlace(placeId);
+
+        List<PlaceImage> existingImages = placeImageRepository.findByPlace(place);
+
+        List<String> oldImageUrls = existingImages.stream()
+                .map(PlaceImage::getImageUrl)
+                .toList();
+        List<String> newImageUrls = s3ImageService.uploadImages(images);
+        placeImageRepository.deleteByPlace(place);
+
+        List<PlaceImage> newImages = new ArrayList<>();
+
+        for (String imageUrl : newImageUrls) {
+            PlaceImage placeImage = PlaceImage.builder()
+                    .place(place)
+                    .imageUrl(imageUrl)
+                    .build();
+            newImages.add(placeImage);
+        }
+
+        placeImageRepository.saveAll(newImages);
+
+        for (String oldUrl : oldImageUrls) {
+            try {
+                s3ImageService.deleteImage(oldUrl);
+            } catch (Exception e) {
+                log.warn("Failed to delete old S3 image: {}", oldUrl, e);
+
+            }
+        }
     }
 
     /**

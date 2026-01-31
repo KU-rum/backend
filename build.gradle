@@ -183,10 +183,6 @@ dependencies {
     //micrometer
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
-    // AWS v1 (기존 - 호환성 유지)
-    implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
-    implementation 'io.awspring.cloud:spring-cloud-starter-aws-secrets-manager-config:2.4.4'
-
     // AWS SDK v2 for S3 (Presigned URL 용)
     implementation platform('software.amazon.awssdk:bom:2.20.26')
     implementation 'software.amazon.awssdk:s3'
