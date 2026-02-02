@@ -786,6 +786,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
     void deletePlaceImages() throws Exception {
         //given
         Long placeId = 1L;
+        Long placeImageId = 1L;
         DeletePlaceImagesRequest request = new DeletePlaceImagesRequest(
                 List.of("https://example.com/image1.jpg", "https://example.com/image2.jpg")
         );
@@ -793,10 +794,8 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         doNothing().when(placeService).deletePlaceImages(eq(placeId), any());
 
         //when
-        mockMvc.perform(delete("/api/v1/places/{placeId}/images", placeId)
-                        .header("Authorization", "Bearer access-token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(request)))
+        mockMvc.perform(delete("/api/v1/places/{placeId}/images/{placeImageId}", placeId, placeImageId)
+                        .header("Authorization", "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -810,11 +809,8 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
                                 )
                                 .pathParameters(
-                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
-                                )
-                                .requestFields(
-                                        fieldWithPath("imageUrls").type(JsonFieldType.ARRAY)
-                                                .description("삭제할 이미지 URL 목록")
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID"),
+                                        RequestDocumentation.parameterWithName("placeImageId").description("장소이미지 ID")
                                 )
                                 .responseFields(
                                         fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
