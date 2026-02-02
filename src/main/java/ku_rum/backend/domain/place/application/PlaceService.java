@@ -19,6 +19,7 @@ import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
 import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
@@ -146,6 +147,12 @@ public class PlaceService {
     }
 
     @Transactional
+    public void modifyPlaceLocation(Long placeId, PutPlaceLocationRequest request) {
+        Place place = findPlace(placeId);
+        place.updateLocation(request.latitude(), request.longitude());
+    }
+
+    @Transactional
     public void modifyPlaceImages(Long placeId, List<MultipartFile> images) {
         Place place = findPlace(placeId);
 
@@ -175,6 +182,39 @@ public class PlaceService {
             } catch (Exception e) {
                 log.warn("Failed to delete old S3 image: {}", oldUrl, e);
 
+            }
+        }
+    }
+
+    @Transactional
+    public void addPlaceImages(Long placeId, List<MultipartFile> images) {
+        Place place = findPlace(placeId);
+
+        List<String> newImageUrls = s3ImageService.uploadImages(images);
+
+        List<PlaceImage> newImages = newImageUrls.stream()
+                .map(url -> PlaceImage.builder()
+                        .place(place)
+                        .imageUrl(url)
+                        .build())
+                .toList();
+
+        placeImageRepository.saveAll(newImages);
+    }
+
+    @Transactional
+    public void deletePlaceImages(Long placeId, List<String> imageUrls) {
+        Place place = findPlace(placeId);
+
+        List<PlaceImage> imagesToDelete = placeImageRepository.findByPlaceAndImageUrlIn(place, imageUrls);
+
+        placeImageRepository.deleteAll(imagesToDelete);
+
+        for (String url : imageUrls) {
+            try {
+                s3ImageService.deleteImage(url);
+            } catch (Exception e) {
+                log.warn("Failed to delete S3 image: {}", url, e);
             }
         }
     }

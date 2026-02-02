@@ -58,4 +58,9 @@ public class Place extends BaseEntity {
     public void updateContent(String content) {
         this.content = content;
     }
+
+    public void updateLocation(BigDecimal latitude, BigDecimal longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }

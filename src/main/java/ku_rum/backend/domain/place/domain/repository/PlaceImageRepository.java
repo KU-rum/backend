@@ -15,5 +15,7 @@ public interface PlaceImageRepository extends JpaRepository<PlaceImage, Long> {
 
     List<PlaceImage> findByPlace(Place place);
 
+    List<PlaceImage> findByPlaceAndImageUrlIn(Place place, List<String> imageUrls);
+
     void deleteByPlace(Place place);
 }

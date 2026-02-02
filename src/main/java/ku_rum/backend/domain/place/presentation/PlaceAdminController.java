@@ -1,13 +1,16 @@
 package ku_rum.backend.domain.place.presentation;
 
 import ku_rum.backend.domain.place.application.PlaceService;
+import ku_rum.backend.domain.place.dto.request.DeletePlaceImagesRequest;
 import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceImagesRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,10 +41,31 @@ public class PlaceAdminController {
         return BaseResponse.ok();
     }
 
+    @PatchMapping("/{placeId}/location")
+    public BaseResponse<Void> modifyPlaceLocation(@PathVariable("placeId") final Long placeId,
+                                                  @RequestBody PutPlaceLocationRequest request) {
+        placeService.modifyPlaceLocation(placeId, request);
+        return BaseResponse.ok();
+    }
+
     @PutMapping(value = "/{placeId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponse<Void> modifyPlaceImages(@PathVariable("placeId") final Long placeId,
                                                 @ModelAttribute PutPlaceImagesRequest request) {
         placeService.modifyPlaceImages(placeId, request.images());
+        return BaseResponse.ok();
+    }
+
+    @PatchMapping(value = "/{placeId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public BaseResponse<Void> addPlaceImages(@PathVariable("placeId") final Long placeId,
+                                             @ModelAttribute PutPlaceImagesRequest request) {
+        placeService.addPlaceImages(placeId, request.images());
+        return BaseResponse.ok();
+    }
+
+    @DeleteMapping("/{placeId}/images")
+    public BaseResponse<Void> deletePlaceImages(@PathVariable("placeId") final Long placeId,
+                                                @RequestBody DeletePlaceImagesRequest request) {
+        placeService.deletePlaceImages(placeId, request.imageUrls());
         return BaseResponse.ok();
     }
 
