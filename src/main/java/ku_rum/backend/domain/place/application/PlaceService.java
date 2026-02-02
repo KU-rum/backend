@@ -1,5 +1,7 @@
 package ku_rum.backend.domain.place.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_IMAGE_NOT_FOUND;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -203,19 +205,18 @@ public class PlaceService {
     }
 
     @Transactional
-    public void deletePlaceImages(Long placeId, List<String> imageUrls) {
+    public void deletePlaceImages(Long placeId, Long imageUrls) {
         Place place = findPlace(placeId);
 
-        List<PlaceImage> imagesToDelete = placeImageRepository.findByPlaceAndImageUrlIn(place, imageUrls);
+        PlaceImage placeImage = placeImageRepository.findByPlaceImageId(imageUrls)
+                .orElseThrow(() -> new GlobalException(PLACE_IMAGE_NOT_FOUND));
 
-        placeImageRepository.deleteAll(imagesToDelete);
+        placeImageRepository.delete(placeImage);
 
-        for (String url : imageUrls) {
-            try {
-                s3ImageService.deleteImage(url);
-            } catch (Exception e) {
-                log.warn("Failed to delete S3 image: {}", url, e);
-            }
+        try {
+            s3ImageService.deleteImage(placeImage.getImageUrl());
+        } catch (Exception e) {
+            log.warn("Failed to delete S3 image: {}", placeImage.getPlaceImageId(), e);
         }
     }
 

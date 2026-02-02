@@ -1,7 +1,6 @@
 package ku_rum.backend.domain.place.presentation;
 
 import ku_rum.backend.domain.place.application.PlaceService;
-import ku_rum.backend.domain.place.dto.request.DeletePlaceImagesRequest;
 import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceImagesRequest;
@@ -62,10 +61,10 @@ public class PlaceAdminController {
         return BaseResponse.ok();
     }
 
-    @DeleteMapping("/{placeId}/images")
+    @DeleteMapping("/{placeId}/images/{placeImageId}")
     public BaseResponse<Void> deletePlaceImages(@PathVariable("placeId") final Long placeId,
-                                                @RequestBody DeletePlaceImagesRequest request) {
-        placeService.deletePlaceImages(placeId, request.imageUrls());
+                                                @PathVariable("placeImageId") final Long placeImageId) {
+        placeService.deletePlaceImages(placeId, placeImageId);
         return BaseResponse.ok();
     }
 
