@@ -3,6 +3,7 @@ package ku_rum.backend.domain.common.image.application;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import ku_rum.backend.domain.common.image.domain.vo.FilePath;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
@@ -82,5 +83,15 @@ public class S3ImageService {
                 .build();
 
         s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    public void deleteImages(List<String> imageUrls) {
+        for (String url : imageUrls) {
+            try {
+                deleteImage(url);
+            } catch (Exception e) {
+                log.warn("Failed to delete S3 image: {}", url, e);
+            }
+        }
     }
 }
