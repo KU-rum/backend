@@ -206,18 +206,21 @@ public class PlaceService {
     }
 
     @Transactional
-    public void deletePlaceImages(Long placeId, Long imageUrls) {
+    public void deletePlaceImages(Long placeId, Long placeImageId) {
         Place place = findPlace(placeId);
 
-        PlaceImage placeImage = placeImageRepository.findByPlaceImageId(imageUrls)
+        PlaceImage placeImage = placeImageRepository.findByPlaceImageId(placeImageId)
                 .orElseThrow(() -> new GlobalException(PLACE_IMAGE_NOT_FOUND));
 
+        if (!placeImage.getPlace().getPlaceId().equals(placeId)) {
+            throw new GlobalException(PLACE_IMAGE_NOT_FOUND);
+        }
         placeImageRepository.delete(placeImage);
 
         try {
             s3ImageService.deleteImage(placeImage.getImageUrl());
         } catch (Exception e) {
-            log.warn("Failed to delete S3 image: {}", placeImage.getPlaceImageId(), e);
+            log.warn("Failed to delete S3 image: {}", placeImage.getImageUrl(), e);
         }
     }
 
