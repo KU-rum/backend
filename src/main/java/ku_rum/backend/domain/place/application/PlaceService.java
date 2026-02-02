@@ -23,6 +23,7 @@ import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
+import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
 import ku_rum.backend.domain.user.application.UserService;
@@ -237,6 +238,23 @@ public class PlaceService {
                 .build();
 
         placeRepository.save(place);
+    }
+
+
+    /**
+     * 장소 이미지 조회
+     *
+     * @param placeId
+     * @return
+     */
+    public List<GetPlaceImageResponse> getPlaceImage(Long placeId) {
+        Place place = findPlace(placeId);
+        List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
+
+        List<GetPlaceImageResponse> response = placeImages.stream()
+                .map(GetPlaceImageResponse::from)
+                .toList();
+        return response;
     }
 
     /**

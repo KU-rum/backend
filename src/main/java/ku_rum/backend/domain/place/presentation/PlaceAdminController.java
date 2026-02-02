@@ -1,15 +1,18 @@
 package ku_rum.backend.domain.place.presentation;
 
+import java.util.List;
 import ku_rum.backend.domain.place.application.PlaceService;
 import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceImagesRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
+import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,5 +75,12 @@ public class PlaceAdminController {
     public BaseResponse<Void> createPlace(@RequestBody PostPlaceRequest request) {
         placeService.createPlace(request);
         return BaseResponse.ok();
+    }
+
+    @GetMapping("/{placeId}/images")
+    public BaseResponse<List<GetPlaceImageResponse>> getPlaceImage(@PathVariable("placeId") final Long placeId) {
+        List<GetPlaceImageResponse> response = placeService.getPlaceImage(placeId);
+
+        return BaseResponse.ok(response);
     }
 }
