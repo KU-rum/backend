@@ -45,6 +45,7 @@ import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
+import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
@@ -816,6 +817,48 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
                                         fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
                                         fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 이미지들을 조회한다")
+    @Test
+    void getPlaceImage() throws Exception {
+        //given
+        Long placeId = 1L;
+        Long placeImageId = 1L;
+        String url = "url";
+        List<GetPlaceImageResponse> response = List.of(new GetPlaceImageResponse(placeImageId, url));
+
+        given(placeService.getPlaceImage(eq(placeId)))
+                .willReturn(response);
+
+        //when
+        mockMvc.perform(get("/api/v1/places/{placeId}/images", placeId)
+                        .header("Authorization", "Bearer access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 해당하는 이미지 조회")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                        fieldWithPath("data[].placeImageId").type(JsonFieldType.NUMBER)
+                                                .description("장소 이미지 ID"),
+                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING)
+                                                .description("장소 이미지 URL")
                                 )
                                 .build())));
     }
