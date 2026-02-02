@@ -17,6 +17,7 @@ import ku_rum.backend.domain.place.domain.repository.PlaceImageRepository;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
+import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.domain.rank.application.RankService;
@@ -175,6 +176,52 @@ public class PlaceService {
                 log.warn("Failed to delete old S3 image: {}", oldUrl, e);
 
             }
+        }
+    }
+
+    /**
+     * 장소 생성
+     *
+     * @param request
+     */
+    public void createPlace(PostPlaceRequest request) {
+
+        List<String> uploadedUrls = Collections.emptyList();
+
+        if (request.images() != null && !request.images().isEmpty()) {
+            uploadedUrls = s3ImageService.uploadImages(request.images());
+        }
+
+        try {
+            Place place = Place.builder()
+                    .categoryChip(request.categoryChip())
+                    .name(request.name())
+                    .subName(request.subName())
+                    .content(request.content())
+                    .latitude(request.latitude())
+                    .longitude(request.longitude())
+                    .build();
+            
+            savePlace(place, uploadedUrls);
+        } catch (Exception e) {
+            s3ImageService.deleteImages(uploadedUrls);
+            throw e;
+        }
+    }
+
+    @Transactional
+    private void savePlace(Place place, List<String> imageUrls) {
+        Place savePlace = placeRepository.save(place);
+
+        if (!imageUrls.isEmpty()) {
+            List<PlaceImage> placeImages = imageUrls.stream()
+                    .map(url -> PlaceImage.builder()
+                            .place(savePlace)
+                            .imageUrl(url)
+                            .build())
+                    .toList();
+
+            placeImageRepository.saveAll(placeImages);
         }
     }
 

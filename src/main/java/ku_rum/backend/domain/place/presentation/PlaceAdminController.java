@@ -1,6 +1,7 @@
 package ku_rum.backend.domain.place.presentation;
 
 import ku_rum.backend.domain.place.application.PlaceService;
+import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceImagesRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
@@ -10,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +42,12 @@ public class PlaceAdminController {
     public BaseResponse<Void> modifyPlaceImages(@PathVariable("placeId") final Long placeId,
                                                 @ModelAttribute PutPlaceImagesRequest request) {
         placeService.modifyPlaceImages(placeId, request.images());
+        return BaseResponse.ok();
+    }
+
+    @PostMapping
+    public BaseResponse<Void> createPlace(@ModelAttribute PostPlaceRequest request) {
+        placeService.createPlace(request);
         return BaseResponse.ok();
     }
 }
