@@ -46,7 +46,7 @@ public class PlaceAdminController {
     }
 
     @PostMapping
-    public BaseResponse<Void> createPlace(@ModelAttribute PostPlaceRequest request) {
+    public BaseResponse<Void> createPlace(@RequestBody PostPlaceRequest request) {
         placeService.createPlace(request);
         return BaseResponse.ok();
     }
