@@ -113,6 +113,31 @@ jobs:
             -v log-volume:/app/logs \
             ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_BE_PROD }}
 
+      - name: Wait for new container to be ready
+        run: |
+          echo "Waiting for new container to be healthy..."
+          MAX_ATTEMPTS=60
+          SLEEP_INTERVAL=2
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            HEALTH_STATUS=$(curl -s http://localhost:$NEXT_PORT/actuator/health 2>/dev/null || echo "")
+
+            if echo "$HEALTH_STATUS" | grep -q '"status":"UP"'; then
+              echo "Container is ready after $((i * SLEEP_INTERVAL)) seconds!"
+              exit 0
+            fi
+
+            echo "Attempt $i/$MAX_ATTEMPTS: Container not ready yet..."
+            sleep $SLEEP_INTERVAL
+          done
+
+          echo "Container failed to become healthy within $((MAX_ATTEMPTS * SLEEP_INTERVAL)) seconds!"
+          echo "Rolling back: removing failed container..."
+          sudo docker stop kurum-backend-$NEXT_PORT || true
+          sudo docker rm kurum-backend-$NEXT_PORT || true
+          echo "Rollback complete. Existing container remains active."
+          exit 1
+
       - name: Update or create Nginx container to point to new container port
         run: |
           NGINX_CONTAINER_NAME="nginx-proxy"
