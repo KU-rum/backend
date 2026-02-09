@@ -182,7 +182,6 @@ jobs:
           
           if sudo docker ps --filter "name=$NGINX_CONTAINER_NAME" --filter "status=running" --format "{{.Names}}" | grep -w $NGINX_CONTAINER_NAME; then
             echo "Reloading Nginx config..."
-            sudo docker cp ./nginx-conf/default.conf $NGINX_CONTAINER_NAME:/etc/nginx/conf.d/default.conf
             sudo docker exec $NGINX_CONTAINER_NAME nginx -s reload
           else
             echo "Starting new Nginx container with HTTPS support..."
