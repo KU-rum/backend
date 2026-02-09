@@ -108,7 +108,7 @@ swaggerSources {
 // 6. openapi3 스펙 생성시 설정 정보
 openapi3 {
     servers = [
-            { url = "https://kuroom.shop" },
+            { url = "https://kuroom.store" },
             { url = "http://localhost:8080" }
     ]
     title = "쿠룸 백엔드 API 문서"
