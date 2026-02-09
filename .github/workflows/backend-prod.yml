@@ -145,10 +145,10 @@ jobs:
           
           echo "Next port is $NEXT_PORT"
           
-          mkdir -p ./nginx-conf
-          mkdir -p ./certbot/conf ./certbot/www
-          
-          cat > ./nginx-conf/default.conf <<EOF
+          mkdir -p ~/nginx-conf
+          mkdir -p ~/certbot/conf ~/certbot/www
+
+          cat > ~/nginx-conf/default.conf <<EOF
           server {
               listen 80;
               server_name kuroom.store www.kuroom.store;
@@ -189,9 +189,9 @@ jobs:
               --name $NGINX_CONTAINER_NAME \
               --network $NETWORK_NAME \
               -p 80:80 -p 443:443 \
-              -v $(pwd)/nginx-conf:/etc/nginx/conf.d \
-              -v $(pwd)/certbot/conf:/etc/letsencrypt \
-              -v $(pwd)/certbot/www:/var/www/certbot \
+              -v $HOME/nginx-conf:/etc/nginx/conf.d \
+              -v $HOME/certbot/conf:/etc/letsencrypt \
+              -v $HOME/certbot/www:/var/www/certbot \
               nginx
           fi
 
