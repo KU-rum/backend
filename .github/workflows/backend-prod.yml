@@ -151,23 +151,23 @@ jobs:
           cat > ./nginx-conf/default.conf <<EOF
           server {
               listen 80;
-              server_name kuroom.shop www.kuroom.shop;
-          
+              server_name kuroom.store www.kuroom.store;
+
               location /.well-known/acme-challenge/ {
                   root /var/www/certbot;
               }
-          
+
               location / {
                   return 301 https://\$host\$request_uri;
               }
           }
-          
+
           server {
               listen 443 ssl;
-              server_name kuroom.shop www.kuroom.shop;
-          
-              ssl_certificate /etc/letsencrypt/live/kuroom.shop/fullchain.pem;
-              ssl_certificate_key /etc/letsencrypt/live/kuroom.shop/privkey.pem;
+              server_name kuroom.store www.kuroom.store;
+
+              ssl_certificate /etc/letsencrypt/live/kuroom.store/fullchain.pem;
+              ssl_certificate_key /etc/letsencrypt/live/kuroom.store/privkey.pem;
           
               location / {
                   proxy_pass http://kurum-backend-$NEXT_PORT:8080;
