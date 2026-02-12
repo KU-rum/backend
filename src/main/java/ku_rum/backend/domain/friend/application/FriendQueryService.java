@@ -84,11 +84,15 @@ public class FriendQueryService {
                 .map(User::getId)
                 .collect(Collectors.toList());
 
-        // 1. 친구 요청을 보낸 사용자 ID 리스트 (PENDING)
+        // 1. 유저가 친구 요청을 보낸 사용자 ID
         List<Long> sentRequestUserIds = friendRepository.findToUserIdsByFromUserAndStatus(currentUser.getId(),
                 targetUserIds, FriendStatus.PENDING);
 
-        // 2. 친구인 사용자 ID 리스트 (ACCEPTED 양방향)
+        // 2. 유저 에게 친구 요청을 보낸 ID
+        List<Long> receivedRequestUserIds = friendRepository.findFromUserIdsByToUserAndStatus(currentUser.getId(),
+                targetUserIds, FriendStatus.PENDING);
+
+        // 3. 친구 ID 리스트 조회
         List<Long> friendUserIds = friendRepository.findFriendUserIds(currentUser.getId(), targetUserIds,
                 FriendStatus.ACCEPT);
 
@@ -98,6 +102,7 @@ public class FriendQueryService {
                         user.getNickname(),
                         user.getImageUrl(),
                         sentRequestUserIds.contains(user.getId()),
+                        receivedRequestUserIds.contains(user.getId()),
                         friendUserIds.contains(user.getId())
                 ))
                 .collect(Collectors.toList());

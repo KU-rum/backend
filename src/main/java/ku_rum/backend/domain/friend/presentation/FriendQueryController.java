@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.friend.presentation;
 
+import java.util.List;
 import ku_rum.backend.domain.friend.application.FriendQueryService;
 import ku_rum.backend.domain.friend.dto.response.FriendListResponse;
 import ku_rum.backend.domain.friend.dto.response.FriendSearchResponse;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,7 +35,8 @@ public class FriendQueryController {
     }
 
     @GetMapping("/search")
-    public BaseResponse<List<FriendSearchResponse>> searchFriendByNickname(@RequestParam final String nickname) {
+    public BaseResponse<List<FriendSearchResponse>> searchFriendByNickname(
+            @RequestParam(name = "nickname") final String nickname) {
         return BaseResponse.ok(friendQueryService.searchByNickname(nickname));
     }
 }
