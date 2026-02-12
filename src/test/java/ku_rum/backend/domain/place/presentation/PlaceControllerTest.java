@@ -40,8 +40,12 @@ import ku_rum.backend.domain.place.domain.PlaceImage;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
+import ku_rum.backend.domain.place.dto.request.DeletePlaceImagesRequest;
+import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
+import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
@@ -577,6 +581,50 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 .build())));
     }
 
+    @DisplayName("장소의 위치를 수정한다")
+    @Test
+    void modifyPlaceLocation() throws Exception {
+        //given
+        Long placeId = 1L;
+        PutPlaceLocationRequest request = new PutPlaceLocationRequest(
+                BigDecimal.valueOf(37.541941),
+                BigDecimal.valueOf(127.073784)
+        );
+
+        doNothing().when(placeService).modifyPlaceLocation(eq(placeId), any(PutPlaceLocationRequest.class));
+
+        //when
+        mockMvc.perform(patch("/api/v1/places/{placeId}/location", placeId)
+                        .header("Authorization", "Bearer access-token")
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 위치 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .requestFields(
+                                        fieldWithPath("latitude").type(JsonFieldType.NUMBER).description("변경할 위도"),
+                                        fieldWithPath("longitude").type(JsonFieldType.NUMBER).description("변경할 경도")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
     @DisplayName("장소의 이미지를 수정한다")
     @Test
     void modifyPlaceImages() throws Exception {
@@ -626,6 +674,191 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                         fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
                                         fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
                                         fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소를 생성한다")
+    @Test
+    void createPlace() throws Exception {
+        //given
+
+        String requestBody = """
+                {
+                    "categoryChip": "BUILDING",
+                    "name": "새로운 건물",
+                    "subName": "새 건물 부가 이름",
+                    "content": "새 건물에 대한 설명입니다",
+                    "latitude": 37.541941,
+                    "longitude": 127.073784
+                }
+                """;
+        doNothing().when(placeService).createPlace(any(PostPlaceRequest.class));
+
+        //when
+        mockMvc.perform(post("/api/v1/places")
+                        .header("Authorization", "Bearer access-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 생성")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .requestFields(
+                                        fieldWithPath("categoryChip").type(JsonFieldType.STRING)
+                                                .description("카테고리 칩 (BUILDING, COLLEGE, K_CUBE 등)"),
+                                        fieldWithPath("name").type(JsonFieldType.STRING).description("장소 이름"),
+                                        fieldWithPath("subName").type(JsonFieldType.STRING).description("장소 부가 이름"),
+                                        fieldWithPath("content").type(JsonFieldType.STRING).description("장소 설명"),
+                                        fieldWithPath("latitude").type(JsonFieldType.NUMBER).description("위도"),
+                                        fieldWithPath("longitude").type(JsonFieldType.NUMBER).description("경도")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소에 이미지를 추가한다")
+    @Test
+    void addPlaceImages() throws Exception {
+        //given
+        Long placeId = 1L;
+        MockMultipartFile image1 = new MockMultipartFile(
+                "images",
+                "image1.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 1".getBytes()
+        );
+        MockMultipartFile image2 = new MockMultipartFile(
+                "images",
+                "image2.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 2".getBytes()
+        );
+
+        doNothing().when(placeService).addPlaceImages(eq(placeId), any());
+
+        //when
+        mockMvc.perform(multipart("/api/v1/places/{placeId}/images", placeId)
+                        .file(image1)
+                        .file(image2)
+                        .with(request -> {
+                            request.setMethod("PATCH");
+                            return request;
+                        })
+                        .header("Authorization", "Bearer access-token")
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 이미지 추가")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 이미지를 삭제한다")
+    @Test
+    void deletePlaceImages() throws Exception {
+        //given
+        Long placeId = 1L;
+        Long placeImageId = 1L;
+        DeletePlaceImagesRequest request = new DeletePlaceImagesRequest(
+                List.of("https://example.com/image1.jpg", "https://example.com/image2.jpg")
+        );
+
+        doNothing().when(placeService).deletePlaceImages(eq(placeId), any());
+
+        //when
+        mockMvc.perform(delete("/api/v1/places/{placeId}/images/{placeImageId}", placeId, placeImageId)
+                        .header("Authorization", "Bearer access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 이미지 삭제")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID"),
+                                        RequestDocumentation.parameterWithName("placeImageId").description("장소이미지 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 이미지들을 조회한다")
+    @Test
+    void getPlaceImage() throws Exception {
+        //given
+        Long placeId = 1L;
+        Long placeImageId = 1L;
+        String url = "url";
+        List<GetPlaceImageResponse> response = List.of(new GetPlaceImageResponse(placeImageId, url));
+
+        given(placeService.getPlaceImage(eq(placeId)))
+                .willReturn(response);
+
+        //when
+        mockMvc.perform(get("/api/v1/places/{placeId}/images", placeId)
+                        .header("Authorization", "Bearer access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 해당하는 이미지 조회")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                        fieldWithPath("data[].placeImageId").type(JsonFieldType.NUMBER)
+                                                .description("장소 이미지 ID"),
+                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING)
+                                                .description("장소 이미지 URL")
                                 )
                                 .build())));
     }
