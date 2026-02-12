@@ -27,6 +27,12 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
                                                 @Param("targetUserIds") List<Long> targetUserIds,
                                                 @Param("status") FriendStatus status);
 
+    @Query("SELECT f.fromUser.id FROM Friend f " +
+            "WHERE f.toUser.id = :toUserId AND f.fromUser.id IN :targetUserIds AND f.status = :status")
+    List<Long> findFromUserIdsByToUserAndStatus(@Param("toUserId") Long toUserId,
+                                                @Param("targetUserIds") List<Long> targetUserIds,
+                                                @Param("status") FriendStatus status);
+
     @Query("SELECT f.toUser.id FROM Friend f " +
             "WHERE f.fromUser.id = :currentUserId AND f.toUser.id IN :targetUserIds AND f.status = :status " +
             "UNION " +
