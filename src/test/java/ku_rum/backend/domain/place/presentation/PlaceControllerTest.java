@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.place.application.PlaceHistoryService;
 import ku_rum.backend.domain.place.application.PlaceService;
 import ku_rum.backend.domain.place.application.PositionService;
@@ -46,12 +46,13 @@ import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
 import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
 import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
+import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -60,12 +61,11 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@WebMvcTest(PlaceController.class)
 @ActiveProfiles("test")
-public class PlaceControllerTest extends RestDocsTestSupport {
+public class PlaceControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     PositionService positionService;
@@ -74,10 +74,10 @@ public class PlaceControllerTest extends RestDocsTestSupport {
     PlaceService placeService;
 
     @MockBean
-    PlaceHistoryService placeHistoryService;
+    RankService rankService;
 
     @MockBean
-    private SecurityFilterChain securityFilterChain;
+    PlaceHistoryService placeHistoryService;
 
     @BeforeEach
     void setUp() {
@@ -103,7 +103,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places/sharing/status")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
 
                 //then
                 .andDo(print())
@@ -137,7 +137,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(post("/api/v1/places/sharing")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .content(new ObjectMapper().writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 //then
@@ -168,7 +168,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(post("/api/v1/places/sharing/confirm")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .content(new ObjectMapper().writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 //then
@@ -195,7 +195,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(delete("/api/v1/places/sharing/confirm")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -232,7 +232,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .param("chip", "K_CUBE"))
                 //then
                 .andDo(print())
@@ -281,7 +281,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places/{placeId}", placeId)
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -434,7 +434,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places/search/history")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -458,7 +458,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //then
         mockMvc.perform(delete("/api/v1/places/search/history/{placeHistoryId}", placeHistoryId)
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -485,7 +485,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //then
         mockMvc.perform(delete("/api/v1/places/search/history")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())

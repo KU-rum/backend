@@ -14,35 +14,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.notice.application.SearchKeywordService;
 import ku_rum.backend.domain.notice.dto.request.SaveKeywordRequest;
 import ku_rum.backend.domain.notice.dto.response.GetKeywordResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(KeywordController.class)
 @ActiveProfiles("test")
-public class KeywordControllerTest extends RestDocsTestSupport {
+public class KeywordControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private SearchKeywordService searchKeywordService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("키워드 검색")
     @Test

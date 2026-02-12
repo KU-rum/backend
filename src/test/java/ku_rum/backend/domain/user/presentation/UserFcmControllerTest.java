@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.application.FcmService;
 import ku_rum.backend.domain.user.application.UserService;
@@ -19,19 +19,16 @@ import ku_rum.backend.domain.user.application.UserValidator;
 import ku_rum.backend.domain.user.domain.DeviceType;
 import ku_rum.backend.domain.user.dto.request.UserFcmRequest;
 import ku_rum.backend.domain.user.dto.response.UserFcmResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(UserController.class)
 @ActiveProfiles("test")
-public class UserFcmControllerTest extends RestDocsTestSupport {
+public class UserFcmControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     AlarmService alarmService;
@@ -44,15 +41,6 @@ public class UserFcmControllerTest extends RestDocsTestSupport {
 
     @MockBean
     FcmService fcmService;
-
-    @MockBean
-    ApiLogRepository apiLogRepository;
-
-    @MockBean
-    SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("사용자 fcm 토큰을 저장한다")
     @Test

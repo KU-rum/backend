@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.time.LocalDateTime;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.application.FcmService;
 import ku_rum.backend.domain.alarm.domain.AlarmCategory;
@@ -32,34 +32,22 @@ import ku_rum.backend.domain.alarm.dto.response.GetAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.GetAlarmUnreadResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchAlarmResponse;
 import ku_rum.backend.domain.alarm.dto.response.PatchDisableAlarmResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(AlarmController.class)
 @ActiveProfiles("test")
-public class AlarmControllerTest extends RestDocsTestSupport {
+public class AlarmControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     AlarmService alarmService;
 
     @MockBean
     FcmService fcmService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("알림을 조회한다")
     @Test

@@ -21,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
+import ku_rum.backend.domain.alarm.application.FcmService;
 import ku_rum.backend.domain.auth.dto.response.AuthResponse;
 import ku_rum.backend.domain.common.mail.dto.request.EmailValidationRequest;
 import ku_rum.backend.domain.friend.application.FriendReportService;
@@ -37,48 +38,37 @@ import ku_rum.backend.domain.user.dto.response.TokenResponse;
 import ku_rum.backend.domain.user.dto.response.UserProfileDepartmentResponse;
 import ku_rum.backend.domain.user.dto.response.UserProfileResponse;
 import ku_rum.backend.domain.user.dto.response.UserResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.json.JsonType;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@Transactional
+@WebMvcTest(UserController.class)
 @ActiveProfiles("test")
-class UserControllerTest extends RestDocsTestSupport {
+class UserControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private UserService userService;
 
     @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private UserDetailsService userDetailsService;
-
-    @MockBean
     private UserValidator userValidator;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
 
     @MockBean
     private FriendReportService friendManageService;
 
     @MockBean
     private FriendBlockRepository friendBlockRepository;
+
+    @MockBean
+    private FcmService fcmService;
 
     @DisplayName("신규 유저를 생성한다.")
     @Test
@@ -169,7 +159,7 @@ class UserControllerTest extends RestDocsTestSupport {
         mockMvc.perform(post("/api/v1/users/social")
                         .content(objectMapper.writeValueAsString(request))
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -278,7 +268,7 @@ class UserControllerTest extends RestDocsTestSupport {
         // when then
         mockMvc.perform(patch("/api/v1/users/profile")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .with(SecurityMockMvcRequestPostProcessors.user(userDetails))
                         .content(objectMapper.writeValueAsString(profileChangeRequest))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -590,7 +580,7 @@ class UserControllerTest extends RestDocsTestSupport {
         // when & Then
         mockMvc.perform(get("/api/v1/users/profile")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())

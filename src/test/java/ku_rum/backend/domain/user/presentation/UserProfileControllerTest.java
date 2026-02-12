@@ -1,8 +1,22 @@
 package ku_rum.backend.domain.user.presentation;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.auth.application.TokenBlacklistService;
 import ku_rum.backend.domain.common.mail.dto.request.MailVerificationRequest;
 import ku_rum.backend.domain.user.application.UserService;
@@ -16,39 +30,21 @@ import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.json.JsonType;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@SpringBootTest
-@Transactional
+@WebMvcTest(UserProfileController.class)
 @ActiveProfiles("test")
-public class UserProfileControllerTest extends RestDocsTestSupport {
+public class UserProfileControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private UserService userService;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
 
     @MockBean
     private TokenBlacklistService tokenBlacklistService;
@@ -59,12 +55,14 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
     void changeNickname_Success() throws Exception {
         // Given
         NicknameChangeRequest request = new NicknameChangeRequest("안녕안녕");
-        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
+        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser",
+                AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
         String requestBody = new ObjectMapper().writeValueAsString(request);
 
         // When & Then
         mockMvc.perform(patch("/api/v1/users/nickname")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access-token")
                         .with(SecurityMockMvcRequestPostProcessors.user(userDetails))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -101,8 +99,9 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
     @WithMockUser
     void resetAccount() throws Exception {
         // given
-        MailVerificationRequest request = new MailVerificationRequest("kmw106933@naver.com","1234");
-        InitiatePasswordResetRequest initiatePasswordResetRequest = new InitiatePasswordResetRequest(request,"user123", "test12345");
+        MailVerificationRequest request = new MailVerificationRequest("kmw106933@naver.com", "1234");
+        InitiatePasswordResetRequest initiatePasswordResetRequest = new InitiatePasswordResetRequest(request, "user123",
+                "test12345");
 
         // when then
         mockMvc.perform(post("/api/v1/users/password-reset/initiate")
@@ -153,11 +152,13 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
     void passwordReset() throws Exception {
         // given
         ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest("test1234", "test12345");
-        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
+        CustomUserDetails userDetails = CustomUserDetails.of(1L, "testUser",
+                AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
 
         // when then
         mockMvc.perform(post("/api/v1/users/password-reset")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access-token")
                         .with(SecurityMockMvcRequestPostProcessors.user(userDetails))
                         .content(objectMapper.writeValueAsString(resetPasswordRequest))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -169,7 +170,8 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
                                 .tag("프로필 관련 API")
                                 .description("로그인 후 비밀번호 변경")
                                 .requestHeaders(
-                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다. Authorization 헤더에 토큰을 넣어주세요. 앞에 Bearer를 붙혀야 합니다.")
+                                        headerWithName("Authorization").description(
+                                                "발급 받은 엑세스 토큰입니다. Authorization 헤더에 토큰을 넣어주세요. 앞에 Bearer를 붙혀야 합니다.")
                                 )
                                 .requestFields(
                                         fieldWithPath("prevPassword")
@@ -203,7 +205,8 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
     void deactivateUser() throws Exception {
         // when & then
         mockMvc.perform(delete("/api/v1/users/deactivate")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access-token")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -250,7 +253,8 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
 
         // when & then
         mockMvc.perform(post("/api/v1/users/department")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req))
@@ -290,7 +294,8 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
 
         // when & then
         mockMvc.perform(delete("/api/v1/users/department")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req))
@@ -341,7 +346,8 @@ public class UserProfileControllerTest extends RestDocsTestSupport {
 
         // when & then
         mockMvc.perform(post("/api/v1/users/profile/presigned-url")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))

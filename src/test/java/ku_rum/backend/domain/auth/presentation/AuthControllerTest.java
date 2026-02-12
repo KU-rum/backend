@@ -1,7 +1,19 @@
 package ku_rum.backend.domain.auth.presentation;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
+import java.util.ArrayList;
+import java.util.List;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.auth.application.AuthService;
 import ku_rum.backend.domain.auth.dto.request.LoginRequest;
 import ku_rum.backend.domain.auth.dto.request.ReissueRequest;
@@ -13,37 +25,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.openqa.selenium.json.JsonType;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@SpringBootTest
-@Transactional
+@WebMvcTest(AuthController.class)
 @ActiveProfiles("test")
-class AuthControllerTest extends RestDocsTestSupport {
+class AuthControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private AuthService authService;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
 
     @MockBean
     private ku_rum.backend.domain.common.s3.application.S3Service s3Service;
@@ -61,7 +54,7 @@ class AuthControllerTest extends RestDocsTestSupport {
         // UserResponse 설정 (사용자 정보도 포함해야 하므로, 예시로 넣음)
         UserResponse userResponse = UserResponse.of(
                 1L, "oauthId", "kmw10693", "email@example.com", "nickname", "studentId", "imageUrl"
-        , departmentResponses);
+                , departmentResponses);
 
         // AuthResponse 설정
         AuthResponse authResponse = AuthResponse.of(tokenResponse, userResponse);
@@ -160,7 +153,7 @@ class AuthControllerTest extends RestDocsTestSupport {
     void logout() throws Exception {
         // when then
         mockMvc.perform(patch("/api/v1/auth/logout")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization", "Bearer your.jwt.token")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -174,7 +167,8 @@ class AuthControllerTest extends RestDocsTestSupport {
                                         .tag("권한 관련 API")
                                         .description("로그아웃")
                                         .requestHeaders(
-                                                headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다. Authorization 헤더에 넣어주세요.")
+                                                headerWithName("Authorization").description(
+                                                        "발급 받은 엑세스 토큰입니다. Authorization 헤더에 넣어주세요.")
                                         )
                                         .responseFields(
 
@@ -256,7 +250,8 @@ class AuthControllerTest extends RestDocsTestSupport {
         // given
         String tempToken = "temporary_token_value";
         List<DepartmentResponse> list = new ArrayList<>();
-        UserResponse userResponse = new UserResponse(1L, "oauthId", "loginId", "email", "nickname", "studentId", "imageUrl", list);
+        UserResponse userResponse = new UserResponse(1L, "oauthId", "loginId", "email", "nickname", "studentId",
+                "imageUrl", list);
         TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", 1800000L, 604800000L, false);
         AuthResponse authResponse = new AuthResponse(
                 tokenResponse,
@@ -296,8 +291,10 @@ class AuthControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("message").description("성공 시 메시지 (OK)"),
                                                 fieldWithPath("data.tokenResponse.accessToken").description("엑세스 토큰"),
                                                 fieldWithPath("data.tokenResponse.refreshToken").description("리프레시 토큰"),
-                                                fieldWithPath("data.tokenResponse.accessExpireIn").description("엑세스 만료 기간"),
-                                                fieldWithPath("data.tokenResponse.refreshExpireIn").description("리프레시 만료 기간"),
+                                                fieldWithPath("data.tokenResponse.accessExpireIn").description(
+                                                        "엑세스 만료 기간"),
+                                                fieldWithPath("data.tokenResponse.refreshExpireIn").description(
+                                                        "리프레시 만료 기간"),
                                                 fieldWithPath("data.userResponse.id").description("사용자 ID"),
                                                 fieldWithPath("data.userResponse.oauthId").description("사용자 Oauth ID"),
                                                 fieldWithPath("data.userResponse.loginId").description("사용자 로그인 ID"),
@@ -305,8 +302,10 @@ class AuthControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("data.userResponse.nickname").description("사용자 닉네임"),
                                                 fieldWithPath("data.userResponse.studentId").description("사용자 학생 ID"),
                                                 fieldWithPath("data.userResponse.imageUrl").description("사용자 이미지 URL"),
-                                                fieldWithPath("data.userResponse.departmentResponse").description("사용자 학과 정보"),
-                                                fieldWithPath("data.tokenResponse.isFirstLogin").description("사용자 최초 로그인 여부")
+                                                fieldWithPath("data.userResponse.departmentResponse").description(
+                                                        "사용자 학과 정보"),
+                                                fieldWithPath("data.tokenResponse.isFirstLogin").description(
+                                                        "사용자 최초 로그인 여부")
 
                                         )
                                         .build()

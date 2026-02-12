@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.department.application.DepartmentQueryService;
 import ku_rum.backend.domain.department.application.UserDepartmentService;
 import ku_rum.backend.domain.department.dto.CollegeDepartmentResponse;
@@ -19,23 +19,19 @@ import ku_rum.backend.domain.department.dto.DepartmentUrlResponse;
 import ku_rum.backend.domain.department.dto.SearchDepartmentResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@WebMvcTest(DepartmentQueryController.class)
 @ActiveProfiles("test")
-class DepartmentQueryControllerTest extends RestDocsTestSupport {
+class DepartmentQueryControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private DepartmentQueryService departmentQueryService;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
 
     @MockBean
     private UserDepartmentService userDepartmentService;
