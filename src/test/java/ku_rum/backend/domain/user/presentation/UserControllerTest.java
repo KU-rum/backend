@@ -51,7 +51,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest({UserController.class, UserProfileController.class})
 @ActiveProfiles("test")
 class UserControllerTest extends RestDocsUnitTestSupport {
 

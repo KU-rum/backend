@@ -63,7 +63,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
-@WebMvcTest(PlaceController.class)
+@WebMvcTest({PlaceController.class, PlaceAdminController.class})
 @ActiveProfiles("test")
 public class PlaceControllerTest extends RestDocsUnitTestSupport {
 
