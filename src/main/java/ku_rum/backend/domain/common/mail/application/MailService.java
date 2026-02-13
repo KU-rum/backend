@@ -4,13 +4,14 @@ import ku_rum.backend.domain.common.mail.domain.MailAuth;
 import ku_rum.backend.domain.common.mail.domain.repository.MailAuthRepository;
 import ku_rum.backend.domain.common.mail.dto.request.MailSendRequest;
 import ku_rum.backend.domain.common.mail.dto.request.MailVerificationRequest;
-import ku_rum.backend.domain.common.mail.dto.response.MailVerificationResponse;
 import ku_rum.backend.global.exception.user.MailSendException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.Duration;
 
@@ -24,6 +25,7 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.I
 public class MailService {
     private final MailSenderService mailSenderService;
     private final MailAuthRepository mailAuthRepository;
+    private final SpringTemplateEngine templateEngine;
 
     @Async
     @Transactional
@@ -34,8 +36,15 @@ public class MailService {
                 request.email(),
                 MAIL_SEND_INFO.getCODE_LENGTH());
 
-        mailSenderService.send(request.email(), MAIL_SEND_INFO.getTITLE(), mailAuth.getAuthCode());
+        String htmlContent = createEmailContent(mailAuth.getAuthCode());
+        mailSenderService.sendHtml(request.email(), MAIL_SEND_INFO.getTITLE(), htmlContent);
         mailAuthRepository.save(mailAuth, Duration.ofMillis(MAIL_SEND_INFO.getAUTH_EXPIRED_MILLS()));
+    }
+
+    private String createEmailContent(String code) {
+        Context context = new Context();
+        context.setVariable("code", code);
+        return templateEngine.process("email_template", context);
     }
 
     private void deleteByEmail(MailSendRequest request) {
