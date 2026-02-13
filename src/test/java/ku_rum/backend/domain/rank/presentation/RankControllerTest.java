@@ -14,15 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankPaginationResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceTopRankResponse;
 import ku_rum.backend.domain.rank.application.response.GetPlaceUserRankResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import ku_rum.backend.global.security.CustomUserDetails;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,24 +31,14 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(RankController.class)
 @ActiveProfiles("test")
-class RankControllerTest extends RestDocsTestSupport {
+class RankControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     RankService rankService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("장소 공유 순위를 확인한다")
     @Test

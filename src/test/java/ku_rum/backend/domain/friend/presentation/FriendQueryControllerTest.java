@@ -13,14 +13,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.friend.application.FriendQueryService;
 import ku_rum.backend.domain.friend.dto.response.FriendListResponse;
 import ku_rum.backend.domain.friend.dto.response.FriendSearchResponse;
 import ku_rum.backend.domain.friend.dto.response.ReceivedFriendResponse;
 import ku_rum.backend.domain.friend.dto.response.SentFriendResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import ku_rum.backend.util.RestDocsFieldSnippets;
 import ku_rum.backend.util.RestDocsTestUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -30,26 +28,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-//@SpringBootTest
 @WebMvcTest(FriendQueryController.class)
 @ActiveProfiles("test")
-class FriendQueryControllerTest extends RestDocsTestSupport {
-
+class FriendQueryControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private FriendQueryService friendQueryService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @Test
     @DisplayName("친구 목록 조회 API")

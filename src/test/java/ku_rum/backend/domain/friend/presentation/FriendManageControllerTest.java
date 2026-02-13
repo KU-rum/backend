@@ -12,30 +12,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.friend.application.FriendManageService;
 import ku_rum.backend.domain.friend.dto.request.FriendRequest;
 import ku_rum.backend.util.RestDocsFieldSnippets;
 import ku_rum.backend.util.RestDocsTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@WebMvcTest(FriendManageController.class)
 @ActiveProfiles("test")
-class FriendManageControllerTest extends RestDocsTestSupport {
+class FriendManageControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private FriendManageService friendManageService;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
 
     @Test
     @DisplayName("친구 요청 API")
@@ -47,7 +43,7 @@ class FriendManageControllerTest extends RestDocsTestSupport {
         mockMvc.perform(post("/api/v1/friends/request")
 
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(friendSendRequest)))
 
@@ -80,7 +76,7 @@ class FriendManageControllerTest extends RestDocsTestSupport {
 
         mockMvc.perform(put("/api/v1/friends/accept")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(friendRequest)))
                 .andDo(print())
