@@ -1,9 +1,11 @@
 package ku_rum.backend.domain.common.mail.application;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import ku_rum.backend.global.exception.user.MailSendException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.MAIL_SEND_EXCEPTION;
@@ -13,19 +15,18 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.M
 public class MailSenderService {
     private final JavaMailSender emailSender;
 
-    public void send(String toEmail, String title, String text) {
+    public void sendHtml(String toEmail, String title, String htmlContent) {
         try {
-            emailSender.send(createEmailForm(toEmail, title, text));
-        } catch (RuntimeException e) {
+            MimeMessage mimeMessage = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject(title);
+            helper.setText(htmlContent, true);
+
+            emailSender.send(mimeMessage);
+        } catch (MessagingException e) {
             throw new MailSendException(MAIL_SEND_EXCEPTION);
         }
-    }
-
-    private SimpleMailMessage createEmailForm(String toEmail, String title, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject(title);
-        message.setText(text);
-        return message;
     }
 }
