@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,6 +61,13 @@ public class GlobalExceptionControllerAdvice {
     public BaseErrorResponse handle_InternalServerError(final InternalServerErrorException e) {
         log.error("[handle_InternalServerError]", e);
         return new BaseErrorResponse(INTERNAL_SERVER_ERROR);
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public BaseErrorResponse handle_AccessDeniedException(final AccessDeniedException e) {
+        log.error("[handle_AccessDeniedException]", e);
+        return new BaseErrorResponse(ACCESS_DENIED);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

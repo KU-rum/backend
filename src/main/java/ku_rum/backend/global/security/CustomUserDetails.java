@@ -1,5 +1,7 @@
 package ku_rum.backend.global.security;
 
+import java.util.Collection;
+import java.util.Map;
 import ku_rum.backend.domain.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,9 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-
-import java.util.Collection;
-import java.util.Map;
 
 @Getter
 @NoArgsConstructor
@@ -24,7 +23,8 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     private Map<String, Object> attributes;
     private boolean firstLogin;
 
-    private CustomUserDetails(Long userId, String username, Collection<? extends GrantedAuthority> role, String password, boolean firstLogin) {
+    private CustomUserDetails(Long userId, String username, Collection<? extends GrantedAuthority> role,
+                              String password, boolean firstLogin) {
         this.userId = userId;
         this.username = username;
         this.email = email;
@@ -33,7 +33,8 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         this.firstLogin = firstLogin;
     }
 
-    private CustomUserDetails(Long userId, String username, String email, Collection<? extends GrantedAuthority> roles, String password, boolean firstLogin) {
+    private CustomUserDetails(Long userId, String username, String email, Collection<? extends GrantedAuthority> roles,
+                              String password, boolean firstLogin) {
         this.userId = userId;
         this.username = username;
         this.email = email;
@@ -42,11 +43,14 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         this.firstLogin = firstLogin;
     }
 
-    public static CustomUserDetails of(Long id, String username, Collection<? extends GrantedAuthority> role, String password, boolean firstLogin) {
+    public static CustomUserDetails of(Long id, String username, Collection<? extends GrantedAuthority> role,
+                                       String password, boolean firstLogin) {
         return new CustomUserDetails(id, username, role, password, firstLogin);
     }
 
-    public static CustomUserDetails of(Long id, String username, String email, Collection<? extends GrantedAuthority> roles, String password, boolean firstLogin) {
+    public static CustomUserDetails of(Long id, String username, String email,
+                                       Collection<? extends GrantedAuthority> roles, String password,
+                                       boolean firstLogin) {
         return new CustomUserDetails(id, username, email, roles, password, firstLogin);
     }
 
@@ -55,7 +59,8 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
                 user.getId(),
                 user.getNickname(),
                 user.getEmail(),
-                AuthorityUtils.createAuthorityList("ROLE_USER"),
+                AuthorityUtils.createAuthorityList(user.getRoles().toArray(new String[0])),
+                //AuthorityUtils.createAuthorityList("ROLE_USER"),
                 user.getPassword(),
                 user.isFirstLogin()
         );
