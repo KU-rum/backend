@@ -11,13 +11,13 @@ public enum CategoryChip {
     K_CUBE("K-Cube"),
     K_HUB("K-Hub"),
     CONVENIENCE_STORE("편의점"),
-    CAFE_RESTIO("레스티오"),
-    CAFE_1847("1847"),
+    CAFE("카페"),
     STUDENT_CAFETERIA("학생식당"),
     DEPARTMENT_OFFICE("학과사무실"),
     DORMITORY("기숙사"),
     BANK("은행"),
     POST_OFFICE("우체국"),
+    COPY_ROOM("복사실"),
     FRIEND("친구");
 
     private final String name;
