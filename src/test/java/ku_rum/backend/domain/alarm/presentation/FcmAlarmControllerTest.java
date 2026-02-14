@@ -9,39 +9,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.alarm.application.AlarmService;
 import ku_rum.backend.domain.alarm.application.FcmService;
 import ku_rum.backend.domain.alarm.dto.FcmDirectDto;
 import ku_rum.backend.domain.alarm.dto.FcmTopicDto;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(AlarmController.class)
 @ActiveProfiles("test")
-public class FcmAlarmControllerTest extends RestDocsTestSupport {
+public class FcmAlarmControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     AlarmService alarmService;
 
     @MockBean
     FcmService fcmService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("특정 사용자에게 푸시 알림을 보낸다")
     @Test

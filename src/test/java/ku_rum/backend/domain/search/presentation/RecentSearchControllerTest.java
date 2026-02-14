@@ -1,25 +1,5 @@
 package ku_rum.backend.domain.search.presentation;
 
-import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
-import ku_rum.backend.domain.search.application.RecentSearchService;
-import ku_rum.backend.domain.search.domain.RecentSearch;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -31,22 +11,28 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import java.time.LocalDateTime;
+import java.util.List;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
+import ku_rum.backend.domain.search.application.RecentSearchService;
+import ku_rum.backend.domain.search.domain.RecentSearch;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
+
 @WebMvcTest(RecentSearchController.class)
 @ActiveProfiles("test")
-class RecentSearchControllerTest extends RestDocsTestSupport {
+class RecentSearchControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private RecentSearchService recentSearchService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
-
 
     @Test
     @DisplayName("최근 검색어 목록을 조회한다")
@@ -79,12 +65,18 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
                                         .responseFields(
                                                 fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드"),
                                                 fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태"),
-                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("최근 검색어 ID"),
-                                                fieldWithPath("data[].userId").type(JsonFieldType.NUMBER).description("유저 ID"),
-                                                fieldWithPath("data[].keyword").type(JsonFieldType.STRING).description("검색 키워드"),
-                                                fieldWithPath("data[].createdAt").type(JsonFieldType.STRING).description("생성 시각"),
-                                                fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING).description("최근 검색 시각")
+                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                        .description("응답 메시지"),
+                                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER)
+                                                        .description("최근 검색어 ID"),
+                                                fieldWithPath("data[].userId").type(JsonFieldType.NUMBER)
+                                                        .description("유저 ID"),
+                                                fieldWithPath("data[].keyword").type(JsonFieldType.STRING)
+                                                        .description("검색 키워드"),
+                                                fieldWithPath("data[].createdAt").type(JsonFieldType.STRING)
+                                                        .description("생성 시각"),
+                                                fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING)
+                                                        .description("최근 검색 시각")
                                         )
                                         .build()
                         )
@@ -110,7 +102,8 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
                                         .responseFields(
                                                 fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드"),
                                                 fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태"),
-                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                        .description("응답 메시지")
                                         )
                                         .build()
                         )
@@ -136,7 +129,8 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
                                         .responseFields(
                                                 fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드"),
                                                 fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태"),
-                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                        .description("응답 메시지")
                                         )
                                         .build()
                         )
@@ -169,7 +163,8 @@ class RecentSearchControllerTest extends RestDocsTestSupport {
                                         .responseFields(
                                                 fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드"),
                                                 fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태"),
-                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                        .description("응답 메시지")
                                         )
                                         .build()
                         )

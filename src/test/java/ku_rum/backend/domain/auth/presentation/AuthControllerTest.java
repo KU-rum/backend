@@ -1,29 +1,5 @@
 package ku_rum.backend.domain.auth.presentation;
 
-import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
-import ku_rum.backend.domain.auth.application.AuthService;
-import ku_rum.backend.domain.auth.dto.request.LoginRequest;
-import ku_rum.backend.domain.auth.dto.request.ReissueRequest;
-import ku_rum.backend.domain.auth.dto.response.AuthResponse;
-import ku_rum.backend.domain.department.dto.DepartmentResponse;
-import ku_rum.backend.domain.user.dto.response.TokenResponse;
-import ku_rum.backend.domain.user.dto.response.UserResponse;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.openqa.selenium.json.JsonType;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
@@ -34,16 +10,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@Transactional
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import java.util.ArrayList;
+import java.util.List;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
+import ku_rum.backend.domain.auth.application.AuthService;
+import ku_rum.backend.domain.auth.dto.request.LoginRequest;
+import ku_rum.backend.domain.auth.dto.request.ReissueRequest;
+import ku_rum.backend.domain.auth.dto.response.AuthResponse;
+import ku_rum.backend.domain.department.dto.DepartmentResponse;
+import ku_rum.backend.domain.user.dto.response.TokenResponse;
+import ku_rum.backend.domain.user.dto.response.UserResponse;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+
+@WebMvcTest(AuthController.class)
 @ActiveProfiles("test")
-class AuthControllerTest extends RestDocsTestSupport {
+class AuthControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private AuthService authService;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
 
     @MockBean
     private ku_rum.backend.domain.common.s3.application.S3Service s3Service;
@@ -61,7 +54,7 @@ class AuthControllerTest extends RestDocsTestSupport {
         // UserResponse 설정 (사용자 정보도 포함해야 하므로, 예시로 넣음)
         UserResponse userResponse = UserResponse.of(
                 1L, "oauthId", "kmw10693", "email@example.com", "nickname", "studentId", "imageUrl"
-        , departmentResponses);
+                , departmentResponses);
 
         // AuthResponse 설정
         AuthResponse authResponse = AuthResponse.of(tokenResponse, userResponse);
@@ -93,62 +86,62 @@ class AuthControllerTest extends RestDocsTestSupport {
                                         .description("로그인")
                                         .requestFields(
                                                 fieldWithPath("loginId")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("멤버 아이디")
                                                         .attributes(constraints("아이디 입력은 필수입니다. 최소 6자 이상입니다.")),
                                                 fieldWithPath("password")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("비밀번호")
                                                         .attributes(constraints("비밀번호 입력은 필수입니다."))
                                         )
                                         .responseFields(
                                                 fieldWithPath("code")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("성공시 반환 코드 (200)"),
                                                 fieldWithPath("status")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공시 상태 값 (OK)"),
                                                 fieldWithPath("message")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 메시지 (OK)"),
                                                 fieldWithPath("data.tokenResponse.accessToken")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("엑세스 토큰"),
                                                 fieldWithPath("data.tokenResponse.refreshToken")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("리프레시 토큰"),
                                                 fieldWithPath("data.tokenResponse.accessExpireIn")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("엑세스 토큰 만료 기간"),
                                                 fieldWithPath("data.tokenResponse.refreshExpireIn")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("리프레시 토큰 만료 기간"),
                                                 fieldWithPath("data.userResponse.loginId")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("로그인 아이디"),
                                                 fieldWithPath("data.userResponse.nickname")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("사용자 닉네임"),
                                                 fieldWithPath("data.userResponse.email")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("사용자 이메일"),
                                                 fieldWithPath("data.userResponse.studentId")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("사용자 학번"),
                                                 fieldWithPath("data.userResponse.imageUrl")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("사용자 이미지 URL"),
                                                 fieldWithPath("data.userResponse.id")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("사용자 인덱스"),
                                                 fieldWithPath("data.userResponse.oauthId")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("사용자 oauthId"),
                                                 fieldWithPath("data.userResponse.departmentResponse")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.ARRAY)
                                                         .description("사용자 학과"),
                                                 fieldWithPath("data.tokenResponse.isFirstLogin")
-                                                        .type(JsonType.BOOLEAN)
+                                                        .type(JsonFieldType.BOOLEAN)
                                                         .description("사용자 최초 로그인 여부")
                                         ).build())));
     }
@@ -160,7 +153,7 @@ class AuthControllerTest extends RestDocsTestSupport {
     void logout() throws Exception {
         // when then
         mockMvc.perform(patch("/api/v1/auth/logout")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization", "Bearer your.jwt.token")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
@@ -174,21 +167,22 @@ class AuthControllerTest extends RestDocsTestSupport {
                                         .tag("권한 관련 API")
                                         .description("로그아웃")
                                         .requestHeaders(
-                                                headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다. Authorization 헤더에 넣어주세요.")
+                                                headerWithName("Authorization").description(
+                                                        "발급 받은 엑세스 토큰입니다. Authorization 헤더에 넣어주세요.")
                                         )
                                         .responseFields(
 
                                                 fieldWithPath("code")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("성공시 반환 코드 (200)"),
                                                 fieldWithPath("status")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공시 상태 값 (OK)"),
                                                 fieldWithPath("message")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 메시지 (OK)"),
                                                 fieldWithPath("data")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 반환 메시지")
                                         ).build())));
     }
@@ -218,33 +212,33 @@ class AuthControllerTest extends RestDocsTestSupport {
                                         .description("토큰 재발급")
                                         .requestFields(
                                                 fieldWithPath("refreshToken")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("발급받은 리프레시 토큰")
                                         )
                                         .responseFields(
                                                 fieldWithPath("code")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("성공시 반환 코드 (200)"),
                                                 fieldWithPath("status")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공시 상태 값 (OK)"),
                                                 fieldWithPath("message")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 메시지 (OK)"),
                                                 fieldWithPath("data.accessToken")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("엑세스 토큰"),
                                                 fieldWithPath("data.refreshToken")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("리프레시 토큰"),
                                                 fieldWithPath("data.accessExpireIn")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("엑세스 토큰 만료 기간"),
                                                 fieldWithPath("data.refreshExpireIn")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("리프레시 토큰 만료 기간"),
                                                 fieldWithPath("data.isFirstLogin")
-                                                        .type(JsonType.BOOLEAN)
+                                                        .type(JsonFieldType.BOOLEAN)
                                                         .description("사용자 최초 로그인 여부")
                                         ).build())));
     }
@@ -256,7 +250,8 @@ class AuthControllerTest extends RestDocsTestSupport {
         // given
         String tempToken = "temporary_token_value";
         List<DepartmentResponse> list = new ArrayList<>();
-        UserResponse userResponse = new UserResponse(1L, "oauthId", "loginId", "email", "nickname", "studentId", "imageUrl", list);
+        UserResponse userResponse = new UserResponse(1L, "oauthId", "loginId", "email", "nickname", "studentId",
+                "imageUrl", list);
         TokenResponse tokenResponse = new TokenResponse("accessToken", "refreshToken", 1800000L, 604800000L, false);
         AuthResponse authResponse = new AuthResponse(
                 tokenResponse,
@@ -296,8 +291,10 @@ class AuthControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("message").description("성공 시 메시지 (OK)"),
                                                 fieldWithPath("data.tokenResponse.accessToken").description("엑세스 토큰"),
                                                 fieldWithPath("data.tokenResponse.refreshToken").description("리프레시 토큰"),
-                                                fieldWithPath("data.tokenResponse.accessExpireIn").description("엑세스 만료 기간"),
-                                                fieldWithPath("data.tokenResponse.refreshExpireIn").description("리프레시 만료 기간"),
+                                                fieldWithPath("data.tokenResponse.accessExpireIn").description(
+                                                        "엑세스 만료 기간"),
+                                                fieldWithPath("data.tokenResponse.refreshExpireIn").description(
+                                                        "리프레시 만료 기간"),
                                                 fieldWithPath("data.userResponse.id").description("사용자 ID"),
                                                 fieldWithPath("data.userResponse.oauthId").description("사용자 Oauth ID"),
                                                 fieldWithPath("data.userResponse.loginId").description("사용자 로그인 ID"),
@@ -305,8 +302,10 @@ class AuthControllerTest extends RestDocsTestSupport {
                                                 fieldWithPath("data.userResponse.nickname").description("사용자 닉네임"),
                                                 fieldWithPath("data.userResponse.studentId").description("사용자 학생 ID"),
                                                 fieldWithPath("data.userResponse.imageUrl").description("사용자 이미지 URL"),
-                                                fieldWithPath("data.userResponse.departmentResponse").description("사용자 학과 정보"),
-                                                fieldWithPath("data.tokenResponse.isFirstLogin").description("사용자 최초 로그인 여부")
+                                                fieldWithPath("data.userResponse.departmentResponse").description(
+                                                        "사용자 학과 정보"),
+                                                fieldWithPath("data.tokenResponse.isFirstLogin").description(
+                                                        "사용자 최초 로그인 여부")
 
                                         )
                                         .build()

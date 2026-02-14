@@ -16,40 +16,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.bookmark.application.BookmarkService;
 import ku_rum.backend.domain.bookmark.dto.request.CreateBookmarkRequest;
 import ku_rum.backend.domain.bookmark.dto.response.CreateBookmarkResponse;
 import ku_rum.backend.domain.bookmark.dto.response.GetBookmarkResponse;
 import ku_rum.backend.domain.bookmark.presentation.BookmarkController;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(BookmarkController.class)
 @ActiveProfiles("test")
-class BookmarkControllerTest extends RestDocsTestSupport {
+class BookmarkControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     BookmarkService bookmarkService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("공지사항 북마크를 생성한다")
     @Test

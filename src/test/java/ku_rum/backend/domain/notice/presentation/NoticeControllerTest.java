@@ -16,12 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import java.time.LocalDateTime;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.notice.application.NoticeService;
 import ku_rum.backend.domain.notice.dto.response.NoticeDetailResponse;
 import ku_rum.backend.domain.notice.dto.response.NoticeResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,24 +29,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(NoticeController.class)
 @ActiveProfiles("test")
-public class NoticeControllerTest extends RestDocsTestSupport {
+public class NoticeControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private NoticeService noticeService;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("카테고리 ID로 공지사항 목록을 조회한다.")
     @Test
@@ -119,7 +107,8 @@ public class NoticeControllerTest extends RestDocsTestSupport {
         String link = "url";
         String title = "공지사항 제목";
         boolean isBookmark = true;
-        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link, title, LocalDateTime.now(), 1L, isBookmark);
+        NoticeDetailResponse noticeDetailResponse = new NoticeDetailResponse(noticeId, htmlContent, link, title,
+                LocalDateTime.now(), 1L, isBookmark);
         given(noticeService.findByNoticeId(eq(noticeId)))
                 .willReturn(noticeDetailResponse);
 

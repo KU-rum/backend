@@ -9,39 +9,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.application.UserValidator;
 import ku_rum.backend.domain.user.dto.request.TemporaryUserRequest;
 import ku_rum.backend.domain.user.dto.response.TemporaryUserResponse;
-import ku_rum.backend.global.domain.repository.ApiLogRepository;
-import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
 @WebMvcTest(TemporaryUserController.class)
 @ActiveProfiles("test")
-public class TemporaryUserControllerTest extends RestDocsTestSupport {
+public class TemporaryUserControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     UserService userService;
 
     @MockBean
     UserValidator userValidator;
-
-    @MockBean
-    private ApiLogRepository apiLogRepository;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
-
-    @MockBean
-    private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter;
 
     @DisplayName("유저 토큰을 생성한다")
     @Test

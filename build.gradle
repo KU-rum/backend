@@ -139,6 +139,9 @@ dependencies {
     // Mail Service
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    // Thymeleaf (이메일 템플릿)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
