@@ -1,8 +1,13 @@
 package ku_rum.backend.domain.user.domain.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import ku_rum.backend.domain.college.domain.College;
+import ku_rum.backend.domain.oauth.domain.ProviderType;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.department.domain.repository.DepartmentRepository;
 import ku_rum.backend.domain.friend.application.FriendReportService;
@@ -32,6 +37,9 @@ class UserRepositoryTest {
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @MockBean
     private SecurityFilterChain securityFilterChain;
@@ -69,6 +77,29 @@ class UserRepositoryTest {
         //then
         assertNotNull(savedUser);
         Assertions.assertThat(savedUser.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("findByOauthId로 조회 시 roles가 함께 로드되어 LazyInitializationException이 발생하지 않는다")
+    void findByOauthId_withEntityGraph_loadsRolesEagerly() {
+        // given
+        User oauthUser = User.builder()
+                .oauthId("google_12345")
+                .nickname("OAuth유저")
+                .providerType(ProviderType.GOOGLE)
+                .build();
+        userRepository.save(oauthUser);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        Optional<User> foundUser = userRepository.findByOauthId("google_12345");
+
+        // then
+        assertThat(foundUser).isPresent();
+        assertThatCode(() -> foundUser.get().getRoles().size())
+                .doesNotThrowAnyException();
     }
 
 }
