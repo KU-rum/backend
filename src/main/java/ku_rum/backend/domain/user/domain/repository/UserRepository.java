@@ -3,6 +3,7 @@ package ku_rum.backend.domain.user.domain.repository;
 import java.util.List;
 import java.util.Optional;
 import ku_rum.backend.domain.user.domain.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,6 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByLoginId(String loginId);
 
+    @EntityGraph(attributePaths = {"roles"})
     Optional<User> findByOauthId(String oauthId);
 
     List<User> findByNicknameContainingIgnoreCase(String nickname);
