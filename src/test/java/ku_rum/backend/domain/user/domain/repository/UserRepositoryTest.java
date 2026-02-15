@@ -1,20 +1,21 @@
 package ku_rum.backend.domain.user.domain.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import ku_rum.backend.domain.college.domain.College;
-import ku_rum.backend.domain.oauth.domain.ProviderType;
+import ku_rum.backend.domain.college.domain.repository.CollegeRepository;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.department.domain.repository.DepartmentRepository;
 import ku_rum.backend.domain.friend.application.FriendReportService;
 import ku_rum.backend.domain.friend.domain.repository.FriendBlockRepository;
+import ku_rum.backend.domain.oauth.domain.ProviderType;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.domain.repository.ApiLogRepository;
 import org.assertj.core.api.Assertions;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class UserRepositoryTest {
     private DepartmentRepository departmentRepository;
 
     @Autowired
+    private CollegeRepository collegeRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @MockBean
@@ -56,6 +60,7 @@ class UserRepositoryTest {
     @BeforeEach
     void setup() {
         College college = College.of("공과대학");
+        collegeRepository.save(college);
         Department department = Department.of("컴퓨터공학부", college, "url");
         departmentRepository.save(department);
 
@@ -97,9 +102,9 @@ class UserRepositoryTest {
         Optional<User> foundUser = userRepository.findByOauthId("google_12345");
 
         // then
-        assertThat(foundUser).isPresent();
-        assertThatCode(() -> foundUser.get().getRoles().size())
-                .doesNotThrowAnyException();
+        assertThat(Hibernate.isInitialized(foundUser.get().getRoles()))
+                .as("@EntityGraph에 의해 roles가 즉시 로드되어야 합니다")
+                .isTrue();
     }
 
 }
