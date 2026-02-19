@@ -105,6 +105,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     LOGIN_ERROR(1007, HttpStatus.UNAUTHORIZED, "잘못된 아이디/비밀번호입니다."),
     OAUTH_ERROR(1008, HttpStatus.UNAUTHORIZED, "잘못된 임시 토큰입니다."),
     OAUTH_INVALID_PRIVATE_KEY(1009, HttpStatus.UNAUTHORIZED, "잘못된 프라이빗 키입니다."),
+    ACCESS_DENIED(1010, HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     /**
      * 1100: Wein

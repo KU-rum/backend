@@ -11,6 +11,7 @@ import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/places")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class PlaceAdminController {
 
     private final PlaceService placeService;
