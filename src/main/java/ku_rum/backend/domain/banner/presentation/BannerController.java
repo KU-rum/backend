@@ -7,6 +7,7 @@ import ku_rum.backend.domain.banner.dto.PatchBannerRequests;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,6 +31,7 @@ public class BannerController {
     }
 
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public BaseResponse<Void> addBanners(
             @RequestParam("images") List<MultipartFile> bannerImages,
             @RequestParam("links") List<String> bannerLinks) {
@@ -39,6 +41,7 @@ public class BannerController {
     }
 
     @DeleteMapping({"/{bannerId}"})
+    @PreAuthorize("hasRole('ADMIN')")
     public BaseResponse<Void> deleteBanners(@PathVariable("bannerId") Long bannerId) {
         bannerService.deleteById(bannerId);
         return BaseResponse.ok();
