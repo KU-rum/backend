@@ -46,7 +46,6 @@ public class BannerService {
                     })
                     .toList();
             bannerRepository.saveAll(banners);
-            throw new RuntimeException();
         } catch (Exception e) {
             log.error("배너 등록 중 오류 발생. 업로드된 파일 롤백. uploadedUrls={}", uploadedUrls, e);
             s3ImageService.deleteBannerImages(uploadedUrls);
