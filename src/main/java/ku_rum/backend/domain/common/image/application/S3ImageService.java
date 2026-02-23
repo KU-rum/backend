@@ -3,7 +3,6 @@ package ku_rum.backend.domain.common.image.application;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import ku_rum.backend.domain.common.image.domain.vo.FilePath;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
@@ -30,22 +29,37 @@ public class S3ImageService {
     @Value("${cloud.aws.region.static}")
     private String region;
 
-    private static final String PREFIX = "place-images";
+    private static final String PLACE_IMAGE_PREFIX = "place-images";
+    private static final String BANNER_PREFIX = "banner";
 
-    public List<String> uploadImages(List<MultipartFile> images) {
+    public List<String> uploadPlaceImages(List<MultipartFile> images) {
         List<String> imageUrls = new ArrayList<>();
 
         for (MultipartFile image : images) {
-            String imageUrl = uploadImage(image);
+            String imageUrl = uploadImage(image, PLACE_IMAGE_PREFIX);
+            imageUrls.add(imageUrl);
+        }
+        return imageUrls;
+    }
+
+    public String uploadBannerImage(MultipartFile image) {
+        return uploadImage(image, BANNER_PREFIX);
+    }
+
+    private List<String> uploadImages(List<MultipartFile> images, String prefix) {
+        List<String> imageUrls = new ArrayList<>();
+
+        for (MultipartFile image : images) {
+            String imageUrl = uploadImage(image, prefix);
             imageUrls.add(imageUrl);
         }
 
         return imageUrls;
     }
 
-    public String uploadImage(MultipartFile image) {
+    private String uploadImage(MultipartFile image, String prefix) {
         String originalFilename = image.getOriginalFilename();
-        String filePath = FilePath.createPath(PREFIX, originalFilename);
+        String filePath = FilePath.createPath(prefix, originalFilename);
 
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -64,12 +78,12 @@ public class S3ImageService {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, filePath);
     }
 
-    public void deleteImage(String imageUrl) {
+    public void deleteImage(String imageUrl, String prefix) {
         if (imageUrl == null || imageUrl.isBlank()) {
             return;
         }
 
-        int prefixIndex = imageUrl.indexOf(PREFIX);
+        int prefixIndex = imageUrl.indexOf(prefix);
         if (prefixIndex == -1) {
             log.warn("삭제할 수 없는 이미지 URL 형식: {}", imageUrl);
             return;
@@ -85,10 +99,39 @@ public class S3ImageService {
         s3Client.deleteObject(deleteObjectRequest);
     }
 
-    public void deleteImages(List<String> imageUrls) {
+    public void deletePlaceImages(List<String> imageUrls) {
+        for (String url : imageUrls) {
+            deletePlaceImages(url);
+        }
+    }
+
+    public void deletePlaceImages(String imageUrls) {
+        try {
+            deleteImage(imageUrls, PLACE_IMAGE_PREFIX);
+        } catch (Exception e) {
+            log.warn("Failed to delete S3 image: {}", imageUrls, e);
+        }
+    }
+
+    public void deleteBannerImages(List<String> imageUrls) {
+        for (String url : imageUrls) {
+            deleteBannerImage(url);
+        }
+    }
+
+    public void deleteBannerImage(String imageUrls) {
+        try {
+            deleteImage(imageUrls, BANNER_PREFIX);
+        } catch (Exception e) {
+            log.warn("Failed to delete S3 image: {}", imageUrls, e);
+        }
+
+    }
+
+    private void deleteImages(List<String> imageUrls, String prefix) {
         for (String url : imageUrls) {
             try {
-                deleteImage(url);
+                deleteImage(url, prefix);
             } catch (Exception e) {
                 log.warn("Failed to delete S3 image: {}", url, e);
             }

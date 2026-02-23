@@ -148,7 +148,12 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     FCM_SEND_ERROR(1404, HttpStatus.BAD_REQUEST, "알림 전송중 문제가 발생했습니다."),
     UNSUPPORTED_TOPIC_FCM(1405, HttpStatus.UNPROCESSABLE_ENTITY, "토픽 FCM을 제공하지 않습니다."),
     UNSUPPORTED_DIRECT_FCM(1406, HttpStatus.UNPROCESSABLE_ENTITY, "Direct FCM을 제공하지 않습니다."),
-    INVALID_USER_TOKEN(1407, HttpStatus.INTERNAL_SERVER_ERROR, "토큰이 없는 유저가 포함되어 있습니다");
+    INVALID_USER_TOKEN(1407, HttpStatus.INTERNAL_SERVER_ERROR, "토큰이 없는 유저가 포함되어 있습니다"),
+
+    /**
+     * 1500: 배너
+     */
+    URL_NOT_BANNER(1500, HttpStatus.NOT_FOUND, "찾을 수 없는 배너 입니다.");
 
     private final int code;
     private final HttpStatus status;

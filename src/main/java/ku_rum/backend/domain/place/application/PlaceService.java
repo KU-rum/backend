@@ -164,7 +164,7 @@ public class PlaceService {
         List<String> oldImageUrls = existingImages.stream()
                 .map(PlaceImage::getImageUrl)
                 .toList();
-        List<String> newImageUrls = s3ImageService.uploadImages(images);
+        List<String> newImageUrls = s3ImageService.uploadPlaceImages(images);
         placeImageRepository.deleteByPlace(place);
 
         List<PlaceImage> newImages = new ArrayList<>();
@@ -179,21 +179,14 @@ public class PlaceService {
 
         placeImageRepository.saveAll(newImages);
 
-        for (String oldUrl : oldImageUrls) {
-            try {
-                s3ImageService.deleteImage(oldUrl);
-            } catch (Exception e) {
-                log.warn("Failed to delete old S3 image: {}", oldUrl, e);
-
-            }
-        }
+        s3ImageService.deletePlaceImages(oldImageUrls);
     }
 
     @Transactional
     public void addPlaceImages(Long placeId, List<MultipartFile> images) {
         Place place = findPlace(placeId);
 
-        List<String> newImageUrls = s3ImageService.uploadImages(images);
+        List<String> newImageUrls = s3ImageService.uploadPlaceImages(images);
 
         List<PlaceImage> newImages = newImageUrls.stream()
                 .map(url -> PlaceImage.builder()
@@ -218,7 +211,7 @@ public class PlaceService {
         placeImageRepository.delete(placeImage);
 
         try {
-            s3ImageService.deleteImage(placeImage.getImageUrl());
+            s3ImageService.deletePlaceImages(placeImage.getImageUrl());
         } catch (Exception e) {
             log.warn("Failed to delete S3 image: {}", placeImage.getImageUrl(), e);
         }
