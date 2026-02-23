@@ -22,7 +22,7 @@ public class BannerService {
     private final S3ImageService s3ImageService;
 
     public List<GetBannerResponse> findBanners() {
-        List<Banner> banners = bannerRepository.findAll();
+        List<Banner> banners = bannerRepository.findAllByOrderByCreatedAtDesc();
         return banners.stream()
                 .map(banner -> new GetBannerResponse(banner.getBannerId(), banner.getImageUrl(),
                         banner.getLink()))
