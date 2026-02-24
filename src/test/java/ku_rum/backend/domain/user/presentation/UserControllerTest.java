@@ -130,7 +130,7 @@ class UserControllerTest extends RestDocsUnitTestSupport {
                                 )
                                 .responseFields(
                                         fieldWithPath("code")
-                                                .type(JsonFieldType.STRING)
+                                                .type(JsonFieldType.NUMBER)
                                                 .description("성공시 반환 코드 (200)"),
                                         fieldWithPath("status")
                                                 .type(JsonFieldType.STRING)
