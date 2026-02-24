@@ -29,7 +29,6 @@ import ku_rum.backend.domain.user.dto.response.S3PresignedUrlResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.json.JsonType;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -116,32 +115,32 @@ public class UserProfileControllerTest extends RestDocsUnitTestSupport {
                                 .description("로그인 전 비밀번호 변경")
                                 .requestFields(
                                         fieldWithPath("emailRequest.email")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("인증 이메일 주소"),
                                         fieldWithPath("emailRequest.code")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("이메일 인증 코드"),
                                         fieldWithPath("loginId")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("비밀번호 변경할 아이디")
                                                 .attributes(constraints("비밀번호를 변경할 아이디입니다.")),
                                         fieldWithPath("newPassword")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("새 비밀번호")
                                                 .attributes(constraints("새 비밀번호입니다."))
                                 )
                                 .responseFields(
                                         fieldWithPath("code")
-                                                .type(JsonType.NUMBER)
+                                                .type(JsonFieldType.NUMBER)
                                                 .description("성공시 반환 코드 (200)"),
                                         fieldWithPath("status")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공시 상태 값 (OK)"),
                                         fieldWithPath("message")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 메시지 값 (OK)"),
                                         fieldWithPath("data")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 '아이디/비밀번호가 변경되었습니다.' 반환")
                                 ).build())));
     }
@@ -175,26 +174,26 @@ public class UserProfileControllerTest extends RestDocsUnitTestSupport {
                                 )
                                 .requestFields(
                                         fieldWithPath("prevPassword")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("기존 비밀번호")
                                                 .attributes(constraints("기존 비밀번호입니다.")),
                                         fieldWithPath("newPassword")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("새 비밀번호")
                                                 .attributes(constraints("새 비밀번호입니다."))
                                 )
                                 .responseFields(
                                         fieldWithPath("code")
-                                                .type(JsonType.NUMBER)
+                                                .type(JsonFieldType.NUMBER)
                                                 .description("성공시 반환 코드 (200)"),
                                         fieldWithPath("status")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공시 상태 값 (OK)"),
                                         fieldWithPath("message")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 메시지 값 (OK)"),
                                         fieldWithPath("data")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 '아이디/비밀번호가 변경되었습니다.' 반환")
                                 ).build())));
     }
@@ -224,16 +223,16 @@ public class UserProfileControllerTest extends RestDocsUnitTestSupport {
                                 )
                                 .responseFields(
                                         fieldWithPath("code")
-                                                .type(JsonType.NUMBER)
+                                                .type(JsonFieldType.NUMBER)
                                                 .description("성공 시 반환 코드 (200)"),
                                         fieldWithPath("status")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 상태 값 (OK)"),
                                         fieldWithPath("message")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 메시지 값 (회원 탈퇴가 완료되었습니다.)"),
                                         fieldWithPath("data")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 메시지 값 (회원 탈퇴가 완료되었습니다.)")
                                 ).build()
                         )
