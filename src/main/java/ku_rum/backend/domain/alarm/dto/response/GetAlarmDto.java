@@ -28,7 +28,7 @@ public record GetAlarmDto(Long id, AlarmType alarmType, AlarmCategory alarmCateg
     public static GetAlarmDto from(UserAnnouncement userAnnouncement) {
         Announcement announcement = userAnnouncement.getAnnouncement();
         return GetAlarmDto.builder()
-                .id(announcement.getId())
+                .id(userAnnouncement.getId())
                 .alarmType(announcement.getAlarmType())
                 .alarmCategory(userAnnouncement.getAnnouncement().getAlarmType().getAlarmCategory())
                 .message(announcement.getMessage())
