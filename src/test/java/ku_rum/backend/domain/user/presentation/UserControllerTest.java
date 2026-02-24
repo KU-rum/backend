@@ -41,7 +41,6 @@ import ku_rum.backend.domain.user.dto.response.UserResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.json.JsonType;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -101,43 +100,43 @@ class UserControllerTest extends RestDocsUnitTestSupport {
                                 .description("신규 유저 생성")
                                 .requestFields(
                                         fieldWithPath("loginId")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("멤버 아이디")
                                                 .attributes(constraints("아이디 입력은 필수입니다. 최소 6자 이상입니다.")),
                                         fieldWithPath("email")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("멤버 이메일")
                                                 .attributes(constraints("유저의 이메일")),
                                         fieldWithPath("nickname")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("멤버 닉네임")
                                                 .attributes(constraints("닉네임 입력은 필수입니다. 최대 8자 이하입니다.")),
                                         fieldWithPath("password")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("멤버 패스워드")
                                                 .attributes(constraints("비밀번호는 영어와 숫자를 포함해서 8자 이상 20자 이내로 입력해주세요.")),
                                         fieldWithPath("studentId")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("멤버 학번")
                                                 .attributes(constraints("학번은 20으로 시작하고, 9자리여야 합니다.")),
                                         fieldWithPath("department")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("멤버 학과")
                                                 .attributes(constraints("ex) 컴퓨터공학부")),
                                         fieldWithPath("agreementStatus")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("선택 동의 여부")
                                                 .attributes(constraints("ex) AGREED/DISAGREED"))
                                 )
                                 .responseFields(
                                         fieldWithPath("code")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.NUMBER)
                                                 .description("성공시 반환 코드 (200)"),
                                         fieldWithPath("status")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공시 상태 값 (OK)"),
                                         fieldWithPath("message")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 메시지 (OK)")
                                 ).build())));
     }
@@ -202,13 +201,13 @@ class UserControllerTest extends RestDocsUnitTestSupport {
                                 )
                                 .responseFields(
                                         fieldWithPath("code")
-                                                .type(JsonType.NUMBER)
+                                                .type(JsonFieldType.NUMBER)
                                                 .description("성공시 반환 코드 (200)"),
                                         fieldWithPath("status")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공시 상태 값 (OK)"),
                                         fieldWithPath("message")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 메시지 (OK)")
                                 ).build())));
     }
@@ -236,22 +235,22 @@ class UserControllerTest extends RestDocsUnitTestSupport {
                                 .description("이메일 중복 확인")
                                 .requestFields(
                                         fieldWithPath("email")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("멤버 이메일")
                                                 .attributes(constraints("중복 확인할 이메일"))
                                 )
                                 .responseFields(
                                         fieldWithPath("code")
-                                                .type(JsonType.NUMBER)
+                                                .type(JsonFieldType.NUMBER)
                                                 .description("성공시 반환 코드 (200)"),
                                         fieldWithPath("status")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공시 상태 값 (OK)"),
                                         fieldWithPath("message")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 메시지 값 (OK)"),
                                         fieldWithPath("data")
-                                                .type(JsonType.STRING)
+                                                .type(JsonFieldType.STRING)
                                                 .description("성공 시 '올바른 이메일 입니다.' 반환")
                                 ).build())));
     }
@@ -285,22 +284,22 @@ class UserControllerTest extends RestDocsUnitTestSupport {
                                         )
                                         .requestFields(
                                                 fieldWithPath("imageUrl")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("새로 변경할 프로필")
                                                         .attributes(constraints("새로 변경할 프로필입니다."))
                                         )
                                         .responseFields(
                                                 fieldWithPath("code")
-                                                        .type(JsonType.NUMBER)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("성공시 반환 코드 (200)"),
                                                 fieldWithPath("status")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공시 상태 값 (OK)"),
                                                 fieldWithPath("message")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 메시지 값 (OK)"),
                                                 fieldWithPath("data")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 반환 메시지")
                                         ).build())));
     }
@@ -594,34 +593,34 @@ class UserControllerTest extends RestDocsUnitTestSupport {
                                         )
                                         .responseFields(
                                                 fieldWithPath("code")
-                                                        .type(JsonType.NUMBER)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("성공시 반환 코드 (200)"),
                                                 fieldWithPath("status")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공시 상태 값 (OK)"),
                                                 fieldWithPath("message")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 메시지 값 (OK)"),
                                                 fieldWithPath("data.profileImage")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("회원 프로필 이미지 URL"),
                                                 fieldWithPath("data.email")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("회원 이메일"),
                                                 fieldWithPath("data.loginId")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("회원 로그인 아이디"),
                                                 fieldWithPath("data.nickname")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("회원 닉네임"),
                                                 fieldWithPath("data.studentId")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("회원 학번"),
                                                 fieldWithPath("data.departments[].department")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("회원 학과"),
                                                 fieldWithPath("data.departments[].college")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("회원 단과대")
                                         ).build())));
     }

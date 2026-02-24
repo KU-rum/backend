@@ -1,6 +1,3 @@
-// 1. Import 추가
-//import org.hidetake.gradle.swagger.generator.GenerateSwaggerUI
-
 buildscript {
     ext {
         restdocsApiSpecVersion = '0.18.3' // restdocsApiSpecVersion 버전 변수 설정
@@ -16,72 +13,10 @@ plugins {
     id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
     //swagger generator 플러그인 추가
     id 'org.hidetake.swagger.generator' version '2.18.2'
-    id 'jacoco'
 }
 
 group = 'ku-rum'
 version = '0.0.1-SNAPSHOT'
-
-jacoco {
-    toolVersion = "0.8.8"
-    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
-}
-
-test {
-    finalizedBy jacocoTestReport // test 작업이 끝나고 jacocoTestReport를 실행
-}
-
-jacocoTestReport {
-    dependsOn test // test 종속성 추가
-
-    reports {
-        xml.required = true
-        csv.required = false
-        html.required = true
-    }
-
-    def QDomainList = []
-    for (qPattern in '**/QA'..'**/QZ') { // QClass 대응
-        QDomainList.add(qPattern + '*')
-    }
-
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    '**/dto/**',
-                    '**/event/**',
-                    '**/*InitData*',
-                    '**/*Application*',
-                    '**/exception/**',
-                    '**/service/alarm/**',
-                    '**/aop/**',
-                    '**/config/**',
-                    '**/MemberRole*',
-                    '**/oauth/**'
-            ] + QDomainList)
-        }))
-    }
-
-    finalizedBy 'jacocoTestCoverageVerification' // jacocoTestReport 태스크가 끝난 후 실행
-}
-
-jacocoTestCoverageVerification {
-    violationRules {
-
-        rule {
-            enabled = true
-            //코드 버커리지 체크 기준
-            element = 'CLASS'
-
-            limit {
-                counter = 'CLASS'
-                value = 'COVEREDRATIO'
-                minimum = 0.0
-            }
-        }
-    }
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -127,8 +62,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
@@ -146,17 +79,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
 
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
-    implementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
-    implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
-
-    // Selenium Java
-    implementation 'org.seleniumhq.selenium:selenium-java:4.12.1'
-
-    // WebDriver Manager
-    implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
-    implementation 'org.jsoup:jsoup:1.15.3'
-
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
@@ -164,9 +86,6 @@ dependencies {
 
     // OAUTH
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-
-    // JSOUP
-    implementation 'org.jsoup:jsoup:1.17.2'
 
     // Spring REST Docs 의존성
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
