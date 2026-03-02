@@ -1,6 +1,5 @@
 package ku_rum.backend.domain.place.application;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,10 +65,5 @@ public class PositionScheduler {
                 .build();
 
         return placeRankRepository.save(newRank);
-    }
-
-    private boolean isOverOneHour(Position position) {
-        Duration duration = Duration.between(position.getCreatedAt(), LocalDateTime.now());
-        return duration.getSeconds() >= CRITERION_TIME;
     }
 }

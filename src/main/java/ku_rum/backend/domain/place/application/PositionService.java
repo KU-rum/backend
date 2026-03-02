@@ -1,8 +1,8 @@
 package ku_rum.backend.domain.place.application;
 
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_BUILDING_NOT_FOUND;
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_NOT_FOUND;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.POSITION_NOT_FOUND;
 
 import java.util.Optional;
 import ku_rum.backend.domain.alarm.application.AlarmService;
@@ -112,7 +112,7 @@ public class PositionService {
     public void disableSharingPosition(CustomUserDetails userDetails) {
         User user = userService.getUser();
         positionRepository.findPositionByUser(user)
-                .orElseThrow(() -> new GlobalException(NO_SUCH_DEPARTMENT));
+                .orElseThrow(() -> new GlobalException(POSITION_NOT_FOUND));
         positionRepository.deleteByUser(user);
     }
 
