@@ -1,10 +1,20 @@
 package ku_rum.backend.global.security.jwt;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
 import io.jsonwebtoken.JwtException;
-import ku_rum.backend.global.utill.RedisUtil;
+import java.util.Collection;
+import java.util.Collections;
+import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.security.JwtProperties;
 import ku_rum.backend.global.security.JwtTokenProvider;
+import ku_rum.backend.global.utill.RedisUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,15 +25,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class JwtTokenProviderTest {
@@ -109,7 +110,7 @@ class JwtTokenProviderTest {
 
         // When & Then
         assertThatThrownBy(() -> jwtTokenProvider.validateToken(expiredToken))
-                .isInstanceOf(JwtException.class);
+                .isInstanceOf(GlobalException.class);
     }
 
     // 4. 사용자 ID 추출 테스트
@@ -155,7 +156,7 @@ class JwtTokenProviderTest {
                 "test",
                 "test",
                 authorities,
-                "test",false
+                "test", false
         );
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
