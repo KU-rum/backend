@@ -3,7 +3,6 @@ package ku_rum.backend.domain.place.application;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
 import ku_rum.backend.domain.place.domain.Place;
@@ -52,14 +51,9 @@ public class SearchService {
      * @return
      */
     private List<SearchPlaceResponse> searchPlaceByCategory(CategoryChip categoryChip) {
-        List<SearchPlaceResponse> response = placeRepository.findByCategoryChip(categoryChip).stream()
+        return placeRepository.findByCategoryChip(categoryChip).stream()
                 .map(SearchPlaceResponse::from)
-                .collect(Collectors.toList());
-
-        response.addAll(placeRepository.findByCategoryChip(categoryChip).stream()
-                .map(SearchPlaceResponse::from)
-                .toList());
-        return response;
+                .toList();
     }
 
     /**
