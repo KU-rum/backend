@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.support.type.BaseEntity;
@@ -39,7 +40,14 @@ public class PlaceRank extends BaseEntity {
     @JoinColumn(nullable = false)
     private Place place;
 
+    private LocalDate lastUpdatedDate;
+
     public void increaseCount() {
         count++;
+        lastUpdatedDate = LocalDate.now();
+    }
+
+    public boolean canUpdateToday() {
+        return lastUpdatedDate == null || !lastUpdatedDate.equals(LocalDate.now());
     }
 }
