@@ -39,7 +39,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     @PostConstruct
     public void init() {
-        setDefaultTargetUrl("https://ku-room.vercel.app/oauth/callback");
+        setDefaultTargetUrl("https://ku-room.com/oauth/callback");
         setAlwaysUseDefaultTargetUrl(false);
     }
 

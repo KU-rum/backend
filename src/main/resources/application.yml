@@ -6,6 +6,7 @@ app:
   oauth2:
     authorizedRedirectUris:
       - https://ku-room.vercel.app/oauth/callback
+      - https://ku-room.com/oauth/callback
       - http://localhost:5173
 
 ---
