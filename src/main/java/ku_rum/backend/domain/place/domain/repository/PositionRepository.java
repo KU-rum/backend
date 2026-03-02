@@ -1,5 +1,6 @@
 package ku_rum.backend.domain.place.domain.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import ku_rum.backend.domain.place.domain.Place;
@@ -60,4 +61,6 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
                   AND p.place = :place
             """)
     List<FriendUserDto> findPositionByFriendAndPlace(@Param("userId") Long userId, @Param("place") Place place);
+
+    List<Position> findByCreatedAtBefore(LocalDateTime oneHourAgo);
 }

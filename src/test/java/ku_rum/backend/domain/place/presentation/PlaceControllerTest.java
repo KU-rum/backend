@@ -21,7 +21,6 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.place.application.PlaceHistoryService;
 import ku_rum.backend.domain.place.application.PlaceService;
@@ -189,8 +188,7 @@ public class PlaceControllerTest extends RestDocsUnitTestSupport {
     @Test
     void disableSharingPosition() throws Exception {
         //given
-        given(positionService.disableSharingPosition(any(CustomUserDetails.class)))
-                .willReturn(Optional.empty());
+        doNothing().when(positionService).disableSharingPosition(any(CustomUserDetails.class));
 
         //when
         mockMvc.perform(delete("/api/v1/places/sharing/confirm")
