@@ -1,10 +1,26 @@
 package ku_rum.backend.global.security;
 
-import io.jsonwebtoken.*;
+import static java.util.stream.Collectors.joining;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import ku_rum.backend.global.utill.RedisUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Optional;
+import javax.crypto.SecretKey;
 import ku_rum.backend.domain.user.dto.response.TokenResponse;
+import ku_rum.backend.global.exception.global.GlobalException;
+import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
+import ku_rum.backend.global.utill.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,14 +28,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Date;
-
-import static java.util.stream.Collectors.joining;
 
 @Component
 @Slf4j
@@ -62,7 +70,10 @@ public class JwtTokenProvider {
         Long userId = claims.get("userPK", Long.class);
         Collection<? extends GrantedAuthority> roles = getGrantedAuthorities(claims);
 
-        boolean firstLogin = claims.get("firstLogin", Boolean.class);
+        Boolean firstLoginObj = claims.get("firstLogin", Boolean.class);
+        boolean firstLogin = Optional
+                .ofNullable(claims.get("firstLogin", Boolean.class))
+                .orElse(false);
         CustomUserDetails principal = CustomUserDetails.of(userId, "", roles, "", firstLogin);
         return new UsernamePasswordAuthenticationToken(principal, token, roles);
     }
@@ -74,22 +85,27 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             if (e instanceof SecurityException) {
                 log.debug("[SecurityException] 잘못된 토큰");
-                throw new JwtException("[SecurityException] 잘못된 토큰입니다.");
+                throw new GlobalException(BaseExceptionResponseStatus.INVALID_TOKEN);
+
             } else if (e instanceof MalformedJwtException) {
-                log.debug("[MalformedJwtException] 잘못된 토큰");
-                throw new JwtException("[MalformedJwtException] 잘못된 토큰입니다.");
+                log.debug("[MalformedJwtException] 잘못된 토큰 구조");
+                throw new GlobalException(BaseExceptionResponseStatus.MALFORMED_TOKEN);
+
             } else if (e instanceof ExpiredJwtException) {
                 log.debug("[ExpiredJwtException] 토큰 만료");
-                throw new JwtException("[ExpiredJwtException] 토큰 만료");
+                throw new GlobalException(BaseExceptionResponseStatus.EXPIRED_TOKEN);
+
             } else if (e instanceof UnsupportedJwtException) {
-                log.debug("[UnsupportedJwtException] 잘못된 형식의 토큰");
-                throw new JwtException("[UnsupportedJwtException] 잘못된 형식의 토큰");
+                log.debug("[UnsupportedJwtException] 지원되지 않는 토큰");
+                throw new GlobalException(BaseExceptionResponseStatus.UNSUPPORTED_TOKEN_TYPE);
+
             } else if (e instanceof IllegalArgumentException) {
-                log.debug("[IllegalArgumentException]");
-                throw new JwtException("[IllegalArgumentException]");
+                log.debug("[IllegalArgumentException] 토큰 없음");
+                throw new GlobalException(BaseExceptionResponseStatus.TOKEN_NOT_FOUND);
+
             } else {
-                log.debug("[토큰검증 오류]" + e.getClass());
-                throw new JwtException("[토큰검증 오류] 미처리 토큰 오류");
+                log.debug("[토큰검증 오류] {}", e.getClass());
+                throw new GlobalException(BaseExceptionResponseStatus.JWT_ERROR);
             }
         }
     }
@@ -141,7 +157,8 @@ public class JwtTokenProvider {
         return getClaimsInUserDetails(userDetails, authorities);
     }
 
-    private Claims getClaimsInUserDetails(CustomUserDetails userDetails, Collection<? extends GrantedAuthority> authorities) {
+    private Claims getClaimsInUserDetails(CustomUserDetails userDetails,
+                                          Collection<? extends GrantedAuthority> authorities) {
         var claimsBuilder = Jwts.claims().add("userPK", userDetails.getUserId())
                 .add("firstLogin", userDetails.isFirstLogin());
 
