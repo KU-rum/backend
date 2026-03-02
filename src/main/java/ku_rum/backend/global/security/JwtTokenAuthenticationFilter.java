@@ -1,23 +1,22 @@
 package ku_rum.backend.global.security;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ku_rum.backend.global.config.AuthorizationList;
-import ku_rum.backend.global.support.response.BaseResponse;
+import ku_rum.backend.global.support.response.BaseErrorResponse;
+import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import ku_rum.backend.global.utill.RedisUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Component
@@ -43,18 +42,30 @@ public class JwtTokenAuthenticationFilter extends GenericFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
             chain.doFilter(request, response);
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (Exception e) {
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            httpServletResponse.setStatus(HttpServletResponse.SC_OK);
             httpServletResponse.setContentType("application/json;charset=UTF-8");
 
-            Map<String, String> errors = new HashMap<>();
-            errors.put("token", e.getMessage());
+            BaseExceptionResponseStatus status = resolveTokenException(e);
+            httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
-            BaseResponse<?> errorResponse = BaseResponse.of(HttpStatus.UNAUTHORIZED, errors);
-
+            BaseErrorResponse errorResponse = new BaseErrorResponse(status);
             httpServletResponse.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
         }
+    }
+
+    private BaseExceptionResponseStatus resolveTokenException(Exception e) {
+        String message = e.getMessage();
+        if (message == null) {
+            return JWT_ERROR;
+        }
+        if (message.contains("ExpiredJwtException") || message.contains("만료")) {
+            return EXPIRED_TOKEN;
+        }
+        if (message.contains("MalformedJwtException")) {
+            return MALFORMED_TOKEN;
+        }
+        return INVALID_TOKEN;
     }
 
     private boolean isNotLogout(String accessToken) {
