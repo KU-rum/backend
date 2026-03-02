@@ -1,18 +1,29 @@
 package ku_rum.backend.domain.user.domain;
 
-import jakarta.persistence.*;
+import static ku_rum.backend.domain.user.domain.UserRole.USER;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.oauth.domain.OAuth2MemberInfo;
 import ku_rum.backend.domain.oauth.domain.ProviderType;
 import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
 import ku_rum.backend.global.support.type.BaseEntity;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static ku_rum.backend.domain.user.domain.UserRole.*;
 
 @Getter
 @Entity
@@ -80,10 +91,13 @@ public class User extends BaseEntity {
         this.activeBuildingName = buildingName;
     }
 
-    public void setLocationSharingActive(boolean value) { this.active = value;}
+    public void setLocationSharingActive(boolean value) {
+        this.active = value;
+    }
 
     @Builder
-    private User(String loginId, String oauthId, String email, String nickname, String password, String studentId, AgreementStatus agreementStatus, ProviderType providerType, String imageUrl) {
+    private User(String loginId, String oauthId, String email, String nickname, String password, String studentId,
+                 AgreementStatus agreementStatus, ProviderType providerType, String imageUrl) {
         this.loginId = loginId;
         this.oauthId = oauthId;
         this.email = email;
@@ -106,7 +120,8 @@ public class User extends BaseEntity {
         firstLogin = false;
     }
 
-    public static User of(String loginId, String email, String nickname, String password, String studentId, Department department, AgreementStatus agreementStatus, ProviderType providerType) {
+    public static User of(String loginId, String email, String nickname, String password, String studentId,
+                          Department department, AgreementStatus agreementStatus, ProviderType providerType) {
         return User.builder()
                 .loginId(loginId)
                 .email(email)
@@ -122,7 +137,6 @@ public class User extends BaseEntity {
         return User.builder()
                 .oauthId(memberInfo.getId())
                 .nickname(memberInfo.getName())
-                .email(memberInfo.getEmail())
                 .providerType(providerType) // enum 변환
                 .build();
     }

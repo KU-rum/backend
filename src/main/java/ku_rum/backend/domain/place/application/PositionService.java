@@ -1,6 +1,16 @@
 package ku_rum.backend.domain.place.application;
 
+import static java.time.Duration.between;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_BUILDING_NOT_FOUND;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_NOT_FOUND;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import ku_rum.backend.domain.alarm.application.AlarmService;
+import ku_rum.backend.domain.alarm.domain.AlarmType;
+import ku_rum.backend.domain.friend.application.FriendQueryService;
 import ku_rum.backend.domain.place.application.response.CurrentPositionConfirmResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
@@ -8,20 +18,22 @@ import ku_rum.backend.domain.place.domain.Place;
 import ku_rum.backend.domain.place.domain.Position;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
+import ku_rum.backend.domain.place.dto.UserPlaceAlarmDto;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
+import ku_rum.backend.domain.place.util.PointParser;
 import ku_rum.backend.domain.rank.application.RankService;
+import ku_rum.backend.domain.rank.domain.PlaceRank;
+import ku_rum.backend.domain.rank.domain.repository.PlaceRankRepository;
 import ku_rum.backend.domain.user.application.UserService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
-import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PositionService {
 
@@ -29,6 +41,11 @@ public class PositionService {
     private final PlaceRepository placeRepository;
     private final UserService userService;
     private final RankService rankService;
+    private final FriendQueryService friendQueryService;
+    private final AlarmService alarmService;
+    private final PlaceRankRepository placeRankRepository;
+
+    public static final long CRITERION_TIME = 3600L;
 
     /**
      * 사용자 위치 공유 여부 확인
@@ -56,8 +73,9 @@ public class PositionService {
      */
     public CurrentPositionResponse getCurrentPosition(CustomUserDetails userDetails,
                                                       CurrentPositionRequest request) {
-        Place findPlace = placeRepository.findNearestPlace(request.latitude(),
-                request.longitude());
+        String point = PointParser.toPointString(request.latitude(), request.longitude());
+        Place findPlace = placeRepository.findContainingPoint(point)
+                .orElseThrow(() -> new GlobalException(PLACE_BUILDING_NOT_FOUND));
         return new CurrentPositionResponse(findPlace.getName());
     }
 
@@ -75,7 +93,6 @@ public class PositionService {
         Optional<Position> positionOptional = positionRepository.findPositionByUser(user);
         Place place = findOneByName(request.placeName());
 
-        rankService.updateRank(user, place);
         if (positionOptional.isPresent()) {
             return updatePosition(positionOptional.get(), place);
         }
@@ -86,14 +103,46 @@ public class PositionService {
         return new CurrentPositionConfirmResponse(savePosition.getPlace().getName());
     }
 
+
+    public void alarmConfirmCurrentPosition(CustomUserDetails userDetails, CurrentPositionConfirmResponse response) {
+        User user = userService.getUser();
+
+        UserPlaceAlarmDto userPlaceAlarmDto = new UserPlaceAlarmDto(user, response.placeName());
+        friendQueryService.getFriends().stream()
+                .forEach(sender -> alarmService.notifyAlarm(AlarmType.NEW_FRIEND_PLACE_SHARING, userPlaceAlarmDto,
+                        sender));
+    }
+
     /**
      * 공유 취소
      *
      * @param userDetails 사용자 인증정보
      */
-    public void disableSharingPosition(CustomUserDetails userDetails) {
+    @Transactional
+    public Optional<RankingChangeDto> disableSharingPosition(CustomUserDetails userDetails) {
         User user = userService.getUser();
+        Position position = positionRepository.findPositionByUser(user)
+                .orElseThrow(() -> new GlobalException(NO_SUCH_DEPARTMENT));
         positionRepository.deleteByUser(user);
+
+        Duration minusTime = between(position.getCreatedAt(), LocalDateTime.now());
+        boolean isUpperBound = minusTime.getSeconds() >= CRITERION_TIME;
+
+        if (isUpperBound) {
+            Optional<PlaceRank> placeRankOptional = placeRankRepository.findByUserAndPlace(user, position.getPlace());
+            Integer beforeRank = -1;
+
+            if (placeRankOptional.isPresent()) {
+                PlaceRank userPlaceRank = placeRankOptional.get();
+                beforeRank = placeRankRepository.findRankingByRankId(userPlaceRank.getRankId());
+            }
+
+            PlaceRank placeRank = rankService.updateRank(user, position.getPlace());
+            Integer afterRank = placeRankRepository.findRankingByRankId(placeRank.getRankId());
+            return Optional.of(new RankingChangeDto(beforeRank, afterRank, placeRank));
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -104,7 +153,7 @@ public class PositionService {
      */
     private Place findOneByName(String name) {
         return placeRepository.findOneByName(name)
-                .orElseThrow(() -> new GlobalException(BaseExceptionResponseStatus.PLACE_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(PLACE_NOT_FOUND));
     }
 
     /**

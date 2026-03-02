@@ -1,13 +1,23 @@
 package ku_rum.backend.global.handler;
 
-import com.github.dockerjava.api.exception.BadRequestException;
-import com.github.dockerjava.api.exception.InternalServerErrorException;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.ACCESS_DENIED;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.BAD_REQUEST;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.FIELD_ERROR;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.INTERNAL_SERVER_ERROR;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.METHOD_ARGUMENT_ERROR;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.METHOD_NOT_ALLOWED;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.SERVER_ERROR;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.URL_NOT_FOUND;
+
 import jakarta.validation.ConstraintViolationException;
+import java.util.ArrayList;
+import java.util.List;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.support.response.BaseErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.TypeMismatchException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,11 +26,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.*;
 
 
 @Slf4j
@@ -35,7 +40,7 @@ public class GlobalExceptionControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({BadRequestException.class, NoHandlerFoundException.class, TypeMismatchException.class})
+    @ExceptionHandler({NoHandlerFoundException.class, TypeMismatchException.class})
     public BaseErrorResponse handleBadRequest(final Exception e) {
         log.error("[handle BadRequest]", e);
         return new BaseErrorResponse(URL_NOT_FOUND);
@@ -43,7 +48,8 @@ public class GlobalExceptionControllerAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public BaseErrorResponse handle_HttpRequestMethodNotSupportedException(final HttpRequestMethodNotSupportedException e) {
+    public BaseErrorResponse handle_HttpRequestMethodNotSupportedException(
+            final HttpRequestMethodNotSupportedException e) {
         log.error("[handle_HttpRequestMethodNotSupportedException]", e);
         return new BaseErrorResponse(METHOD_NOT_ALLOWED);
     }
@@ -55,11 +61,11 @@ public class GlobalExceptionControllerAdvice {
         return new BaseErrorResponse(BAD_REQUEST);
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(InternalServerErrorException.class)
-    public BaseErrorResponse handle_InternalServerError(final InternalServerErrorException e) {
-        log.error("[handle_InternalServerError]", e);
-        return new BaseErrorResponse(INTERNAL_SERVER_ERROR);
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessDeniedException.class)
+    public BaseErrorResponse handle_AccessDeniedException(final AccessDeniedException e) {
+        log.error("[handle_AccessDeniedException]", e);
+        return new BaseErrorResponse(ACCESS_DENIED);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -74,7 +80,8 @@ public class GlobalExceptionControllerAdvice {
         List<BaseErrorResponse> responses = new ArrayList<>();
         for (FieldError error : e.getFieldErrors()) {
             log.error("errorFieldName : {}, error message : {}", error.getField(), error.getDefaultMessage());
-            BaseErrorResponse baseErrorResponse = new BaseErrorResponse(FIELD_ERROR.getStatus(), error.getDefaultMessage());
+            BaseErrorResponse baseErrorResponse = new BaseErrorResponse(FIELD_ERROR.getStatus(),
+                    error.getDefaultMessage());
             responses.add(baseErrorResponse);
         }
         return responses;

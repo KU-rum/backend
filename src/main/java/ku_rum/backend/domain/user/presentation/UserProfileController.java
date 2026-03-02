@@ -1,17 +1,32 @@
-
 package ku_rum.backend.domain.user.presentation;
+
+import static ku_rum.backend.domain.user.domain.UserMessage.SUCCESS_CHANGE_NICKNAME;
+import static ku_rum.backend.domain.user.domain.UserMessage.SUCCESS_DEACTIVATE;
+import static ku_rum.backend.domain.user.domain.UserMessage.SUCCESS_RESET_PASSWORD;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.SUCCESS_PROFILE_SET;
 
 import jakarta.validation.Valid;
 import ku_rum.backend.domain.user.application.UserService;
-import ku_rum.backend.domain.user.dto.request.*;
+import ku_rum.backend.domain.user.dto.request.DepartmentRequest;
+import ku_rum.backend.domain.user.dto.request.InitiatePasswordResetRequest;
+import ku_rum.backend.domain.user.dto.request.NicknameChangeRequest;
+import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
+import ku_rum.backend.domain.user.dto.request.ResetPasswordRequest;
+import ku_rum.backend.domain.user.dto.request.S3PresignedUrlRequest;
 import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
+import ku_rum.backend.domain.user.dto.response.S3PresignedUrlResponse;
+import ku_rum.backend.domain.user.dto.response.UserProfileResponse;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import static ku_rum.backend.domain.user.domain.UserMessage.*;
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.SUCCESS_PROFILE_SET;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -20,6 +35,18 @@ import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.S
 public class UserProfileController {
 
     private final UserService userService;
+
+
+    /**
+     * 프로필 조회 API
+     *
+     * @return
+     */
+    @GetMapping("/profile")
+    public BaseResponse<UserProfileResponse> getUserProfile() {
+        UserProfileResponse response = userService.getUserProfile();
+        return BaseResponse.ok(response);
+    }
 
     /**
      * 프로필 변경 API
@@ -67,7 +94,8 @@ public class UserProfileController {
      */
 
     @PostMapping("/password-reset/initiate")
-    public BaseResponse<String> initiatePasswordReset(@RequestBody @Valid final InitiatePasswordResetRequest initiatePasswordResetRequest) {
+    public BaseResponse<String> initiatePasswordReset(
+            @RequestBody @Valid final InitiatePasswordResetRequest initiatePasswordResetRequest) {
         userService.initiatePasswordReset(initiatePasswordResetRequest);
         return BaseResponse.ok(SUCCESS_RESET_PASSWORD.getMessage());
     }
@@ -110,6 +138,19 @@ public class UserProfileController {
     public BaseResponse<String> deleteDepartment(@RequestBody @Valid final DepartmentRequest departmentRequest) {
         userService.deleteDepartment(departmentRequest.department());
         return BaseResponse.ok("학과 삭제에 성공하였습니다.");
+    }
+
+    /**
+     * 프로필 이미지 업로드용 S3 Presigned URL 생성 API
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/profile/presigned-url")
+    public BaseResponse<S3PresignedUrlResponse> generatePresignedUrl(
+            @RequestBody @Valid final S3PresignedUrlRequest request) {
+        S3PresignedUrlResponse response = userService.generateProfileImagePresignedUrl(request);
+        return BaseResponse.ok(response);
     }
 }
 

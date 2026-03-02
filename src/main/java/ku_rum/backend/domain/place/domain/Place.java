@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Polygon;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,4 +47,20 @@ public class Place extends BaseEntity {
     @NotNull
     @Column(nullable = false, precision = 15, scale = 9)
     private BigDecimal longitude;
+
+    @Column(columnDefinition = "POLYGON")
+    private Polygon boundary;
+
+    public void updateSubName(String subName) {
+        this.subName = subName;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateLocation(BigDecimal latitude, BigDecimal longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }

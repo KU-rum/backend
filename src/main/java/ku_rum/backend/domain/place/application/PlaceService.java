@@ -1,9 +1,13 @@
 package ku_rum.backend.domain.place.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PLACE_IMAGE_NOT_FOUND;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import ku_rum.backend.domain.common.image.application.S3ImageService;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipFriendListResponse;
@@ -15,16 +19,28 @@ import ku_rum.backend.domain.place.domain.repository.PlaceImageRepository;
 import ku_rum.backend.domain.place.domain.repository.PlaceRepository;
 import ku_rum.backend.domain.place.domain.repository.PositionRepository;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
+import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
+import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
+import ku_rum.backend.domain.rank.application.RankService;
+import ku_rum.backend.domain.rank.application.response.PlaceUserRankResponse;
+import ku_rum.backend.domain.user.application.UserService;
+import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.support.status.BaseExceptionResponseStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class PlaceService {
 
     private final PlaceRepository placeRepository;
@@ -32,6 +48,9 @@ public class PlaceService {
     private final PlaceImageRepository placeImageRepository;
     private final PlaceHistoryService placeHistoryService;
     private final SearchService searchService;
+    private final RankService rankService;
+    private final UserService userService;
+    private final S3ImageService s3ImageService;
 
     /**
      * 지도 칩 조회(회원 로직)
@@ -88,8 +107,10 @@ public class PlaceService {
         List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
         List<FriendUserDto> friendUserDtos = positionRepository.findPositionByFriendAndPlace(userDetails.getUserId(),
                 place);
+        User user = userService.getUser();
+        List<PlaceUserRankResponse> placeRanks = rankService.getPlaceRanks(user, placeId);
 
-        return GetPlaceResponse.of(place, friendUserDtos, placeImages);
+        return GetPlaceResponse.of(place, friendUserDtos, placeImages, placeRanks);
     }
 
     /**
@@ -103,7 +124,7 @@ public class PlaceService {
         Place place = findPlace(placeId);
         List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
 
-        return GetPlaceResponse.of(place, Collections.emptyList(), placeImages);
+        return GetPlaceResponse.of(place, Collections.emptyList(), placeImages, Collections.emptyList());
     }
 
     /**
@@ -116,17 +137,120 @@ public class PlaceService {
         return searchService.searchPlace(query);
     }
 
+    @Transactional
+    public void modifyPlaceSubName(Long placeId, PutPlaceSubNameRequest request) {
+        Place place = findPlace(placeId);
+        place.updateSubName(request.subName());
+    }
+
+    @Transactional
+    public void modifyPlaceContent(Long placeId, PutPlaceContentRequest request) {
+        Place place = findPlace(placeId);
+        place.updateContent(request.content());
+    }
+
+    @Transactional
+    public void modifyPlaceLocation(Long placeId, PutPlaceLocationRequest request) {
+        Place place = findPlace(placeId);
+        place.updateLocation(request.latitude(), request.longitude());
+    }
+
+    @Transactional
+    public void modifyPlaceImages(Long placeId, List<MultipartFile> images) {
+        Place place = findPlace(placeId);
+
+        List<PlaceImage> existingImages = placeImageRepository.findByPlace(place);
+
+        List<String> oldImageUrls = existingImages.stream()
+                .map(PlaceImage::getImageUrl)
+                .toList();
+        List<String> newImageUrls = s3ImageService.uploadPlaceImages(images);
+        placeImageRepository.deleteByPlace(place);
+
+        List<PlaceImage> newImages = new ArrayList<>();
+
+        for (String imageUrl : newImageUrls) {
+            PlaceImage placeImage = PlaceImage.builder()
+                    .place(place)
+                    .imageUrl(imageUrl)
+                    .build();
+            newImages.add(placeImage);
+        }
+
+        placeImageRepository.saveAll(newImages);
+
+        s3ImageService.deletePlaceImages(oldImageUrls);
+    }
+
+    @Transactional
+    public void addPlaceImages(Long placeId, List<MultipartFile> images) {
+        Place place = findPlace(placeId);
+
+        List<String> newImageUrls = s3ImageService.uploadPlaceImages(images);
+
+        List<PlaceImage> newImages = newImageUrls.stream()
+                .map(url -> PlaceImage.builder()
+                        .place(place)
+                        .imageUrl(url)
+                        .build())
+                .toList();
+
+        placeImageRepository.saveAll(newImages);
+    }
+
+    @Transactional
+    public void deletePlaceImages(Long placeId, Long placeImageId) {
+        Place place = findPlace(placeId);
+
+        PlaceImage placeImage = placeImageRepository.findByPlaceImageId(placeImageId)
+                .orElseThrow(() -> new GlobalException(PLACE_IMAGE_NOT_FOUND));
+
+        if (!placeImage.getPlace().getPlaceId().equals(placeId)) {
+            throw new GlobalException(PLACE_IMAGE_NOT_FOUND);
+        }
+        placeImageRepository.delete(placeImage);
+
+        try {
+            s3ImageService.deletePlaceImages(placeImage.getImageUrl());
+        } catch (Exception e) {
+            log.warn("Failed to delete S3 image: {}", placeImage.getImageUrl(), e);
+        }
+    }
+
     /**
-     * 장소 검색(회원 로직)
+     * 장소 생성
      *
-     * @param userDetails
-     * @param query
-     * @return
+     * @param request
      */
     @Transactional
-    public List<SearchPlaceResponse> searchPlaceWithUser(CustomUserDetails userDetails, String query) {
-        placeHistoryService.updatePlaceHistory(query, userDetails);
-        return searchPlace(query);
+    public void createPlace(PostPlaceRequest request) {
+        Place place = Place.builder()
+                .categoryChip(request.categoryChip())
+                .name(request.name())
+                .subName(request.subName())
+                .content(request.content())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .build();
+
+        placeRepository.save(place);
+    }
+
+
+    /**
+     * 장소 이미지 조회
+     *
+     * @param placeId
+     * @return
+     */
+    public List<GetPlaceImageResponse> getPlaceImage(Long placeId) {
+        Place place = findPlace(placeId);
+        List<PlaceImage> placeImages = placeImageRepository.findByPlace(place);
+
+        List<GetPlaceImageResponse> response = placeImages.stream()
+                .map(GetPlaceImageResponse::from)
+                .toList();
+        return response;
     }
 
     /**

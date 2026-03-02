@@ -26,6 +26,12 @@ public class TempTokenProvider {
         return tempToken;
     }
 
+    public String createTempTokenByUserId(Long userId) {
+        String tempToken = UUID.randomUUID().toString();
+        redisUtil.setRedisData("TEMP_TOKEN:" + tempToken, String.valueOf(userId), TEMP_TOKEN_EXPIRY_MILLIS);
+        return tempToken;
+    }
+
     public Long resolveUserId(String tempToken) {
         String userId = redisUtil.getRedisData("TEMP_TOKEN:" + tempToken);
         if (userId == null) {

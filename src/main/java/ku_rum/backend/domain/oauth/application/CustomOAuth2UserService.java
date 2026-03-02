@@ -1,8 +1,9 @@
 package ku_rum.backend.domain.oauth.application;
 
 import ku_rum.backend.domain.oauth.domain.OAuth2MemberInfo;
-import ku_rum.backend.domain.oauth.handler.OAuth2MemberInfoFactory;
+import ku_rum.backend.domain.oauth.domain.PreSignupPrincipal;
 import ku_rum.backend.domain.oauth.domain.ProviderType;
+import ku_rum.backend.domain.oauth.handler.OAuth2MemberInfoFactory;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
 import ku_rum.backend.global.exception.oauth.OAuthProviderMissMatchException;
@@ -34,28 +35,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private OAuth2User process(OAuth2UserRequest userRequest, OAuth2User user) {
-        ProviderType providerType = ProviderType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
+        ProviderType providerType =
+                ProviderType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 
-        OAuth2MemberInfo memberInfo = OAuth2MemberInfoFactory.getOauth2MemberInfo(providerType, user.getAttributes());
+        OAuth2MemberInfo memberInfo =
+                OAuth2MemberInfoFactory.getOauth2MemberInfo(providerType, user.getAttributes());
+
         Optional<User> userOptional = userRepository.findByOauthId(memberInfo.getId());
 
-        User member;
         if (userOptional.isPresent()) {
-            member = userOptional.get();
+            User member = userOptional.get();
             if (providerType != member.getProviderType()) {
                 throw new OAuthProviderMissMatchException(
-                        "Looks like you're signed up with " + providerType +
-                                " account. Please use your " + member.getProviderType() + " account to login."
+                        "이미 " + member.getProviderType() + "로 가입된 계정입니다. 해당 계정으로 로그인해주세요."
                 );
             }
-        } else {
-            member = createUser(memberInfo, providerType);
+            // 로그인 시점에는 더 이상 isFirstLogin을 변경/저장하지 않음
+            return CustomUserDetails.create(member, user.getAttributes());
         }
-        return CustomUserDetails.create(member, user.getAttributes());
-    }
 
-    private User createUser(OAuth2MemberInfo memberInfo, ProviderType providerType) {
-        User user = User.createMemberWithOAuthInfo(memberInfo, providerType);
-        return userRepository.save(user);
+        // 신규 유입: 아직 회원가입 전 —> PreSignupPrincipal 반환 (가입 보류)
+        return PreSignupPrincipal.of(providerType, memberInfo, user.getAttributes());
     }
 }

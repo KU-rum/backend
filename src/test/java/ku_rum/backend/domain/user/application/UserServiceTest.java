@@ -1,5 +1,8 @@
 package ku_rum.backend.domain.user.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import jakarta.transaction.Transactional;
 import ku_rum.backend.domain.college.domain.College;
 import ku_rum.backend.domain.college.domain.repository.CollegeRepository;
@@ -30,9 +33,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -77,7 +77,7 @@ class UserServiceTest {
         collegeRepository.save(college);
         user = User.builder().oauthId("kmw106933").build();
 
-        department = Department.of("컴퓨터공학부", college);
+        department = Department.of("컴퓨터공학부", college, "url");
         departmentRepository.save(department);
         userRepository.save(user);
     }
@@ -195,7 +195,6 @@ class UserServiceTest {
 
         userRepository.save(user);
 
-
         //when then
         assertThatThrownBy(() -> userService.getLoginId("kmw106943@konkuk.ac.kr"))
                 .isInstanceOf(NoSuchUserException.class);
@@ -239,8 +238,10 @@ class UserServiceTest {
 
         userRepository.save(user);
 
-        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345");
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser",
+                AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null,
+                userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
         NicknameChangeRequest request = new NicknameChangeRequest("abcd1234");
 
@@ -266,8 +267,10 @@ class UserServiceTest {
         userRepository.save(user);
         userRepository.flush();
 
-        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser", AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345");
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        CustomUserDetails userDetails = CustomUserDetails.of(user.getId(), "testUser",
+                AuthorityUtils.createAuthorityList("ROLE_USER"), "test12345", false);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null,
+                userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         //when

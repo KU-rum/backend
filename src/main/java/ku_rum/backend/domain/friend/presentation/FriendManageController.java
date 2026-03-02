@@ -4,7 +4,13 @@ import ku_rum.backend.domain.friend.application.FriendManageService;
 import ku_rum.backend.domain.friend.dto.request.FriendRequest;
 import ku_rum.backend.global.support.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/friends")
@@ -27,7 +33,7 @@ public class FriendManageController {
      */
     @PutMapping("/accept")
     public BaseResponse<Void> acceptRequest(@RequestBody final FriendRequest friendAcceptRequest) {
-        friendManageService.respondToFriend(friendAcceptRequest, true);
+        friendManageService.respondToFriend(friendAcceptRequest);
         return BaseResponse.ok();
     }
 
@@ -36,7 +42,7 @@ public class FriendManageController {
      */
     @PutMapping("/reject")
     public BaseResponse<Void> rejectRequest(@RequestBody final FriendRequest friendRejectRequest) {
-        friendManageService.respondToFriend(friendRejectRequest, false);
+        friendManageService.rejectToFriend(friendRejectRequest);
         return BaseResponse.ok();
     }
 

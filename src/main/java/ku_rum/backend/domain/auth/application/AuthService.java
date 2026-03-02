@@ -30,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.*;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DELETED_MEMBER;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.MALFORMED_TOKEN;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
 
 @Slf4j
 @Service
@@ -146,7 +148,6 @@ public class AuthService {
                 user.getNickname(),
                 user.getStudentId(),
                 user.getImageUrl(),
-                list,
-                user.isFirstLogin());
+                list);
     }
 }

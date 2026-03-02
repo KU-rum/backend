@@ -46,11 +46,14 @@ public class JwtTokenProvider {
         String refreshToken = createToken(claims, getRefreshValidTime());
         setRedisData(claims, refreshToken);
 
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
         return TokenResponse.of(
                 accessToken,
                 refreshToken,
                 this.jwtProperties.getAccessTokenValiditySeconds(),
-                this.jwtProperties.getRefreshTokenValiditySeconds());
+                this.jwtProperties.getRefreshTokenValiditySeconds(),
+                userDetails.isFirstLogin());
     }
 
     public Authentication getAuthentication(String token) {
@@ -59,7 +62,8 @@ public class JwtTokenProvider {
         Long userId = claims.get("userPK", Long.class);
         Collection<? extends GrantedAuthority> roles = getGrantedAuthorities(claims);
 
-        CustomUserDetails principal = CustomUserDetails.of(userId, "", roles, "");
+        boolean firstLogin = claims.get("firstLogin", Boolean.class);
+        CustomUserDetails principal = CustomUserDetails.of(userId, "", roles, "", firstLogin);
         return new UsernamePasswordAuthenticationToken(principal, token, roles);
     }
 
@@ -138,7 +142,8 @@ public class JwtTokenProvider {
     }
 
     private Claims getClaimsInUserDetails(CustomUserDetails userDetails, Collection<? extends GrantedAuthority> authorities) {
-        var claimsBuilder = Jwts.claims().add("userPK", userDetails.getUserId());
+        var claimsBuilder = Jwts.claims().add("userPK", userDetails.getUserId())
+                .add("firstLogin", userDetails.isFirstLogin());
 
         if (!authorities.isEmpty()) {
             claimsBuilder.add(AUTHORITIES_KEY, authorities.stream()

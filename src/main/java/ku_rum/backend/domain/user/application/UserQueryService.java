@@ -1,5 +1,8 @@
 package ku_rum.backend.domain.user.application;
 
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
+
+import java.util.List;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
 import ku_rum.backend.global.exception.global.GlobalException;
@@ -7,8 +10,6 @@ import ku_rum.backend.global.exception.user.NoSuchUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -29,5 +30,9 @@ public class UserQueryService {
     public User getUserById(final Long userId) {
         return userRepository.findUserById(userId)
                 .orElseThrow(() -> new GlobalException(NO_SUCH_USER));
+    }
+
+    public List<User> getUsersByIds(List<Long> userIds) {
+        return userRepository.findAllById(userIds);
     }
 }

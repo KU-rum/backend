@@ -9,7 +9,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,7 +21,8 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
-import ku_rum.backend.config.RestDocsTestSupport;
+import java.util.Optional;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.place.application.PlaceHistoryService;
 import ku_rum.backend.domain.place.application.PlaceService;
 import ku_rum.backend.domain.place.application.PositionService;
@@ -27,6 +31,7 @@ import ku_rum.backend.domain.place.application.response.CurrentPositionResponse;
 import ku_rum.backend.domain.place.application.response.CurrentPositionStatusResponse;
 import ku_rum.backend.domain.place.application.response.GetPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SearchPlaceHistoryResponse;
+import ku_rum.backend.domain.place.application.response.SearchPlaceResponse;
 import ku_rum.backend.domain.place.application.response.SelectPlaceChipResponse;
 import ku_rum.backend.domain.place.domain.CategoryChip;
 import ku_rum.backend.domain.place.domain.Place;
@@ -35,23 +40,32 @@ import ku_rum.backend.domain.place.domain.PlaceImage;
 import ku_rum.backend.domain.place.dto.FriendUserDto;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionConfirmRequest;
 import ku_rum.backend.domain.place.dto.request.CurrentPositionRequest;
+import ku_rum.backend.domain.place.dto.request.DeletePlaceImagesRequest;
+import ku_rum.backend.domain.place.dto.request.PostPlaceRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceContentRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceLocationRequest;
+import ku_rum.backend.domain.place.dto.request.PutPlaceSubNameRequest;
+import ku_rum.backend.domain.place.dto.response.GetPlaceImageResponse;
+import ku_rum.backend.domain.rank.application.RankService;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.security.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+@WebMvcTest({PlaceController.class, PlaceAdminController.class})
 @ActiveProfiles("test")
-public class PlaceControllerTest extends RestDocsTestSupport {
+public class PlaceControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     PositionService positionService;
@@ -60,10 +74,10 @@ public class PlaceControllerTest extends RestDocsTestSupport {
     PlaceService placeService;
 
     @MockBean
-    PlaceHistoryService placeHistoryService;
+    RankService rankService;
 
     @MockBean
-    private SecurityFilterChain securityFilterChain;
+    PlaceHistoryService placeHistoryService;
 
     @BeforeEach
     void setUp() {
@@ -89,7 +103,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places/sharing/status")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
 
                 //then
                 .andDo(print())
@@ -123,7 +137,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(post("/api/v1/places/sharing")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .content(new ObjectMapper().writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 //then
@@ -154,7 +168,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(post("/api/v1/places/sharing/confirm")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .content(new ObjectMapper().writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON))
                 //then
@@ -171,16 +185,17 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 .build())));
     }
 
-    @DisplayName("현재 유저의 위치를 공유한다")
+    @DisplayName("현재 유저의 위치를 해제한다")
     @Test
     void disableSharingPosition() throws Exception {
         //given
-        doNothing().when(positionService).disableSharingPosition(any(CustomUserDetails.class));
+        given(positionService.disableSharingPosition(any(CustomUserDetails.class)))
+                .willReturn(Optional.empty());
 
         //when
         mockMvc.perform(delete("/api/v1/places/sharing/confirm")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -217,7 +232,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70")
+                                "Bearer access-token")
                         .param("chip", "K_CUBE"))
                 //then
                 .andDo(print())
@@ -258,7 +273,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                 .build();
 
         List<PlaceImage> placeImages = List.of(placeImage);
-        GetPlaceResponse response = GetPlaceResponse.of(place, friendUserDtos, placeImages);
+        GetPlaceResponse response = GetPlaceResponse.of(place, friendUserDtos, placeImages, null);
 
         given(placeService.getPlaceWithUser(any(CustomUserDetails.class), eq(placeId)))
                 .willReturn(response);
@@ -266,7 +281,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places/{placeId}", placeId)
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -280,6 +295,113 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 )
                                 .pathParameters(
                                         RequestDocumentation.parameterWithName("placeId").description("건물id")
+                                )
+                                .build())));
+
+    }
+
+    @DisplayName("장소를 검색한다")
+    @Test
+    void searchPlace() throws Exception {
+        //given
+        String query = "도서관";
+        String name = "상허기념도서관";
+        Long placeId = 1L;
+        Place place = Place.builder()
+                .placeId(placeId)
+                .categoryChip(CategoryChip.K_CUBE)
+                .name(name)
+                .subName("상허기념도서관 K-CUBE")
+                .content("상허기념도서관 K-CUBE입니다")
+                .latitude(BigDecimal.valueOf(37.541941000))
+                .longitude(BigDecimal.valueOf(127.073784000))
+                .build();
+
+        List<SearchPlaceResponse> responses = List.of(
+                new SearchPlaceResponse(name, placeId, BigDecimal.valueOf(123.1), BigDecimal.valueOf(123.1)));
+
+        given(placeService.searchPlace(eq(query)))
+                .willReturn(responses);
+
+        //when
+        mockMvc.perform(get("/api/v1/places/search")
+                        .param("query", query)
+                        .header("Authorization", "Bearer test-access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value(name))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("지도 검색")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .queryParameters(
+                                        RequestDocumentation.parameterWithName("query").description("검색어")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("응답 코드 (200)"),
+                                        fieldWithPath("status")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 상태 (OK)"),
+                                        fieldWithPath("message")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 메시지"),
+                                        fieldWithPath("data[].name")
+                                                .type(JsonFieldType.STRING)
+                                                .description("장소 이름"),
+                                        fieldWithPath("data[].placeId")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("장소 ID"),
+                                        fieldWithPath("data[].latitude")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("장소 위도"),
+                                        fieldWithPath("data[].longitude")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("장소 경도")
+                                )
+                                .build())));
+
+    }
+
+    @DisplayName("장소 검색어를 저장한다")
+    @Test
+    void savePlaceSearchKeyword() throws Exception {
+        //given
+        doNothing().when(placeHistoryService).updatePlaceHistory(any(), any());
+
+        //when
+        mockMvc.perform(post("/api/v1/places/search/keyword")
+                        .queryParam("query", "검색어")
+                        .header("Authorization",
+                                "Bearer test-access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("지도 검색어 저장")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .queryParameters(
+                                        RequestDocumentation.parameterWithName("query").description("검색어")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code")
+                                                .type(JsonFieldType.NUMBER)
+                                                .description("응답 코드 (200)"),
+                                        fieldWithPath("status")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 상태 (OK)"),
+                                        fieldWithPath("message")
+                                                .type(JsonFieldType.STRING)
+                                                .description("응답 메시지")
                                 )
                                 .build())));
 
@@ -312,7 +434,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //when
         mockMvc.perform(get("/api/v1/places/search/history")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -336,7 +458,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //then
         mockMvc.perform(delete("/api/v1/places/search/history/{placeHistoryId}", placeHistoryId)
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -363,7 +485,7 @@ public class PlaceControllerTest extends RestDocsTestSupport {
         //then
         mockMvc.perform(delete("/api/v1/places/search/history")
                         .header("Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpㄴGJdOigSKjxMIab0cV06xFjSpwrq70"))
+                                "Bearer access-token"))
                 //then
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -373,6 +495,370 @@ public class PlaceControllerTest extends RestDocsTestSupport {
                                 .description("지도 검색 히스토리 전부 삭제")
                                 .requestHeaders(
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 부가 이름을 수정한다")
+    @Test
+    void modifyPlaceSubName() throws Exception {
+        //given
+        Long placeId = 1L;
+        PutPlaceSubNameRequest request = new PutPlaceSubNameRequest("변경된 소제목");
+
+        doNothing().when(placeService).modifyPlaceSubName(eq(placeId), any(PutPlaceSubNameRequest.class));
+
+        //when
+        mockMvc.perform(patch("/api/v1/places/{placeId}/sub-name", placeId)
+                        .header("Authorization",
+                                "Bearer access-token")
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 부가 이름 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .requestFields(
+                                        fieldWithPath("subName").type(JsonFieldType.STRING).description("변경할 부가 이름")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 내용을 수정한다")
+    @Test
+    void modifyPlaceContent() throws Exception {
+        //given
+        Long placeId = 1L;
+        PutPlaceContentRequest request = new PutPlaceContentRequest("변경된 내용");
+
+        doNothing().when(placeService).modifyPlaceContent(eq(placeId), any(PutPlaceContentRequest.class));
+
+        //when
+        mockMvc.perform(patch("/api/v1/places/{placeId}/content", placeId)
+                        .header("Authorization",
+                                "Bearer access-token")
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 내용 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .requestFields(
+                                        fieldWithPath("content").type(JsonFieldType.STRING).description("변경할 내용")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 위치를 수정한다")
+    @Test
+    void modifyPlaceLocation() throws Exception {
+        //given
+        Long placeId = 1L;
+        PutPlaceLocationRequest request = new PutPlaceLocationRequest(
+                BigDecimal.valueOf(37.541941),
+                BigDecimal.valueOf(127.073784)
+        );
+
+        doNothing().when(placeService).modifyPlaceLocation(eq(placeId), any(PutPlaceLocationRequest.class));
+
+        //when
+        mockMvc.perform(patch("/api/v1/places/{placeId}/location", placeId)
+                        .header("Authorization", "Bearer access-token")
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 위치 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .requestFields(
+                                        fieldWithPath("latitude").type(JsonFieldType.NUMBER).description("변경할 위도"),
+                                        fieldWithPath("longitude").type(JsonFieldType.NUMBER).description("변경할 경도")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 이미지를 수정한다")
+    @Test
+    void modifyPlaceImages() throws Exception {
+        //given
+        Long placeId = 1L;
+        MockMultipartFile image1 = new MockMultipartFile(
+                "images",
+                "image1.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 1".getBytes()
+        );
+        MockMultipartFile image2 = new MockMultipartFile(
+                "images",
+                "image2.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 2".getBytes()
+        );
+
+        doNothing().when(placeService).modifyPlaceImages(eq(placeId), any());
+
+        //when
+        mockMvc.perform(multipart("/api/v1/places/{placeId}/images", placeId)
+                        .file(image1)
+                        .file(image2)
+                        .with(request -> {
+                            request.setMethod(HttpMethod.PUT.name());
+                            return request;
+                        })
+                        .header("Authorization", "Bearer access-token")
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 이미지 수정")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소를 생성한다")
+    @Test
+    void createPlace() throws Exception {
+        //given
+
+        String requestBody = """
+                {
+                    "categoryChip": "BUILDING",
+                    "name": "새로운 건물",
+                    "subName": "새 건물 부가 이름",
+                    "content": "새 건물에 대한 설명입니다",
+                    "latitude": 37.541941,
+                    "longitude": 127.073784
+                }
+                """;
+        doNothing().when(placeService).createPlace(any(PostPlaceRequest.class));
+
+        //when
+        mockMvc.perform(post("/api/v1/places")
+                        .header("Authorization", "Bearer access-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 생성")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .requestFields(
+                                        fieldWithPath("categoryChip").type(JsonFieldType.STRING)
+                                                .description("카테고리 칩 (BUILDING, COLLEGE, K_CUBE 등)"),
+                                        fieldWithPath("name").type(JsonFieldType.STRING).description("장소 이름"),
+                                        fieldWithPath("subName").type(JsonFieldType.STRING).description("장소 부가 이름"),
+                                        fieldWithPath("content").type(JsonFieldType.STRING).description("장소 설명"),
+                                        fieldWithPath("latitude").type(JsonFieldType.NUMBER).description("위도"),
+                                        fieldWithPath("longitude").type(JsonFieldType.NUMBER).description("경도")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소에 이미지를 추가한다")
+    @Test
+    void addPlaceImages() throws Exception {
+        //given
+        Long placeId = 1L;
+        MockMultipartFile image1 = new MockMultipartFile(
+                "images",
+                "image1.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 1".getBytes()
+        );
+        MockMultipartFile image2 = new MockMultipartFile(
+                "images",
+                "image2.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "test image content 2".getBytes()
+        );
+
+        doNothing().when(placeService).addPlaceImages(eq(placeId), any());
+
+        //when
+        mockMvc.perform(multipart("/api/v1/places/{placeId}/images", placeId)
+                        .file(image1)
+                        .file(image2)
+                        .with(request -> {
+                            request.setMethod("PATCH");
+                            return request;
+                        })
+                        .header("Authorization", "Bearer access-token")
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 이미지 추가")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 이미지를 삭제한다")
+    @Test
+    void deletePlaceImages() throws Exception {
+        //given
+        Long placeId = 1L;
+        Long placeImageId = 1L;
+        DeletePlaceImagesRequest request = new DeletePlaceImagesRequest(
+                List.of("https://example.com/image1.jpg", "https://example.com/image2.jpg")
+        );
+
+        doNothing().when(placeService).deletePlaceImages(eq(placeId), any());
+
+        //when
+        mockMvc.perform(delete("/api/v1/places/{placeId}/images/{placeImageId}", placeId, placeImageId)
+                        .header("Authorization", "Bearer access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 이미지 삭제")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID"),
+                                        RequestDocumentation.parameterWithName("placeImageId").description("장소이미지 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                )
+                                .build())));
+    }
+
+    @DisplayName("장소의 이미지들을 조회한다")
+    @Test
+    void getPlaceImage() throws Exception {
+        //given
+        Long placeId = 1L;
+        Long placeImageId = 1L;
+        String url = "url";
+        List<GetPlaceImageResponse> response = List.of(new GetPlaceImageResponse(placeImageId, url));
+
+        given(placeService.getPlaceImage(eq(placeId)))
+                .willReturn(response);
+
+        //when
+        mockMvc.perform(get("/api/v1/places/{placeId}/images", placeId)
+                        .header("Authorization", "Bearer access-token"))
+                //then
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andDo(restDocs.document(resource(
+                        ResourceSnippetParameters.builder()
+                                .tag("지도 관련 API")
+                                .description("장소 해당하는 이미지 조회")
+                                .requestHeaders(
+                                        headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
+                                )
+                                .pathParameters(
+                                        RequestDocumentation.parameterWithName("placeId").description("장소 ID")
+                                )
+                                .responseFields(
+                                        fieldWithPath("code").type(JsonFieldType.NUMBER).description("응답 코드 (200)"),
+                                        fieldWithPath("status").type(JsonFieldType.STRING).description("응답 상태 (OK)"),
+                                        fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                        fieldWithPath("data[].placeImageId").type(JsonFieldType.NUMBER)
+                                                .description("장소 이미지 ID"),
+                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING)
+                                                .description("장소 이미지 URL")
                                 )
                                 .build())));
     }

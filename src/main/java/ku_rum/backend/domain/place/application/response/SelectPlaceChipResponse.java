@@ -17,14 +17,14 @@ public record SelectPlaceChipResponse(
 
     public static SelectPlaceChipResponse from(Place place) {
         return new SelectPlaceChipResponse(place.getPlaceId(), place.getName(), place.getSubName(),
-                place.getAbbreviation(),
+                place.getContent(),
                 place.getLatitude(), place.getLongitude(), Collections.emptyList());
     }
 
     public static SelectPlaceChipResponse from(Place place,
                                                List<SelectPlaceChipFriendListResponse> selectPlaceChipFriendListResponses) {
         return new SelectPlaceChipResponse(place.getPlaceId(), place.getName(), place.getSubName(),
-                place.getAbbreviation(),
+                place.getContent(),
                 place.getLatitude(), place.getLongitude(), selectPlaceChipFriendListResponses);
     }
 }

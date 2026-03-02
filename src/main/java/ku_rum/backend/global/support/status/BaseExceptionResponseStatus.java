@@ -83,6 +83,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     NO_SUCH_NOTICE(800, HttpStatus.NOT_FOUND, "해당 공지사항은 존재하지 않습니다."),
     DUPLICATE_NOTICE(801, HttpStatus.BAD_REQUEST, "이미 북마크된 공지사항입니다."),
     INVALID_PAGE(802, HttpStatus.BAD_REQUEST, "유효하지 않은 페이지입니다.(페이지는 1 이상부터 가능합니다)"),
+    NO_SUCH_NOTICE_DETAIL(804, HttpStatus.NOT_FOUND, "해당 공지사항 상세정보는 존재하지 않습니다."),
 
     /**
      * 900: Server, DataBase
@@ -103,6 +104,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     TOKEN_MISMATCH(1006, HttpStatus.UNAUTHORIZED, "로그인 정보가 토큰 정보와 일치하지 않습니다."),
     LOGIN_ERROR(1007, HttpStatus.UNAUTHORIZED, "잘못된 아이디/비밀번호입니다."),
     OAUTH_ERROR(1008, HttpStatus.UNAUTHORIZED, "잘못된 임시 토큰입니다."),
+    OAUTH_INVALID_PRIVATE_KEY(1009, HttpStatus.UNAUTHORIZED, "잘못된 프라이빗 키입니다."),
+    ACCESS_DENIED(1010, HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     /**
      * 1100: Wein
@@ -120,7 +123,39 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      */
     PLACE_NOT_FOUND(1200, HttpStatus.NOT_FOUND, "해당되는 장소가 없습니다."),
     PLACE_IMAGE_NOT_FOUND(1201, HttpStatus.NOT_FOUND, "해당되는 장소 이미지가 없습니다."),
-    UNSUPPORTED_FRIEND_CHIP_ERROR(1202, HttpStatus.UNAUTHORIZED, "비회원으로 친구를 조회할 수 없습니다");
+    UNSUPPORTED_FRIEND_CHIP_ERROR(1202, HttpStatus.UNAUTHORIZED, "비회원으로 친구를 조회할 수 없습니다"),
+    PLACE_RANK_NOT_FOUND(1203, HttpStatus.NOT_FOUND, "해당되는 랭크장소가 없습니다."),
+    PLACE_BUILDING_NOT_FOUND(1204, HttpStatus.NOT_FOUND, "해당 위치가 속한 건물이 없습니다."),
+    RANK_NOT_FOUND(1205, HttpStatus.NOT_FOUND, "랭크가 없습니다"),
+    INVALID_RANK_RANGE(1206, HttpStatus.BAD_REQUEST, "잘못된 랭킹입니다"),
+    IMAGE_UPLOAD_FAILED(1207, HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패하였습니다."),
+
+    /**
+     * 1300: 북마크
+     */
+    DUPLICATE_BOOKMARK(1300, HttpStatus.BAD_REQUEST, "이미 북마크 공지사항입니다."),
+    BOOKMARK_NOT_FOUND(1301, HttpStatus.NOT_FOUND, "해당되는 북마크가 없습니다."),
+    UNAUTHORIZED_BOOKMARK(1302, HttpStatus.UNAUTHORIZED, "권한이 없는 북마크 입니다."),
+    INVALID_LAST_KNOWN(1303, HttpStatus.BAD_REQUEST, "잘못된 lastknown 입니다"),
+
+    /**
+     * 1400: 알람
+     */
+    ALARM_NOT_FOUND(1400, HttpStatus.NOT_FOUND, "해당하는 알림이 없습니다."),
+    UNAUTHORIZED_ALARM(1401, HttpStatus.UNAUTHORIZED, "권한이 없는 알람입니다."),
+    UNAUTHORIZED_ANNOUNCEMENT(1402, HttpStatus.UNAUTHORIZED, "권한이 없는 공지 알람입니다."),
+    INVALID_CURSOR_FORMAT(1403, HttpStatus.BAD_REQUEST, "알림 커서가 올바르지 않습니다."),
+    FCM_SEND_ERROR(1404, HttpStatus.BAD_REQUEST, "알림 전송중 문제가 발생했습니다."),
+    UNSUPPORTED_TOPIC_FCM(1405, HttpStatus.UNPROCESSABLE_ENTITY, "토픽 FCM을 제공하지 않습니다."),
+    UNSUPPORTED_DIRECT_FCM(1406, HttpStatus.UNPROCESSABLE_ENTITY, "Direct FCM을 제공하지 않습니다."),
+    INVALID_USER_TOKEN(1407, HttpStatus.INTERNAL_SERVER_ERROR, "토큰이 없는 유저가 포함되어 있습니다"),
+
+    /**
+     * 1500: 배너
+     */
+    URL_NOT_BANNER(1500, HttpStatus.NOT_FOUND, "찾을 수 없는 배너입니다."),
+    BANNER_REQUEST_NULL(1502, HttpStatus.BAD_REQUEST, "images와 links는 null일 수 없습니다."),
+    BANNER_IMAGE_LINK_COUNT_MISMATCH(1503, HttpStatus.BAD_REQUEST, "images와 links의 개수가 일치해야 합니다.");
 
     private final int code;
     private final HttpStatus status;

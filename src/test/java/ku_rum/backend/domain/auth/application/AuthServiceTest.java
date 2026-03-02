@@ -4,15 +4,12 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import ku_rum.backend.domain.auth.dto.request.LoginRequest;
 import ku_rum.backend.domain.auth.dto.request.ReissueRequest;
-import ku_rum.backend.domain.auth.dto.response.AuthResponse;
 import ku_rum.backend.domain.common.firebase.application.NotificationService;
-import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.domain.user.dto.response.UserResponse;
+import ku_rum.backend.domain.user.dto.response.TokenResponse;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import ku_rum.backend.global.security.JwtTokenProvider;
-import ku_rum.backend.domain.user.dto.response.TokenResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -107,7 +101,7 @@ class AuthServiceTest {
         ReissueRequest reissueRequest = new ReissueRequest("valid-refresh-token");
         Authentication authentication = mock(Authentication.class);
         CustomUserDetails userDetails = mock(CustomUserDetails.class);
-        TokenResponse expectedTokenResponse = TokenResponse.of("new-access-token", "new-refresh-token", 10480000, 20400000);
+        TokenResponse expectedTokenResponse = TokenResponse.of("new-access-token", "new-refresh-token", 10480000, 20400000, false);
 
         when(jwtTokenProvider.validateToken("valid-refresh-token")).thenReturn(true);
         when(jwtTokenProvider.getAuthentication("valid-refresh-token")).thenReturn(authentication);

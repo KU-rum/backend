@@ -1,5 +1,16 @@
 package ku_rum.backend.domain.common.mail.application;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.time.Duration;
+import java.util.Optional;
 import ku_rum.backend.domain.common.mail.domain.MailAuth;
 import ku_rum.backend.domain.common.mail.domain.repository.MailAuthRepository;
 import ku_rum.backend.domain.common.mail.dto.request.MailSendRequest;
@@ -11,30 +22,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.test.context.ActiveProfiles;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.time.Duration;
-import java.util.Optional;
-
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class MailServiceTest {
-
-    @Mock
-    private JavaMailSender emailSender;
 
     @Mock
     private MailSenderService mailSenderService;
 
     @Mock
     private MailAuthRepository mailAuthRepository;
+
+    @Mock
+    private SpringTemplateEngine templateEngine;
 
     @InjectMocks
     private MailService mailService;
@@ -44,13 +45,16 @@ class MailServiceTest {
     void sendCodeToEmail_success() {
         // given
         MailSendRequest request = new MailSendRequest("test@example.com");
-        MailAuth mailAuth = MailAuth.create(request.email(), 6);
+        String htmlContent = "<html>테스트</html>";
+
+        given(templateEngine.process(eq("email_template"), any(Context.class))).willReturn(htmlContent);
 
         // when
         mailService.sendCodeToEmail(request);
 
         // then
-        verify(mailSenderService, times(1)).send(eq(request.email()), anyString(), anyString());
+        verify(templateEngine, times(1)).process(eq("email_template"), any(Context.class));
+        verify(mailSenderService, times(1)).sendHtml(eq(request.email()), anyString(), eq(htmlContent));
         verify(mailAuthRepository, times(1)).save(any(MailAuth.class), any(Duration.class));
     }
 

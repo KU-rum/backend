@@ -16,6 +16,20 @@ jobs:
     permissions:
       contents: read
 
+    services:
+      mysql:
+        image: mysql:latest
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: testdb
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -ptesdb --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
       - name: CheckOut
         uses: actions/checkout@v4
@@ -99,51 +113,75 @@ jobs:
             -v log-volume:/app/logs \
             ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_BE_PROD }}
 
+      - name: Wait for new container to be ready
+        run: |
+          echo "Waiting for new container to be healthy..."
+          MAX_ATTEMPTS=60
+          SLEEP_INTERVAL=2
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            HEALTH_STATUS=$(curl -s http://localhost:$NEXT_PORT/actuator/health 2>/dev/null || echo "")
+
+            if echo "$HEALTH_STATUS" | grep -q '"status":"UP"'; then
+              echo "Container is ready after $((i * SLEEP_INTERVAL)) seconds!"
+              exit 0
+            fi
+
+            echo "Attempt $i/$MAX_ATTEMPTS: Container not ready yet..."
+            sleep $SLEEP_INTERVAL
+          done
+
+          echo "Container failed to become healthy within $((MAX_ATTEMPTS * SLEEP_INTERVAL)) seconds!"
+          echo "Rolling back: removing failed container..."
+          sudo docker stop kurum-backend-$NEXT_PORT || true
+          sudo docker rm kurum-backend-$NEXT_PORT || true
+          echo "Rollback complete. Existing container remains active."
+          exit 1
+
       - name: Update or create Nginx container to point to new container port
         run: |
           NGINX_CONTAINER_NAME="nginx-proxy"
           NETWORK_NAME="kurum_network"
-      
+          
           echo "Next port is $NEXT_PORT"
-      
-          mkdir -p ./nginx-conf
-          mkdir -p ./certbot/conf ./certbot/www
-      
-          cat > ./nginx-conf/default.conf <<EOF
+          
+          mkdir -p ~/nginx-conf
+          mkdir -p ~/certbot/conf ~/certbot/www
+
+          cat > ~/nginx-conf/default.conf <<EOF
           server {
               listen 80;
-              server_name kuroom.shop www.kuroom.shop;
-              
+              server_name kuroom.store www.kuroom.store;
+
               location /.well-known/acme-challenge/ {
                   root /var/www/certbot;
               }
-      
+
               location / {
                   return 301 https://\$host\$request_uri;
               }
           }
-      
+
           server {
               listen 443 ssl;
-              server_name kuroom.shop www.kuroom.shop;
-      
-              ssl_certificate /etc/letsencrypt/live/kuroom.shop/fullchain.pem;
-              ssl_certificate_key /etc/letsencrypt/live/kuroom.shop/privkey.pem;
-      
+              server_name kuroom.store www.kuroom.store;
+
+              ssl_certificate /etc/letsencrypt/live/kuroom.store/fullchain.pem;
+              ssl_certificate_key /etc/letsencrypt/live/kuroom.store/privkey.pem;
+          
               location / {
                   proxy_pass http://kurum-backend-$NEXT_PORT:8080;
                   proxy_set_header Host \$host;
                   proxy_set_header X-Real-IP \$remote_addr;
                   proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
                   proxy_set_header X-Forwarded-Proto \$scheme;
-                  client_max_body_size 300M;
+                  client_max_body_size 50M;
               }
           }
           EOF
-      
+          
           if sudo docker ps --filter "name=$NGINX_CONTAINER_NAME" --filter "status=running" --format "{{.Names}}" | grep -w $NGINX_CONTAINER_NAME; then
             echo "Reloading Nginx config..."
-            sudo docker cp ./nginx-conf/default.conf $NGINX_CONTAINER_NAME:/etc/nginx/conf.d/default.conf
             sudo docker exec $NGINX_CONTAINER_NAME nginx -s reload
           else
             echo "Starting new Nginx container with HTTPS support..."
@@ -151,9 +189,9 @@ jobs:
               --name $NGINX_CONTAINER_NAME \
               --network $NETWORK_NAME \
               -p 80:80 -p 443:443 \
-              -v $(pwd)/nginx-conf:/etc/nginx/conf.d \
-              -v $(pwd)/certbot/conf:/etc/letsencrypt \
-              -v $(pwd)/certbot/www:/var/www/certbot \
+              -v $HOME/nginx-conf:/etc/nginx/conf.d \
+              -v $HOME/certbot/conf:/etc/letsencrypt \
+              -v $HOME/certbot/www:/var/www/certbot \
               nginx
           fi
 

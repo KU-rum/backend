@@ -1,26 +1,5 @@
 package ku_rum.backend.domain.friend.presentation;
 
-import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
-import ku_rum.backend.domain.friend.application.FriendQueryService;
-import ku_rum.backend.domain.friend.dto.response.FriendListResponse;
-import ku_rum.backend.domain.friend.dto.response.FriendSearchResponse;
-import ku_rum.backend.domain.friend.dto.response.ReceivedFriendResponse;
-import ku_rum.backend.domain.friend.dto.response.SentFriendResponse;
-import ku_rum.backend.util.RestDocsFieldSnippets;
-import ku_rum.backend.util.RestDocsTestUtils;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
-
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -32,15 +11,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import java.util.List;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
+import ku_rum.backend.domain.friend.application.FriendQueryService;
+import ku_rum.backend.domain.friend.dto.response.FriendListResponse;
+import ku_rum.backend.domain.friend.dto.response.FriendSearchResponse;
+import ku_rum.backend.domain.friend.dto.response.ReceivedFriendResponse;
+import ku_rum.backend.domain.friend.dto.response.SentFriendResponse;
+import ku_rum.backend.util.RestDocsFieldSnippets;
+import ku_rum.backend.util.RestDocsTestUtils;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+
+@WebMvcTest(FriendQueryController.class)
 @ActiveProfiles("test")
-class FriendQueryControllerTest extends RestDocsTestSupport {
+class FriendQueryControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private FriendQueryService friendQueryService;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
 
     @Test
     @DisplayName("친구 목록 조회 API")
@@ -55,7 +50,8 @@ class FriendQueryControllerTest extends RestDocsTestSupport {
 
         // when & then
         mockMvc.perform(get("/api/v1/friends/list")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access_token")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -71,8 +67,10 @@ class FriendQueryControllerTest extends RestDocsTestSupport {
                                 )
                                 .responseFields(RestDocsFieldSnippets.withDataFields(List.of(
                                         fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("친구 ID"),
-                                        fieldWithPath("data[].nickname").type(JsonFieldType.STRING).description("친구 닉네임"),
-                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING).description("프로필 이미지")
+                                        fieldWithPath("data[].nickname").type(JsonFieldType.STRING)
+                                                .description("친구 닉네임"),
+                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING)
+                                                .description("프로필 이미지")
                                 )))
                                 .build())
                 ));
@@ -91,7 +89,8 @@ class FriendQueryControllerTest extends RestDocsTestSupport {
 
         // when & then
         mockMvc.perform(get("/api/v1/friends/requests/received")
-                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyUEsiOjEsInJvbGVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzQwMjQyNjQxLCJleHAiOjE3NDAyNDQ0NDF9.kLSMBLWdvIvrBpGJdOigSKjxMIab0cV06xFjSpwrq70")
+                        .header("Authorization",
+                                "Bearer access_token")
 
                 )
                 .andDo(print())
@@ -108,10 +107,14 @@ class FriendQueryControllerTest extends RestDocsTestSupport {
                                         headerWithName("Authorization").description("발급 받은 엑세스 토큰입니다.")
                                 )
                                 .responseFields(RestDocsFieldSnippets.withDataFields(List.of(
-                                        fieldWithPath("data[].requestId").type(JsonFieldType.NUMBER).description("요청 ID"),
-                                        fieldWithPath("data[].fromUserId").type(JsonFieldType.NUMBER).description("보낸 사람 ID"),
-                                        fieldWithPath("data[].fromUserNickname").type(JsonFieldType.STRING).description("보낸 사람 닉네임"),
-                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING).description("프로필 이미지")
+                                        fieldWithPath("data[].requestId").type(JsonFieldType.NUMBER)
+                                                .description("요청 ID"),
+                                        fieldWithPath("data[].fromUserId").type(JsonFieldType.NUMBER)
+                                                .description("보낸 사람 ID"),
+                                        fieldWithPath("data[].fromUserNickname").type(JsonFieldType.STRING)
+                                                .description("보낸 사람 닉네임"),
+                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING)
+                                                .description("프로필 이미지")
                                 )))
                                 .build())
                 ));
@@ -164,8 +167,8 @@ class FriendQueryControllerTest extends RestDocsTestSupport {
 
         // Mock 응답 데이터
         List<FriendSearchResponse> mockResponse = List.of(
-                new FriendSearchResponse(1L, "minu1", "https://img1.com", true, true),
-                new FriendSearchResponse(2L, "minu2", "https://img2.com", false, false)
+                new FriendSearchResponse(1L, "minu1", "https://img1.com", true, true, false),
+                new FriendSearchResponse(2L, "minu2", "https://img2.com", false, false, false)
         );
         when(friendQueryService.searchByNickname(nickname)).thenReturn(mockResponse);
 
@@ -190,10 +193,16 @@ class FriendQueryControllerTest extends RestDocsTestSupport {
                                 )
                                 .responseFields(RestDocsFieldSnippets.withDataFields(List.of(
                                         fieldWithPath("data[].userId").type(JsonFieldType.NUMBER).description("유저 ID"),
-                                        fieldWithPath("data[].nickname").type(JsonFieldType.STRING).description("유저 닉네임"),
-                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING).description("프로필 이미지 URL"),
-                                        fieldWithPath("data[].requestSent").type(JsonFieldType.BOOLEAN).description("친구 요청 보냈는지 여부"),
-                                        fieldWithPath("data[].isFriend").type(JsonFieldType.BOOLEAN).description("이미 친구인지 여부")
+                                        fieldWithPath("data[].nickname").type(JsonFieldType.STRING)
+                                                .description("유저 닉네임"),
+                                        fieldWithPath("data[].imageUrl").type(JsonFieldType.STRING)
+                                                .description("프로필 이미지 URL"),
+                                        fieldWithPath("data[].requestSent").type(JsonFieldType.BOOLEAN)
+                                                .description("친구 요청 보냈는지 여부"),
+                                        fieldWithPath("data[].requestReceived").type(JsonFieldType.BOOLEAN)
+                                                .description("친구 요청 받았는지 여부"),
+                                        fieldWithPath("data[].isFriend").type(JsonFieldType.BOOLEAN)
+                                                .description("이미 친구인지 여부")
                                 )))
                                 .build())
                 ));

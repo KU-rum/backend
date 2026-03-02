@@ -1,35 +1,57 @@
 package ku_rum.backend.domain.user.application;
 
-import jakarta.servlet.http.HttpServletRequest;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_DEPARTMENT;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.DUPLICATE_NICKNAME;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_DEPARTMENT;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
+import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.PREV_NEW_EQUAL_EXCEPTION;
+
+import java.util.List;
+import ku_rum.backend.domain.auth.dto.response.AuthResponse;
 import ku_rum.backend.domain.common.mail.application.MailService;
+import ku_rum.backend.domain.common.s3.application.S3Service;
 import ku_rum.backend.domain.department.application.DepartmentQueryService;
 import ku_rum.backend.domain.department.application.UserDepartmentService;
 import ku_rum.backend.domain.department.domain.Department;
 import ku_rum.backend.domain.department.domain.UserDepartment;
 import ku_rum.backend.domain.department.domain.repository.DepartmentRepository;
 import ku_rum.backend.domain.department.domain.repository.UserDepartmentRepository;
+import ku_rum.backend.domain.department.dto.DepartmentResponse;
+import ku_rum.backend.domain.oauth.handler.PreSignupTokenProvider;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.domain.user.dto.request.*;
-import ku_rum.backend.domain.user.dto.response.*;
+import ku_rum.backend.domain.user.dto.request.InitiatePasswordResetRequest;
+import ku_rum.backend.domain.user.dto.request.NicknameChangeRequest;
+import ku_rum.backend.domain.user.dto.request.ProfileChangeRequest;
+import ku_rum.backend.domain.user.dto.request.ResetPasswordRequest;
+import ku_rum.backend.domain.user.dto.request.S3PresignedUrlRequest;
+import ku_rum.backend.domain.user.dto.request.SocialSignupRequest;
+import ku_rum.backend.domain.user.dto.request.TemporaryUserRequest;
+import ku_rum.backend.domain.user.dto.request.UserSaveRequest;
+import ku_rum.backend.domain.user.dto.response.LoginIdResponse;
+import ku_rum.backend.domain.user.dto.response.S3PresignedUrlResponse;
+import ku_rum.backend.domain.user.dto.response.TemporaryUserResponse;
+import ku_rum.backend.domain.user.dto.response.TokenResponse;
+import ku_rum.backend.domain.user.dto.response.UserProfileDepartmentResponse;
+import ku_rum.backend.domain.user.dto.response.UserProfileResponse;
+import ku_rum.backend.domain.user.dto.response.UserResponse;
+import ku_rum.backend.domain.user.dto.response.UserSaveResponse;
 import ku_rum.backend.global.exception.department.DuplicateDepartmentException;
 import ku_rum.backend.global.exception.department.NoSuchDepartmentException;
 import ku_rum.backend.global.exception.global.GlobalException;
 import ku_rum.backend.global.exception.user.DuplicateNicknameException;
 import ku_rum.backend.global.exception.user.NoSuchUserException;
-import ku_rum.backend.global.exception.user.UserMapBuildingNotFoundException;
-import ku_rum.backend.global.utill.LocationUtils;
+import ku_rum.backend.global.security.CustomUserDetails;
+import ku_rum.backend.global.security.JwtTokenProvider;
 import ku_rum.backend.global.utill.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Comparator;
-import java.util.List;
-
-import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -45,7 +67,9 @@ public class UserService {
     private final DepartmentRepository departmentRepository;
     private final UserDepartmentService userDepartmentService;
     private final MailService mailService;
-    private final UserUtil userUtil;
+    private final S3Service s3Service;
+    private final PreSignupTokenProvider preSignupTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 소셜 로그인 X
     @Transactional
@@ -63,20 +87,42 @@ public class UserService {
         return UserSaveResponse.from(userRepository.save(user));
     }
 
-    // 소셜 로그인 전용 회원 가입 토큰 필요
+    /**
+     * 프리사인업 토큰으로 소셜 가입 완료 + 즉시 로그인(JWT 발급)
+     */
     @Transactional
-    public UserSaveResponse saveUserBySocial(final UserSaveRequest userSaveRequest) {
-        log.info("사용자 저장 요청: {}", userSaveRequest);
-        userValidator.validateUser(userSaveRequest);
+    public AuthResponse completeSocialSignup(final SocialSignupRequest req) {
+        log.info("소셜 가입 요청: {}", req);
 
-        Department department = departmentQueryService.getDepartment(userSaveRequest);
-        User user = userUtil.getUser();
-        user.changeProfile(userSaveRequest, passwordEncoder.encode(userSaveRequest.password()));
+        userValidator.validateNickname(req.nickname());
+        PreSignupTokenProvider.PreSignupPayload payload = preSignupTokenProvider.resolve(req.token());
+
+        userRepository.findByOauthId(payload.getOauthId()).ifPresent(u -> {
+            throw new BadCredentialsException("이미 가입된 계정입니다. 로그인해주세요.");
+        });
+
+        Department department = departmentQueryService.getDepartment(req.department());
+
+        User user = User.builder()
+                .providerType(payload.getProviderType())
+                .oauthId(payload.getOauthId())
+                .studentId(req.studentId())
+                .nickname(req.nickname())
+                .agreementStatus(req.agreementStatus())
+                .build();
+        user.changeFirstLogin(false);
+        user = userRepository.save(user);
 
         userDepartmentService.addDeptToUser(user, department);
 
-        log.info("사용자 저장 완료: ID={}", userSaveRequest.loginId());
-        return UserSaveResponse.from(user);
+        preSignupTokenProvider.invalidate(req.token());
+
+        CustomUserDetails userDetails = CustomUserDetails.from(user);
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        log.info("소셜 가입 완료: userId={}", user.getId());
+        return AuthResponse.of(jwtTokenProvider.createToken(authentication), buildUserResponse(user));
     }
 
     @Transactional
@@ -85,8 +131,6 @@ public class UserService {
         User user = userQueryService.getUserByLoginId(initiatePasswordResetRequest.loginId());
         mailService.verifyCode(initiatePasswordResetRequest.emailRequest());
 
-
-        
         if (passwordEncoder.matches(initiatePasswordResetRequest.newPassword(), user.getPassword())) {
             throw new GlobalException(PREV_NEW_EQUAL_EXCEPTION);
         }
@@ -114,6 +158,25 @@ public class UserService {
         User user = getUser();
         user.changeImage(profileChangeRequest.imageUrl());
         log.info("프로필 변경 완료: userId={}", user.getId());
+    }
+
+    /**
+     * 프로필 이미지 업로드용 S3 Presigned URL 생성
+     */
+    public S3PresignedUrlResponse generateProfileImagePresignedUrl(final S3PresignedUrlRequest request) {
+        log.info("Presigned URL 생성 요청: fileName={}, fileType={}", request.fileName(), request.fileType());
+
+        S3Service.PresignedUrlInfo urlInfo = s3Service.generatePresignedUrl(
+                request.fileName(),
+                request.fileType()
+        );
+
+        log.info("Presigned URL 생성 완료: fileKey={}", urlInfo.fileKey());
+        return S3PresignedUrlResponse.of(
+                urlInfo.presignedUrl(),
+                urlInfo.fileKey(),
+                urlInfo.fullUrl()
+        );
     }
 
     public LoginIdResponse getLoginId(final String email) {
@@ -176,32 +239,45 @@ public class UserService {
         return userRepository.existsByNickname(nickname);
     }
 
-    @Transactional
-    public UserShareActiveResponse isShareActive() {
-        User currentUser = userUtil.getUser();
-        return new UserShareActiveResponse(currentUser.isActive());
+    private UserResponse buildUserResponse(User user) {
+        List<UserDepartment> byUserId = userDepartmentRepository.findByUserId(user.getId());
+        List<DepartmentResponse> list = byUserId.stream()
+                .map(UserDepartment::getDepartment)
+                .map(DepartmentResponse::of)
+                .toList();
+
+        return UserResponse.of(
+                user.getId(),
+                user.getOauthId(),
+                user.getLoginId(),
+                user.getEmail(),
+                user.getNickname(),
+                user.getStudentId(),
+                user.getImageUrl(),
+                list);
     }
 
-    @Transactional
-    public UserLocationShareStartResponse startShareLocation(UserLocationShareStartRequest request) {
-        //요청한 장소 이름 가져오기
-        String placePointed = request.placePointed();
-
-        //현재 로그인한 사용자 정보 가져오기
-        User currentUser = userUtil.getUser();
-
-        //사용자 위치 공유 활성화 상태 변경 및 activeBuildingName 변경
-        currentUser.changeActiveBuildingName(placePointed);
-        currentUser.setLocationSharingActive(true);
-
-        //응답용 DTO 생성 및 반환
-        return new UserLocationShareStartResponse(placePointed, true);
+    public TemporaryUserResponse getUserToken(TemporaryUserRequest request) {
+        User user = userRepository.findUserById(request.userId())
+                .orElseThrow(() -> new GlobalException(NO_SUCH_USER));
+        CustomUserDetails userDetails = CustomUserDetails.from(user);
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        TokenResponse token = jwtTokenProvider.createToken(authentication);
+        return TemporaryUserResponse.from(token);
     }
 
-    @Transactional
-    public UserShareActiveResponse changeToNotActive() {
-        User currentUser = userUtil.getUser();
-        currentUser.setLocationSharingActive(false);
-        return new UserShareActiveResponse(currentUser.isActive());
+    public UserProfileResponse getUserProfile() {
+        User user = getUser();
+        List<UserProfileDepartmentResponse> userDepartments = userDepartmentRepository.findByUserId(user.getId())
+                .stream()
+                .map(userDepartment -> {
+                    String departmentName = userDepartment.getDepartment().getName();
+                    String collegeName = userDepartment.getDepartment().getCollege().getName();
+                    return new UserProfileDepartmentResponse(departmentName, collegeName);
+                })
+                .toList();
+        return new UserProfileResponse(user.getImageUrl(), user.getEmail(), user.getLoginId(), user.getNickname(),
+                user.getStudentId(), userDepartments);
     }
 }

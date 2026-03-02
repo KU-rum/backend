@@ -4,11 +4,12 @@ import ku_rum.backend.domain.oauth.application.CustomOAuth2UserService;
 import ku_rum.backend.domain.oauth.handler.HttpCookieOAuth2AuthorizationRequestRepository;
 import ku_rum.backend.domain.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import ku_rum.backend.domain.user.domain.repository.UserRepository;
-import ku_rum.backend.global.utill.RedisUtil;
 import ku_rum.backend.global.security.CustomUserDetails;
 import ku_rum.backend.global.security.JwtTokenAuthenticationFilter;
 import ku_rum.backend.global.security.JwtTokenProvider;
+import ku_rum.backend.global.utill.RedisUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,19 +28,22 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
 import static ku_rum.backend.global.support.status.BaseExceptionResponseStatus.NO_SUCH_USER;
 
 @EnableWebSecurity
+@EnableMethodSecurity
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -47,6 +52,10 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+    private final OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver;
+
+    private final ObjectProvider<OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest>>
+            appleAwareTokenResponseClientProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -75,20 +84,26 @@ public class SecurityConfig {
                 )
 
                 // OAuth2 로그인 설정 (인증 성공/실패 핸들러)
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .baseUri("/oauth2/authorization")
-                                .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
-                        )
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                        // OAuth 로그인 도중 에러 발생 시에도 401 반환
-                        .failureHandler((request, response, exception) ->
-                                response.sendError(HttpStatus.UNAUTHORIZED.value())
-                        )
-                )
+                .oauth2Login(oauth2 -> {
+                    oauth2.authorizationEndpoint(endpoint -> endpoint
+                            .baseUri("/oauth2/authorization")
+                            .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
+                            .authorizationRequestResolver(oAuth2AuthorizationRequestResolver)
+                    );
+
+                    OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenClient =
+                            appleAwareTokenResponseClientProvider.getIfAvailable();
+
+                    if (tokenClient != null) {
+                        oauth2.tokenEndpoint(token -> token.accessTokenResponseClient(tokenClient));
+                    }
+
+                    oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService));
+                    oauth2.successHandler(oAuth2AuthenticationSuccessHandler);
+                    oauth2.failureHandler((request, response, exception) ->
+                            response.sendError(HttpStatus.UNAUTHORIZED.value())
+                    );
+                })
                 .oauth2Client(Customizer.withDefaults())
 
                 // JWT 필터 등록
@@ -107,7 +122,8 @@ public class SecurityConfig {
                 .map(u -> CustomUserDetails.of(u.getId(),
                         u.getEmail(),
                         AuthorityUtils.createAuthorityList(u.getRoles().toArray(new String[0])),
-                        u.getPassword()))
+                        u.getPassword(),
+                        u.isFirstLogin()))
                 .orElseThrow(() -> new UsernameNotFoundException(NO_SUCH_USER.getMessage()));
     }
 

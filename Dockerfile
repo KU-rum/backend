@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-slim
+FROM amazoncorretto:17-al2023-headless
 
 WORKDIR /app
 

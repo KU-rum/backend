@@ -1,36 +1,32 @@
 package ku_rum.backend.domain.common.mail.presentation;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import ku_rum.backend.config.RestDocsTestSupport;
+import ku_rum.backend.config.RestDocsUnitTestSupport;
 import ku_rum.backend.domain.common.mail.application.MailService;
 import ku_rum.backend.domain.common.mail.dto.request.MailSendRequest;
 import ku_rum.backend.domain.common.mail.dto.request.MailVerificationRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.json.JsonType;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 
-import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@SpringBootTest
+@WebMvcTest(MailController.class)
 @ActiveProfiles("test")
-class MailControllerTest extends RestDocsTestSupport {
+class MailControllerTest extends RestDocsUnitTestSupport {
 
     @MockBean
     private MailService mailService;
-
-    @MockBean
-    private SecurityFilterChain securityFilterChain;
 
     @DisplayName("이메일 인증 요청을 보낸다.")
     @Test
@@ -57,22 +53,22 @@ class MailControllerTest extends RestDocsTestSupport {
                                         .description("이메일 인증 요청")
                                         .requestFields(
                                                 fieldWithPath("email")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("건국대학교 웹메일")
                                                         .attributes(constraints("이메일 형식을 지켜야 합니다."))
                                         )
                                         .responseFields(
                                                 fieldWithPath("code")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("성공시 반환 코드 (200)"),
                                                 fieldWithPath("status")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공시 상태 값 (OK)"),
                                                 fieldWithPath("message")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 메시지 (OK)"),
                                                 fieldWithPath("data")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("성공 시 '메일이 성공적으로 전송되었습니다.' 반환합니다.")
                                         ).build())));
     }
@@ -102,26 +98,26 @@ class MailControllerTest extends RestDocsTestSupport {
                                         .description("이메일 인증 코드 검증")
                                         .requestFields(
                                                 fieldWithPath("email")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("건국대학교 웹메일")
                                                         .attributes(constraints("이메일 형식을 지켜야 합니다.")),
                                                 fieldWithPath("code")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("건국대학교 웹메일")
                                                         .attributes(constraints("사용자가 받은 인증코드를 입력받습니다."))
                                         )
                                         .responseFields(
                                                 fieldWithPath("code")
-                                                        .type(JsonType.NUMBER)
+                                                        .type(JsonFieldType.NUMBER)
                                                         .description("성공시 반환 코드 (200)"),
                                                 fieldWithPath("status")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("올바른 인증코드 시 상태 값 (OK)"),
                                                 fieldWithPath("message")
-                                                        .type(JsonType.STRING)
+                                                        .type(JsonFieldType.STRING)
                                                         .description("올바른 인증코드 시 메시지 (OK)"),
                                                 fieldWithPath("data.verified")
-                                                        .type(JsonType.BOOLEAN)
+                                                        .type(JsonFieldType.BOOLEAN)
                                                         .description("인증 성공 여부")
                                         ).build())));
     }

@@ -1,15 +1,16 @@
 package ku_rum.backend.domain.notice.dto.response;
 
 
+import java.time.LocalDateTime;
 import ku_rum.backend.domain.notice.domain.Notice;
 
 public record NoticeResponse(
         Long id,
-        Integer categoryId,
+        Long categoryId,
         String categoryName,
         String title,
         String link,
-        String pubDate,
+        LocalDateTime pubDate,
         String author,
         String description
 ) {
