@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import java.time.LocalDate;
 import ku_rum.backend.domain.user.domain.User;
 import ku_rum.backend.global.support.type.BaseEntity;
 import lombok.AccessLevel;
