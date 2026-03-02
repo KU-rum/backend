@@ -33,8 +33,9 @@ public class PositionScheduler {
     @Scheduled(fixedRate = 120000)//2분
     @Transactional
     public void updatePlaceRanks() {
-        LocalDateTime oneHourAgo = LocalDateTime.now().minusSeconds(CRITERION_TIME);
-        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneHourAgo = now.minusSeconds(CRITERION_TIME);
+        LocalDate today = now.toLocalDate();
 
         List<Position> positions = positionRepository.findByCreatedAtBefore(oneHourAgo);
         for (Position position : positions) {
